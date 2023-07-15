@@ -33,6 +33,10 @@ namespace Swoop {
 
         internal bool ignore_dialog { get; set; } = false;
 
+        internal UIElementManager parent { get; set; }
+
+        public string name { get; set; }
+
         bool _enable_rt = false;
         public bool enable_render_target {
             get {

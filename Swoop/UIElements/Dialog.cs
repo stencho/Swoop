@@ -25,9 +25,15 @@ namespace Swoop.UIElements {
 
         void build(Vector2 position, Vector2 size) {
             sub_elements = new UIElementManager(position, size);
-            sub_elements.add_element("test_button", new Button("test", Vector2.One * -5f));
+
             sub_elements.add_element("test_label", new Label("this is a test label for testing\n" +
                 "all sorts of different text\n\nit's also a sub-element of a dialog box UI element and this is actually a really long string which goes way beyond the edge of this dialog box but is being line wrapped\nabcdefghijklmnopqrstuvwxyz1234567890-=!@#$%^&*(){}:\"\\|<>?,./;\'[]~`", Vector2.One * 30, (size - Vector2.One * 60)));
+            
+            
+            sub_elements.add_element("close", new Button("close", new Vector2(size.X / 2, size.Y - 40)));
+            ((Button)sub_elements.elements["close"]).click_action = () => {
+                this.parent.remove_element(this.name);
+            };
         }
 
         public override void update() {

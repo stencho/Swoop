@@ -22,7 +22,14 @@ namespace Swoop {
         }
 
         public void add_element(string name, UIElement element) {
+            element.parent = this;
+            element.name = name;
             elements.Add(name, element);
+        }
+
+        public void remove_element(string name) {
+            if (dialog_element == name) dialog_element = null;
+            elements.Remove(name);
         }
 
         bool mouse_down_prev = false;
@@ -121,7 +128,8 @@ namespace Swoop {
 
             Drawing.end();
 
-            Drawing.fill_rect(bounds.Location.ToVector2(), bounds.Location.ToVector2() + bounds.Size.ToVector2(), Color.FromNonPremultiplied(0, 0, 0, 128));
+            if (in_dialog)
+                Drawing.fill_rect(bounds.Location.ToVector2(), bounds.Location.ToVector2() + bounds.Size.ToVector2(), Color.FromNonPremultiplied(0, 0, 0, 128));
 
             foreach (string k in elements.Keys) {
                 if (k == dialog_element) continue;
