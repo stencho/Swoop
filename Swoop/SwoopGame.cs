@@ -97,10 +97,10 @@ namespace Swoop {
             StringBuilder sb = new StringBuilder();
 
             string title_text = $"{UIExterns.get_window_title()}";
-            //string FPS_text = $"~{Input.frame_rate} Hz poll/{fps.frame_rate} FPS draw";
+            string FPS_text = $"{Input.frame_rate} Hz poll/{fps.frame_rate} FPS draw";
 
             ((TitleBar)ui.elements["title_bar"]).left_text = title_text;
-            //((TitleBar)ui.elements["title_bar"]).right_text = FPS_text;
+            ((TitleBar)ui.elements["title_bar"]).right_text = FPS_text;
 
 
             ui.update();
