@@ -62,7 +62,7 @@ namespace SwoopDemo {
         }
 
         protected override void LoadContent() {
-            Swoop.Load(GraphicsDevice, graphics, Content);
+            Swoop.Load(GraphicsDevice, graphics, Content, resolution);
             build_UI();
         }
 
@@ -105,10 +105,10 @@ It's also gonna be a couple of lines long just to make sure everything works",
                     sub_elements.add_element(new Label("test_label", "this is a test label for testing\nall sorts of different text\n\nthis is a bit of extra text for testing\nabcdefghijklmnopqrstuvwxyz",
                         td.size / 2, Label.anchor_point.CENTER));
 
-                    ((Label)sub_elements.elements["test_label"]).draw_outline = true;
                     ((Label)sub_elements.elements["test_label"]).text_justification = Label.alignment.CENTER;
+                    ((Label)sub_elements.elements["test_label"]).draw_outline = true;
 
-                    sub_elements.add_element(new Label("test_label_2", "this another test", Vector2.One * 10));
+                    sub_elements.add_element(new Label("test_label_2", $"this is another test label with an outline\nalso this dialog is called {td.name}", Vector2.One * 10));
                     ((Label)sub_elements.elements["test_label_2"]).draw_outline = true;
 
                     sub_elements.add_element(new Button("close", "close", new Vector2(td.size.X / 2, td.size.Y - 40)));
@@ -124,6 +124,27 @@ It's also gonna be a couple of lines long just to make sure everything works",
                         "this is a really really really really really really long test button that should be far longer than the width of the panel", 
                         Vector2.One * 5f + (Vector2.UnitY * 25)));
 
+                    ((Button)sub_elements.elements["long_button"]).click_action = () => {
+                        UI.add_element(new Dialog("test_dialog",
+                        (resolution.ToVector2() / 2) - (dialog_size * 0.5f),
+                        dialog_size,
+                        "test dialog title text",
+                        (Dialog td, UIElementManager sub_elements) => {
+                            sub_elements.add_element(new Label("test_label", "this is a test label for testing\nall sorts of different text\n\nthis is a bit of extra text for testing\nabcdefghijklmnopqrstuvwxyz",
+                                td.size / 2, Label.anchor_point.CENTER));
+
+                            ((Label)sub_elements.elements["test_label"]).text_justification = Label.alignment.CENTER;
+
+                            sub_elements.add_element(new Label("test_label_2", $"this is another test label with an outline\nalso this dialog is called {td.name}", Vector2.One * 10));
+                            ((Label)sub_elements.elements["test_label_2"]).draw_outline = true;
+
+                            sub_elements.add_element(new Button("close", "close", new Vector2(td.size.X / 2, td.size.Y - 40)));
+                            ((Button)sub_elements.elements["close"]).click_action = () => {
+                                UI.remove_element(td.name);
+                            };
+                        }));
+                    };
+
                     sub_elements.add_element(new Label("label",
                         $"this label is a sub_element of a Panel called \'{panel.name}\'", 
                         Vector2.One * 5f));
@@ -136,9 +157,11 @@ It's also gonna be a couple of lines long just to make sure everything works",
 
             string title_text = $"{UIExterns.get_window_title()}";
             string FPS_text = $"{Input.frame_rate} Hz poll/{fps.frame_rate} FPS draw";
+            string focus_info = $"{(Swoop.UI.focused_element != null ? Swoop.UI.focused_element.name : "")}";
+            string more_focus_info = $"{(Swoop.UI.elements["test_panel"].sub_elements.focused_element != null ? Swoop.UI.elements["test_panel"].sub_elements.focused_element.name : "")}";
 
             ((TitleBar)UI.elements["title_bar"]).left_text = title_text;
-            ((TitleBar)UI.elements["title_bar"]).right_text = FPS_text;
+            ((TitleBar)UI.elements["title_bar"]).right_text = FPS_text + " " + focus_info + " " + more_focus_info;
 
             Swoop.Update();
 
@@ -147,11 +170,10 @@ It's also gonna be a couple of lines long just to make sure everything works",
         }
 
         protected override void Draw(GameTime gameTime) {
-            GraphicsDevice.Clear(Color.Black);
+            GraphicsDevice.Clear(Swoop.UIBackgroundColor);
 
             Swoop.Draw();
-
-            Drawing.rect(Vector2.UnitX, (Vector2.UnitY * title_bar_height) + (Vector2.UnitX * resolution.X), Swoop.UIColor, 1f);
+            
             Drawing.rect(Vector2.Zero, resolution.ToVector2(), Swoop.UIColor, 2f);
 
             Drawing.end();

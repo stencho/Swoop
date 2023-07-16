@@ -63,7 +63,7 @@ namespace SwoopLib {
             Drawing.graphics_device.DepthStencilState = DepthStencilState.Default;            
 
             Drawing.sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.Default, null, sdf_effect, null);
-            Drawing.sb.Draw(sdf, new Rectangle((int)position.X, (int)position.Y, (int)scale.X, (int)scale.Y), null, Swoop.UIColor, 0f,
+            Drawing.sb.Draw(sdf, new Rectangle((int)position.X, (int)position.Y, (int)scale.X, (int)scale.Y), null, Color.White, 0f,
                 Vector2.Zero, SpriteEffects.None, 1f);
             Drawing.sb.End();
         }
@@ -76,7 +76,7 @@ namespace SwoopLib {
             Drawing.end();
             
             Drawing.sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.Default, null, sdf_effect, null);
-            Drawing.sb.Draw(sdf, new Rectangle((int)position.X, (int)position.Y, (int)scale.X, (int)scale.Y), null, Swoop.UIColor, 0f,
+            Drawing.sb.Draw(sdf, new Rectangle((int)position.X, (int)position.Y, (int)scale.X, (int)scale.Y), null, Color.White, 0f,
                 (Vector2.One * 0.5f) * tex_size, SpriteEffects.None, 1f);
             Drawing.sb.End();
         }

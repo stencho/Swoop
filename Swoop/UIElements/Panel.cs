@@ -16,6 +16,7 @@ namespace SwoopLib.UIElements {
         }
 
         void build(Vector2 position, Vector2 size, Action<Panel, UIElementManager>? build_action) {
+            can_be_focused = false;
             sub_elements = new UIElementManager(position, size.ToPoint());
             if (build_action != null) build_action(this, sub_elements);            
         }
@@ -25,9 +26,9 @@ namespace SwoopLib.UIElements {
         }
 
         internal override void draw_rt() {
-            Drawing.fill_rect(Vector2.Zero, size.X, size.Y, Color.Black);
+            Drawing.fill_rect(Vector2.Zero, size.X, size.Y, Swoop.UIBackgroundColor);
             sub_elements.sub_draw(draw_target);
-            Drawing.rect(Vector2.One, size, Swoop.UIColor, 1f);
+            Drawing.rect(Vector2.One, size, Swoop.get_color(this), 1f);
         }
 
         internal override void draw() {

@@ -24,6 +24,8 @@ namespace SwoopLib {
         public static GraphicsDevice graphics_device;
         public static GraphicsDeviceManager graphics;
 
+        internal static RenderTarget2D main_render_target;
+
         public static SpriteFont fnt_profont;
 
         public static Texture2D OnePXWhite;
@@ -31,15 +33,17 @@ namespace SwoopLib {
         public static Texture2D sdf_circle;
         private static int sdf_circle_res = 256;
 
-        public static void load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content) {
+        public static void load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, Point resolution) {
             sb = new SpriteBatch(gd);
 
-            Drawing.graphics_device = gd;
-            Drawing.graphics = gdm;
+            graphics_device = gd;
+            graphics = gdm;
 
+            main_render_target = new RenderTarget2D(graphics_device, resolution.X, resolution.Y, 
+                false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
             //create a 1x1 white texture
             OnePXWhite = new Texture2D(gd, 1, 1);
-            OnePXWhite.SetData<Color>(new Color[1] { Swoop.UIColor });
+            OnePXWhite.SetData<Color>(new Color[1] { Color.White });
 
             //create an SDF of a circle
             Color[] sdf_data = new Color[sdf_circle_res * sdf_circle_res];
@@ -190,6 +194,14 @@ namespace SwoopLib {
             begin();
             sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), Color.White);
         }
+        public static void image(Texture2D image, Vector2 position, Point size) {
+            begin();
+            sb.Draw(image, new Rectangle(position.ToPoint(), size), Color.White);
+        }
+        public static void image(Texture2D image, Point position, Point size) {
+            begin();
+            sb.Draw(image, new Rectangle(position, size), Color.White);
+        }
         public static void image(Texture2D image, Vector2 position, Vector2 size, Color tint) {
             begin();
             sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), tint);
@@ -227,7 +239,7 @@ namespace SwoopLib {
             sb.DrawString(fnt_profont, text, position, color);            
         }
         public static void text_shadow(string text, Vector2 position, Color color) {
-            Drawing.text(text, position + (Vector2.One), Color.Black);
+            Drawing.text(text, position + (Vector2.One), Swoop.UIBackgroundColor);
             Drawing.text(text, position, color);
         }
         public static Vector2 measure_string_profont(string text) {

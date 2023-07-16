@@ -25,13 +25,14 @@ namespace SwoopLib.UIElements {
         }
 
         void build(Vector2 position, Vector2 size, Action<Dialog, UIElementManager>? build_action) {
+            can_be_focused = false;
             sub_elements = new UIElementManager(position, size.ToPoint());
 
             if (build_action != null) build_action(this, sub_elements);
         }
 
         internal override void added() {
-
+            parent.dialog_element = this.name;
         }
 
         internal override void update() {
@@ -39,9 +40,9 @@ namespace SwoopLib.UIElements {
         }
 
         internal override void draw_rt() {
-            Drawing.fill_rect(Vector2.Zero, size.X, size.Y, Color.Black);
+            Drawing.fill_rect(Vector2.Zero, size.X, size.Y, Swoop.UIBackgroundColor);
             sub_elements.sub_draw(draw_target);
-            Drawing.rect(Vector2.One, size, Swoop.UIColor, 1f);
+            Drawing.rect(Vector2.One, size, Swoop.get_color(this), 1f);
         }
 
         internal override void draw() {
@@ -50,8 +51,8 @@ namespace SwoopLib.UIElements {
             Vector2 tl = position + (Vector2.UnitX * 6) - (Vector2.UnitY * Drawing.measure_string_profont("A").Y);
 
             if (!String.IsNullOrWhiteSpace(title)) {
-                Drawing.fill_rect_outline(tl - (Vector2.UnitX * 3) - (Vector2.UnitY * 1), tl + Drawing.measure_string_profont(title) + (Vector2.UnitX * 3) + (Vector2.UnitY * 1), Color.Black, Swoop.UIColor, 1f);
-                Drawing.text(title, tl, Swoop.UIColor);
+                Drawing.fill_rect_outline(tl - (Vector2.UnitX * 3) - (Vector2.UnitY * 1), tl + Drawing.measure_string_profont(title) + (Vector2.UnitX * 3) + (Vector2.UnitY * 1), Swoop.UIBackgroundColor, Swoop.get_color(this), 1f);
+                Drawing.text(title, tl, Swoop.get_color(this));
             }
         }
     }

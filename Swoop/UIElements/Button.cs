@@ -14,9 +14,6 @@ namespace SwoopLib.UIElements {
 
         public Action click_action = null;
 
-        public Color color_foreground { get; set; } = Swoop.UIColor;
-        public Color color_background { get; set; } = Color.Black;
-
         public Button(string name, string text, Vector2 position, Vector2 size) : base(name, position, size) {
             _text = text;
         }
@@ -32,18 +29,28 @@ namespace SwoopLib.UIElements {
             size = (margin * 2) + Drawing.measure_string_profont(text);
         }
 
+        private bool enter_down = false;
+        private bool enter_was_down = false;
+
         internal override void update() {
             //successful click, released left mouse while over the button and clicking
             if (!clicking && was_clicking && mouse_over) {
+                if (click_action != null) click_action();
+            } 
+
+            enter_was_down = enter_down;
+            enter_down = Input.is_pressed(Microsoft.Xna.Framework.Input.Keys.Enter);
+
+            if (is_focused && enter_down && !enter_was_down) {
                 if (click_action != null) click_action();
             }
         }
 
 
         internal override void draw() { 
-            bool col_toggle = mouse_over && !mouse_down;
-            Drawing.fill_rect_outline(position, position + size, col_toggle ? color_foreground : color_background, color_foreground, 1f);
-            Drawing.text(_text, position + margin, col_toggle ? color_background : color_foreground);
+            bool col_toggle = (mouse_over && !mouse_down) || (enter_down && !enter_was_down);
+            Drawing.fill_rect_outline(position, position + size, col_toggle ? Swoop.get_color(this) : Swoop.UIBackgroundColor, Swoop.get_color(this), 1f);
+            Drawing.text(_text, position + margin, col_toggle ? Swoop.UIBackgroundColor : Swoop.get_color(this));
         }
 
         internal override void draw_rt() { }

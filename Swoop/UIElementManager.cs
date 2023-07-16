@@ -36,14 +36,16 @@ namespace SwoopLib {
 
         bool mouse_down_prev = false;
         public void update() {
-            bool hit = false;
+            bool click_hit = false;
             bool mouse_over_hit = false;
             bool mouse_down = Input.is_pressed(InputStructs.MouseButtons.Left);
+
             if (in_dialog) {
                 if (elements[dialog_element].click_update(bounds, mouse_over_hit)) {
-                    if (!hit) hit = true;
-
-                    focused_element = elements[dialog_element];
+                    if (elements[dialog_element].can_be_focused) {
+                        focused_element = elements[dialog_element];
+                        click_hit = true;
+                    }
                 }
 
                 elements[dialog_element].update();
@@ -52,16 +54,14 @@ namespace SwoopLib {
                     if (k == dialog_element) continue;
                     if (elements[k].ignore_dialog) {
                         if (elements[k].click_update(bounds, mouse_over_hit)) {
-                            if (!hit) hit = true;
-
-                            focused_element = elements[k];
+                            if (elements[k].can_be_focused) {
+                                focused_element = elements[k];
+                                click_hit = true;
+                            }
                         }
 
                         if (elements[k].mouse_over) mouse_over_hit = true;
 
-                        if (!hit && mouse_down && !mouse_down_prev) {
-                            focused_element = null;
-                        }
                         elements[k].update();
                     }
                 }
@@ -70,21 +70,23 @@ namespace SwoopLib {
                 foreach (string k in elements.Keys.Reverse()) {
 
                     if (elements[k].click_update(bounds, mouse_over_hit)) {
-                        if (!hit) hit = true;
-
-                        focused_element = elements[k];
+                        if (elements[k].can_be_focused) {
+                            focused_element = elements[k];
+                            click_hit = true;
+                        }
                     }
 
                     if (elements[k].mouse_over) mouse_over_hit = true;
 
-                    hit = false;
-
-                    if (!hit && mouse_down && !mouse_down_prev) {
-                        focused_element = null;
-                    }
                     elements[k].update();
                 }
             }
+            
+            if (mouse_down && !mouse_down_prev && !click_hit && UIExterns.in_foreground()) {
+                focused_element = null;
+            }
+
+
             mouse_down_prev = mouse_down;
         }
 
@@ -93,7 +95,7 @@ namespace SwoopLib {
                 if (elements[k].enable_render_target) {
                     Drawing.end();
                     Drawing.graphics_device.SetRenderTarget(elements[k].draw_target);
-                    Drawing.fill_rect(Vector2.Zero, elements[k].size, Color.Black);
+                    Drawing.fill_rect(Vector2.Zero, elements[k].size, Swoop.UIBackgroundColor);
                     elements[k].draw_rt();
                 }
             }
@@ -105,7 +107,9 @@ namespace SwoopLib {
         }
 
         public void draw() {
-            Drawing.graphics_device.SetRenderTarget(null);
+            Drawing.graphics_device.SetRenderTarget(Drawing.main_render_target);
+            Drawing.graphics_device.Clear(Swoop.UIBackgroundColor);
+
             foreach (string k in elements.Keys) {
                 if (in_dialog && k == dialog_element) continue;
                 if (elements[k].enable_render_target) {
@@ -126,7 +130,7 @@ namespace SwoopLib {
             
             Drawing.end();
 
-            Drawing.graphics_device.SetRenderTarget(null);
+            Drawing.graphics_device.SetRenderTarget(Drawing.main_render_target);
             foreach (string k in elements.Keys) {
                 if (k == dialog_element) continue;
                 if (elements[k].ignore_dialog) continue;
@@ -147,7 +151,7 @@ namespace SwoopLib {
             }
 
             if (in_dialog) {
-                Drawing.graphics_device.SetRenderTarget(null);
+                Drawing.graphics_device.SetRenderTarget(Drawing.main_render_target);
                 Drawing.end();
                 elements[dialog_element].draw();                
             }

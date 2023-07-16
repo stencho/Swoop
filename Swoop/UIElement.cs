@@ -10,8 +10,60 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace SwoopLib {
     public abstract class UIElement {
-        internal UIElementManager sub_elements;
-        internal bool has_sub_elements => (sub_elements != null && sub_elements.elements.Count > 0);
+        public enum anchor_point : byte {
+            TOP = 1 << 0,
+            BOTTOM = 1 << 1,
+            LEFT = 1 << 2,
+            RIGHT = 1 << 3,
+            TOP_LEFT = TOP | LEFT,
+            TOP_RIGHT = TOP | RIGHT,
+            BOTTOM_LEFT = BOTTOM | LEFT,
+            BOTTOM_RIGHT = BOTTOM | RIGHT,
+            CENTER = 0
+        };
+
+        public anchor_point anchor = anchor_point.TOP_LEFT;
+
+        internal Vector2 anchor_offset() {
+            Vector2 o = Vector2.Zero;
+            switch (anchor) {
+                case anchor_point.TOP:
+                    o.X -= size.X / 2;
+                    break;
+                case anchor_point.BOTTOM:
+                    o.X -= size.X / 2;
+                    o.Y -= size.Y;
+                    break;
+                case anchor_point.LEFT:
+                    o.Y -= size.Y / 2;
+                    break;
+                case anchor_point.RIGHT:
+                    o.X -= size.X;
+                    o.Y -= size.Y / 2;
+                    break;
+                case anchor_point.TOP_LEFT:
+                    break;
+                case anchor_point.TOP_RIGHT:
+                    o.X -= size.X;
+                    break;
+                case anchor_point.BOTTOM_LEFT:
+                    o.Y -= size.Y;
+                    break;
+                case anchor_point.BOTTOM_RIGHT:
+                    o.X -= size.X;
+                    o.Y -= size.Y;
+                    break;
+                case anchor_point.CENTER:
+                    o.X -= size.X / 2;
+                    o.Y -= size.Y / 2;
+                    break;
+            }
+            return o;
+        }
+
+
+        public UIElementManager sub_elements;
+        public bool has_sub_elements => (sub_elements != null && sub_elements.elements.Count > 0);
 
         public Vector2 position { get; set; }
         public Vector2 size { get; set; }
@@ -21,6 +73,10 @@ namespace SwoopLib {
 
         public float width => size.X;
         public float height => size.Y;
+
+        public bool is_focused => parent.focused_element == this;
+
+        public bool can_be_focused = true;
 
         public bool mouse_over { get; set; } = false;
         public bool mouse_down { get; set; } = false;
@@ -71,11 +127,14 @@ namespace SwoopLib {
         internal abstract void draw_rt();
 
         internal bool click_update(Rectangle bounds, bool mouse_over_hit) {
+
             bool hit_bounds = Collision2D.v2_intersects_rect(Input.cursor_pos.ToVector2(),
                     bounds.Location.ToVector2(), bounds.Location.ToVector2() + bounds.Size.ToVector2());
 
             if (mouse_over_hit) mouse_over = false;
-            else mouse_over = hit_bounds && Collision2D.v2_intersects_rect(Input.cursor_pos.ToVector2(), bounds.Location.ToVector2() + position, bounds.Location.ToVector2() + position + (size - Vector2.One));
+            else mouse_over = hit_bounds 
+                    && Collision2D.v2_intersects_rect(Input.cursor_pos.ToVector2(), bounds.Location.ToVector2() + position + anchor_offset(), 
+                    bounds.Location.ToVector2() + position + anchor_offset() + (size - Vector2.One));
 
             mouse_was_down = mouse_down;
             mouse_down = Input.is_pressed(InputStructs.MouseButtons.Left);
@@ -90,8 +149,8 @@ namespace SwoopLib {
                 return false;
             }
 
-            if (clicking && !mouse_down) clicking = false;
-            if (mouse_over && mouse_down && !mouse_was_down) clicking = true;
+            if (clicking && !mouse_down) this.clicking = false;
+            if (mouse_over && mouse_down && !mouse_was_down) this.clicking = true;
             
             return (mouse_over && mouse_down && !mouse_was_down);
         }

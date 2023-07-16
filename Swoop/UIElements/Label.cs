@@ -9,24 +9,9 @@ using Microsoft.Xna.Framework;
 
 namespace SwoopLib.UIElements {
     public class Label : UIElement {
-        public enum anchor_point : byte {
-            TOP = 1 << 0,
-            BOTTOM = 1 << 1,
-            LEFT = 1 << 2,
-            RIGHT = 1 << 3,
-            TOP_LEFT = TOP | LEFT,
-            TOP_RIGHT = TOP | RIGHT,
-            BOTTOM_LEFT = BOTTOM | LEFT,
-            BOTTOM_RIGHT = BOTTOM | RIGHT,
-            CENTER = 0
-        };
-        public anchor_point draw_anchor = anchor_point.TOP_LEFT;
-
         string text = "";
 
         public bool draw_outline = false;
-
-        Color text_color = Swoop.UIColor;
 
         bool _auto_size = true;
         bool auto_size {
@@ -55,7 +40,7 @@ namespace SwoopLib.UIElements {
             this.text = text;
             this.position = position;
             this.size = size;
-            this.draw_anchor = anchor;
+            this.anchor = anchor;
         }
 
         public Label(string name, string text, Vector2 position)
@@ -72,7 +57,7 @@ namespace SwoopLib.UIElements {
             this.text = text;
             this.position = position;
             this.size = Drawing.measure_string_profont(text);
-            this.draw_anchor = anchor;
+            this.anchor = anchor;
         }
 
         internal override void update() { }
@@ -108,7 +93,7 @@ namespace SwoopLib.UIElements {
                         still_too_long:
 
                         if (!line.Contains(' ')) {
-                            Drawing.text(line, offset + line_offset + (line_height * line_num * Vector2.UnitY), text_color);
+                            Drawing.text(line, offset + line_offset + (line_height * line_num * Vector2.UnitY), Swoop.get_color(this));
                             line_num++;
                             continue;
                         }
@@ -124,7 +109,7 @@ namespace SwoopLib.UIElements {
                             last_space = next_space;
                         }
 
-                        Drawing.text(working_string, offset + line_offset + (line_height * line_num * Vector2.UnitY), text_color);
+                        Drawing.text(working_string, offset + line_offset + (line_height * line_num * Vector2.UnitY), Swoop.get_color(this));
                         line_num++;
 
                         line = line.Remove(0, working_string.Length).TrimStart();
@@ -142,71 +127,34 @@ namespace SwoopLib.UIElements {
 
                             goto still_too_long;
                         } else {
-                            Drawing.text(line, offset + line_offset + (line_height * line_num * Vector2.UnitY), text_color);
+                            Drawing.text(line, offset + line_offset + (line_height * line_num * Vector2.UnitY), Swoop.get_color(this));
                             line_num++;
                         }
 
                     } else {
-                        Drawing.text(line, offset + line_offset + (line_height * line_num * Vector2.UnitY), text_color);
+                        Drawing.text(line, offset + line_offset + (line_height * line_num * Vector2.UnitY), Swoop.get_color(this));
                     }
 
                 } else {
-                    Drawing.text(line, offset + line_offset + (line_height * line_num * Vector2.UnitY), text_color);
+                    Drawing.text(line, offset + line_offset + (line_height * line_num * Vector2.UnitY), Swoop.get_color(this));
                 }
 
                 line_num++;
             }
 
             if (draw_outline)
-                Drawing.rect(offset - (Vector2.UnitX * 2), size.X + 5, size.Y, Swoop.UIColor, 1f);
-        }
-
-        Vector2 draw_offset() {
-            Vector2 o = Vector2.Zero;
-            switch (draw_anchor) {
-                case anchor_point.TOP:
-                    o.X -= size.X / 2;
-                    break;
-                case anchor_point.BOTTOM:
-                    o.X -= size.X / 2;
-                    o.Y -= size.Y;
-                    break;
-                case anchor_point.LEFT:
-                    o.Y -= size.Y / 2;
-                    break;
-                case anchor_point.RIGHT:
-                    o.X -= size.X;
-                    o.Y -= size.Y / 2;
-                    break;
-                case anchor_point.TOP_LEFT:
-                    break;
-                case anchor_point.TOP_RIGHT:
-                    o.X -= size.X;
-                    break;
-                case anchor_point.BOTTOM_LEFT:
-                    o.Y -= size.Y;
-                    break;
-                case anchor_point.BOTTOM_RIGHT:
-                    o.X -= size.X;
-                    o.Y -= size.Y;
-                    break;
-                case anchor_point.CENTER:
-                    o.X -= size.X / 2;
-                    o.Y -= size.Y / 2;
-                    break;
-            }
-            return o;
+                Drawing.rect(offset - (Vector2.UnitX * 2), size.X + 5, size.Y, Swoop.get_color(this), 1f);
         }
 
         internal override void draw_rt() {
-            draw_internal(Vector2.Zero + draw_offset(), text_justification);
+            draw_internal(Vector2.Zero + anchor_offset(), text_justification);
         }
 
         internal override void draw() {
             if (!_auto_size) {
                 Drawing.image(draw_target, position, size);
             } else {
-                draw_internal(position + draw_offset(), text_justification);
+                draw_internal(position + anchor_offset(), text_justification);
             }
         }
         internal override void added() {}

@@ -11,18 +11,28 @@ using MGRawInputLib;
 
 namespace SwoopLib {
     public static class Swoop {
-        public static Color UIColor = Color.FromNonPremultiplied(235, 140, 195, 255);
-        public static UIElementManager UI;
-
-        public static void Initialize(Game parent, Point resolution) {
-            Input.initialize(parent);
-
-            UI = new UIElementManager(Vector2.Zero, resolution);
+        public static Color get_color(UIElement element) {
+            if (element.parent.focused_element == element) return UIHighlightColor;
+            else return UIColor;
         }
 
-        public static void Load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content) {
-            Drawing.load(gd, gdm, content);
+        public static Color UIColor = Color.White;
+        public static Color UIHighlightColor = Color.FromNonPremultiplied(235, 140, 195, 255);
+        public static Color UIBackgroundColor = Color.FromNonPremultiplied(0x15,0x15,0x15, 255);
+
+        public static UIElementManager UI;
+
+        static Point current_resolution;
+        
+        public static void Initialize(Game parent, Point resolution) {
+            Input.initialize(parent);
+            current_resolution = resolution;
+        }
+
+        public static void Load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, Point resolution) {
+            Drawing.load(gd, gdm, content, resolution);
             SDF.load(content);
+            UI = new UIElementManager(Vector2.Zero, resolution);
         }
 
         public static void Update() {
@@ -31,10 +41,14 @@ namespace SwoopLib {
 
         public static void Draw() {
             UI.draw();
+            Drawing.graphics_device.SetRenderTarget(null);
+            Drawing.image(Drawing.main_render_target, Vector2.Zero, current_resolution);
         }
 
         public static void End() {
             Input.end();
         }
+
+        static void change_resolution() { }
     }
 }
