@@ -10,12 +10,12 @@ namespace SwoopLib.UIElements {
 
         public Action<UIElementManager> build_action;
 
-        public Panel(Vector2 position, Vector2 size, Action<Panel, UIElementManager> build_action) : base(position, size) {
+        public Panel(Vector2 position, Vector2 size, Action<Panel, UIElementManager>? build_action) : base(position, size) {
             this.enable_render_target = true;
             build(position, size, build_action);
         }
 
-        void build(Vector2 position, Vector2 size, Action<Panel, UIElementManager> build_action) {
+        void build(Vector2 position, Vector2 size, Action<Panel, UIElementManager>? build_action) {
             if (build_action != null) build_action(this, sub_elements);            
         }
 

@@ -11,20 +11,20 @@ namespace SwoopLib.UIElements {
     public class Dialog : UIElement {
         string title = "";
 
-        public Dialog(Vector2 position, Vector2 size, string title, Action<Dialog, UIElementManager> build_action)
+        public Dialog(Vector2 position, Vector2 size, string title, Action<Dialog, UIElementManager>? build_action)
             : base(position, size) {
             this.enable_render_target = true;
             this.title = title;
             build(position, size, build_action);
         }
 
-        public Dialog(Vector2 position, Vector2 size, Action<Dialog, UIElementManager> build_action)
+        public Dialog(Vector2 position, Vector2 size, Action<Dialog, UIElementManager>? build_action)
             : base(position, size) {
             this.enable_render_target = true;
             build(position, size, build_action);
         }
 
-        void build(Vector2 position, Vector2 size, Action<Dialog, UIElementManager> build_action) {
+        void build(Vector2 position, Vector2 size, Action<Dialog, UIElementManager>? build_action) {
             sub_elements = new UIElementManager(position, size.ToPoint());
 
             if (build_action != null) build_action(this, sub_elements);
