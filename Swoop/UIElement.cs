@@ -65,7 +65,10 @@ namespace SwoopLib {
         public UIElementManager sub_elements;
         public bool has_sub_elements => (sub_elements != null && sub_elements.elements.Count > 0);
 
-        public Vector2 position { get; set; }
+        Vector2 _position = Vector2.Zero;
+        public Vector2 position { get { return _position + anchor_offset(); } set { _position = value; } }
+        public Vector2 position_actual => _position;
+
         public Vector2 size { get; set; }
 
         public float X => position.X;
@@ -133,8 +136,8 @@ namespace SwoopLib {
 
             if (mouse_over_hit) mouse_over = false;
             else mouse_over = hit_bounds 
-                    && Collision2D.v2_intersects_rect(Input.cursor_pos.ToVector2(), bounds.Location.ToVector2() + position + anchor_offset(), 
-                    bounds.Location.ToVector2() + position + anchor_offset() + (size - Vector2.One));
+                    && Collision2D.v2_intersects_rect(Input.cursor_pos.ToVector2(), bounds.Location.ToVector2() + position, 
+                    bounds.Location.ToVector2() + position + (size - Vector2.One));
 
             mouse_was_down = mouse_down;
             mouse_down = Input.is_pressed(InputStructs.MouseButtons.Left);
