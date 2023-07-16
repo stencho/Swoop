@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -67,7 +68,7 @@ namespace Swoop {
         static void begin() {
             if (!sb_drawing) {
                 //sb.Begin();
-                sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
+                sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, null, null, null, null);
                 sb_drawing = true;
             }
         }
@@ -95,12 +96,16 @@ namespace Swoop {
             sb.Draw(OnePXWhite, A, null, color, rot, middlePoint, scale, SpriteEffects.None, 0f);
         }
         public static void line_rounded_ends(Vector2 A, Vector2 B, Color color, float thickness) {
-            begin();
-
             line(A, B, color, thickness);
 
             fill_circle(A, thickness + 1f, color);
             fill_circle(B, thickness + 1f, color);
+        }
+
+        public static void cross(Vector2 center, float size, Color color) {
+            center.Round();
+            line(center - (Vector2.UnitX * (size+1)), center + (Vector2.UnitX * size), color, 1f);
+            line(center - (Vector2.UnitY * (size+1)), center + (Vector2.UnitY * size), color, 1f);
         }
 
         public static void poly(Color color, float thickness, bool close_polygon, params Vector2[] points) {
@@ -212,9 +217,9 @@ namespace Swoop {
                 Color.White);
         }
 
-
         public static void text(string text, Vector2 position, Color color) {
             begin();
+            position.Round(); //this prevents half-pixel positioning which helps keep text crisp and artifact-free
             sb.DrawString(fnt_profont, text, position, color);            
         }
         public static void text_shadow(string text, Vector2 position, Color color) {
