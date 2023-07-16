@@ -33,7 +33,7 @@ namespace SwoopLib {
         }
 
         public static void End() {
-            Input.kill();
+            Input.end();
         }
     }
 }
