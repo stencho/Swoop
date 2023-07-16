@@ -10,12 +10,13 @@ namespace SwoopLib.UIElements {
 
         public Action<UIElementManager> build_action;
 
-        public Panel(Vector2 position, Vector2 size, Action<Panel, UIElementManager>? build_action) : base(position, size) {
+        public Panel(string name, Vector2 position, Vector2 size, Action<Panel, UIElementManager>? build_action) : base(name, position, size) {
             this.enable_render_target = true;
             build(position, size, build_action);
         }
 
         void build(Vector2 position, Vector2 size, Action<Panel, UIElementManager>? build_action) {
+            sub_elements = new UIElementManager(position, size.ToPoint());
             if (build_action != null) build_action(this, sub_elements);            
         }
 
@@ -26,7 +27,7 @@ namespace SwoopLib.UIElements {
         internal override void draw_rt() {
             Drawing.fill_rect(Vector2.Zero, size.X, size.Y, Color.Black);
             sub_elements.sub_draw(draw_target);
-            Drawing.rect(Vector2.One, size, Color.White, 1f);
+            Drawing.rect(Vector2.One, size, Swoop.UIColor, 1f);
         }
 
         internal override void draw() {

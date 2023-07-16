@@ -14,14 +14,14 @@ namespace SwoopLib.UIElements {
 
         public Action click_action = null;
 
-        public Color color_foreground { get; set; } = Color.White;
+        public Color color_foreground { get; set; } = Swoop.UIColor;
         public Color color_background { get; set; } = Color.Black;
 
-        public Button(string text, Vector2 position, Vector2 size) : base(position, size) {
+        public Button(string name, string text, Vector2 position, Vector2 size) : base(name, position, size) {
             _text = text;
         }
 
-        public Button(string text, Vector2 position) : base(position, Vector2.Zero) {
+        public Button(string name, string text, Vector2 position) : base(name, position, Vector2.Zero) {
             _text = text;
             this.position = position;
             size = (margin * 2) + Drawing.measure_string_profont(text);

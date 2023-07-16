@@ -39,7 +39,7 @@ namespace SwoopLib {
 
             //create a 1x1 white texture
             OnePXWhite = new Texture2D(gd, 1, 1);
-            OnePXWhite.SetData<Color>(new Color[1] { Color.White });
+            OnePXWhite.SetData<Color>(new Color[1] { Swoop.UIColor });
 
             //create an SDF of a circle
             Color[] sdf_data = new Color[sdf_circle_res * sdf_circle_res];
@@ -138,6 +138,7 @@ namespace SwoopLib {
         }
 
         public static void rect(Vector2 min, Vector2 max, Color color, float thickness) {
+            min.Round(); max.Round();
             begin();
 
             var w = Vector2.UnitX * (max.X - min.X);
@@ -165,12 +166,14 @@ namespace SwoopLib {
         }
 
         public static void fill_rect(Vector2 min, Vector2 max, Color color) {
+            min.Round(); max.Round();
             begin();
             sb.Draw(OnePXWhite, min, null, color, 0f, Vector2.Zero, max-min, SpriteEffects.None, 0f);
         }
 
 
         public static void fill_rect_outline(Vector2 min, Vector2 max, Color color, Color outline, float outline_thickness) {
+            min.Round(); max.Round();
             fill_rect(min, max, color);
             rect(min, max, outline, outline_thickness);
         }

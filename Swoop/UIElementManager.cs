@@ -21,11 +21,12 @@ namespace SwoopLib {
             bounds = new Rectangle((int)pos.X, (int)pos.Y, size.X, size.Y);
         }
 
-        public void add_element(string name, UIElement element) {
+        public void add_element(UIElement element) {
             element.parent = this;
-            element.name = name;
-            elements.Add(name, element);
-            elements[name].added();
+
+            elements.Add(element.name, element);
+
+            elements[element.name].added();
         }
 
         public void remove_element(string name) {
@@ -142,8 +143,7 @@ namespace SwoopLib {
             if (in_dialog) {
                 Drawing.graphics_device.SetRenderTarget(null);
                 Drawing.end();
-                elements[dialog_element].draw();
-                
+                elements[dialog_element].draw();                
             }
 
         }

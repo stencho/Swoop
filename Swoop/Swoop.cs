@@ -11,6 +11,7 @@ using MGRawInputLib;
 
 namespace SwoopLib {
     public static class Swoop {
+        public static Color UIColor = Color.FromNonPremultiplied(235, 140, 195, 255);
         public static UIElementManager UI;
 
         public static void Initialize(Game parent, Point resolution) {

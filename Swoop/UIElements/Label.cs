@@ -26,7 +26,7 @@ namespace SwoopLib.UIElements {
 
         public bool draw_outline = false;
 
-        Color text_color = Color.White;
+        Color text_color = Swoop.UIColor;
 
         bool _auto_size = true;
         bool auto_size {
@@ -41,16 +41,16 @@ namespace SwoopLib.UIElements {
 
         bool line_wrap = true;
 
-        public Label(string text, Vector2 position, Vector2 size)
-            : base(position, size) {
+        public Label(string name, string text, Vector2 position, Vector2 size)
+            : base(name, position, size) {
             auto_size = false;
             this.text = text;
             this.position = position;
             this.size = size;
         }
 
-        public Label(string text, Vector2 position, Vector2 size, anchor_point anchor)
-            : base(position, size) {
+        public Label(string name, string text, Vector2 position, Vector2 size, anchor_point anchor)
+            : base(name, position, size) {
             auto_size = false;
             this.text = text;
             this.position = position;
@@ -58,16 +58,16 @@ namespace SwoopLib.UIElements {
             this.draw_anchor = anchor;
         }
 
-        public Label(string text, Vector2 position)
-            : base(position, Vector2.Zero) {
+        public Label(string name, string text, Vector2 position)
+            : base(name, position, Vector2.Zero) {
             auto_size = true;
             this.text = text;
             this.position = position;
             this.size = Drawing.measure_string_profont(text);
         }
 
-        public Label(string text, Vector2 position, anchor_point anchor)
-            : base(position, Vector2.Zero) {
+        public Label(string name, string text, Vector2 position, anchor_point anchor)
+            : base(name, position, Vector2.Zero) {
             auto_size = true;
             this.text = text;
             this.position = position;
@@ -158,7 +158,7 @@ namespace SwoopLib.UIElements {
             }
 
             if (draw_outline)
-                Drawing.rect(offset - (Vector2.UnitX * 2), size.X + 5, size.Y, Color.White, 1f);
+                Drawing.rect(offset - (Vector2.UnitX * 2), size.X + 5, size.Y, Swoop.UIColor, 1f);
         }
 
         Vector2 draw_offset() {

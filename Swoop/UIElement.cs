@@ -35,7 +35,7 @@ namespace SwoopLib {
 
         internal UIElementManager parent { get; set; }
 
-        public string name { get; set; }
+        public readonly string name;
 
         bool _enable_rt = false;
         public bool enable_render_target {
@@ -49,7 +49,8 @@ namespace SwoopLib {
                     _enable_rt = value;
 
                     if (value) {
-                        draw_target = new RenderTarget2D(Drawing.graphics_device, (int)width, (int)height, false, SurfaceFormat.Vector4, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+                        draw_target = new RenderTarget2D(Drawing.graphics_device, (int)width, (int)height, false, 
+                            SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PlatformContents);
                     } else {
                         draw_target = null;
                     }
@@ -58,7 +59,8 @@ namespace SwoopLib {
         }
         internal RenderTarget2D draw_target;
 
-        public UIElement(Vector2 position, Vector2 size) {
+        public UIElement(string name, Vector2 position, Vector2 size) {
+            this.name = name;
             this.position = position;
             this.size = size;
         }
