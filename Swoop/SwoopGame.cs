@@ -87,9 +87,9 @@ namespace Swoop {
             ui.add_element("title_bar", new TitleBar(Vector2.Zero, new Vector2(resolution.X - ((ui.elements["exit_button"].width*2)), top_bar_height)));
             ui.elements["title_bar"].ignore_dialog = true;
 
-            ui.add_element("big_ol_test_button", new Button("this is a really long test string to put on the button to test a thing for a moment", Vector2.One * 20));
+            ui.add_element("big_ol_test_button", new Button("this is a really long test string to put on the button to test a thing for a moment", Vector2.One * 20 + (Vector2.UnitY * 300)));
 
-            ui.add_element("test_dialog", new Dialog((resolution * 0.5f) - (s * 0.5f), s, "test"));
+            ui.add_element("test_dialog", new Dialog((resolution * 0.5f) - (s * 0.5f), s, "test dialog title text"));
             ui.dialog_element = "test_dialog";
         }
 
