@@ -8,7 +8,7 @@ using MGRawInputLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Swoop {
+namespace SwoopLib {
     public abstract class UIElement {
         internal UIElementManager sub_elements;
         internal bool has_sub_elements => (sub_elements != null && sub_elements.elements.Count > 0);
@@ -22,16 +22,16 @@ namespace Swoop {
         public float width => size.X;
         public float height => size.Y;
 
-        internal bool mouse_over { get; set; } = false;
-        internal bool mouse_down { get; set; } = false;
-        internal bool mouse_was_down { get; set; } = false;
-        internal bool right_mouse_down { get; set; } = false;
-        internal bool right_mouse_was_down { get; set; } = false;
+        public bool mouse_over { get; set; } = false;
+        public bool mouse_down { get; set; } = false;
+        public bool mouse_was_down { get; set; } = false;
+        public bool right_mouse_down { get; set; } = false;
+        public bool right_mouse_was_down { get; set; } = false;
 
-        internal bool clicking { get; set; } = false;
-        internal bool was_clicking { get; set; } = false;
+        public bool clicking { get; set; } = false;
+        public bool was_clicking { get; set; } = false;
 
-        internal bool ignore_dialog { get; set; } = false;
+        public bool ignore_dialog { get; set; } = false;
 
         internal UIElementManager parent { get; set; }
 
@@ -63,9 +63,10 @@ namespace Swoop {
             this.size = size;
         }
 
-        public abstract void update();
-        public abstract void draw();
-        public abstract void draw_rt();
+        internal abstract void update();
+        internal abstract void added();
+        internal abstract void draw();
+        internal abstract void draw_rt();
 
         internal bool click_update(Rectangle bounds) {
             bool hit_bounds = Collision2D.v2_intersects_rect(Input.cursor_pos.ToVector2(),

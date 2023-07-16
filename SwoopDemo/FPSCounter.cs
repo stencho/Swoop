@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 
-namespace Swoop {
+namespace SwoopDemo {
     internal class FPSCounter {
         public int frame_rate => _frame_rate;
         int _frame_rate;

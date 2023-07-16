@@ -8,12 +8,13 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Swoop {
-    static class SDF {
+namespace SwoopLib {
+    public static class SDF {
         private static Effect sdf_effect;
 
-        public static void load(ContentManager Content) {
-            sdf_effect = Content.Load<Effect>("sdf");
+        internal static bool effect_unloaded => sdf_effect == null;
+        internal static void load(ContentManager Content) {
+            if (effect_unloaded) sdf_effect = Content.Load<Effect>("sdf");
         }
 
         public static void draw(Texture2D sdf, Vector2 position, Vector2 scale, Color color) {

@@ -7,8 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 
-namespace Swoop.UIElements {
-    internal class Label : UIElement {
+namespace SwoopLib.UIElements {
+    public class Label : UIElement {
         public enum anchor_point : byte {
             TOP = 1 << 0,
             BOTTOM = 1 << 1,
@@ -25,20 +25,23 @@ namespace Swoop.UIElements {
         string text = "";
 
         public bool draw_outline = false;
-        
+
         Color text_color = Color.White;
 
         bool _auto_size = true;
-        bool auto_size { get { return _auto_size; } set {
+        bool auto_size {
+            get { return _auto_size; }
+            set {
                 enable_render_target = !value;
                 if (value) line_wrap = false;
-                _auto_size = value;  
-            } }
+                _auto_size = value;
+            }
+        }
 
 
         bool line_wrap = true;
 
-        public Label(string text, Vector2 position, Vector2 size) 
+        public Label(string text, Vector2 position, Vector2 size)
             : base(position, size) {
             auto_size = false;
             this.text = text;
@@ -55,7 +58,7 @@ namespace Swoop.UIElements {
             this.draw_anchor = anchor;
         }
 
-        public Label(string text, Vector2 position) 
+        public Label(string text, Vector2 position)
             : base(position, Vector2.Zero) {
             auto_size = true;
             this.text = text;
@@ -72,9 +75,7 @@ namespace Swoop.UIElements {
             this.draw_anchor = anchor;
         }
 
-        public override void update() {
-
-        }
+        internal override void update() { }
 
         public enum alignment { LEFT, CENTER, RIGHT }
         public alignment text_justification = alignment.LEFT;
@@ -83,7 +84,7 @@ namespace Swoop.UIElements {
             StringReader sr = new StringReader(text);
             int line_num = 0;
             float line_height = Drawing.measure_string_profont("A").Y;
-            
+
 
             while (sr.Peek() > -1) {
                 string line = sr.ReadLine();
@@ -94,12 +95,12 @@ namespace Swoop.UIElements {
                 if (tj == alignment.CENTER)
                     line_offset = new Vector2((size.X / 2) - (line_width / 2), 0);
                 else if (tj == alignment.RIGHT)
-                    line_offset = new Vector2(size.X - line_width , 0);
+                    line_offset = new Vector2(size.X - line_width, 0);
 
                 if (line_wrap) {
                     if (line_width > size.X) {
                         float build_size = 0;
-                        
+
                         string working_string = "";
                         int last_space = 0;
                         int next_space = 0;
@@ -113,7 +114,7 @@ namespace Swoop.UIElements {
                         }
 
                         while (build_size < this.size.X && line.IndexOf(' ', last_space + 1) < line.LastIndexOf(' ')) {
-                            next_space = line.IndexOf(' ', last_space+1);
+                            next_space = line.IndexOf(' ', last_space + 1);
 
                             if (Drawing.measure_string_profont(working_string + line.Substring(last_space, next_space - last_space)).X < this.size.X) {
                                 working_string += line.Substring(last_space, next_space - last_space);
@@ -177,7 +178,7 @@ namespace Swoop.UIElements {
                     o.X -= size.X;
                     o.Y -= size.Y / 2;
                     break;
-                case anchor_point.TOP_LEFT: 
+                case anchor_point.TOP_LEFT:
                     break;
                 case anchor_point.TOP_RIGHT:
                     o.X -= size.X;
@@ -197,16 +198,17 @@ namespace Swoop.UIElements {
             return o;
         }
 
-        public override void draw_rt() {
+        internal override void draw_rt() {
             draw_internal(Vector2.Zero + draw_offset(), text_justification);
         }
 
-        public override void draw() {
+        internal override void draw() {
             if (!_auto_size) {
                 Drawing.image(draw_target, position, size);
             } else {
                 draw_internal(position + draw_offset(), text_justification);
             }
         }
+        internal override void added() {}
     }
 }

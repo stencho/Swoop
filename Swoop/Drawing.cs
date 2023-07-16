@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,8 +11,8 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using static System.Formats.Asn1.AsnWriter;
 
-namespace Swoop {
-    internal static class Drawing {
+namespace SwoopLib {
+    public static class Drawing {
         public static SpriteBatch sb;
 
         private static bool _sb_drawing = false;

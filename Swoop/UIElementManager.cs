@@ -7,8 +7,8 @@ using MGRawInputLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Swoop {    
-    internal class UIElementManager {
+namespace SwoopLib {    
+    public class UIElementManager {
         public Dictionary<string, UIElement> elements = new Dictionary<string, UIElement>();
 
         public string dialog_element = "";
@@ -17,14 +17,15 @@ namespace Swoop {
         public UIElement? focused_element = null;
 
         Rectangle bounds = Rectangle.Empty;
-        public UIElementManager(Vector2 pos, Vector2 size) {
-            bounds = new Rectangle((int)pos.X, (int)pos.Y, (int)size.X, (int)size.Y);
+        public UIElementManager(Vector2 pos, Point size) {
+            bounds = new Rectangle((int)pos.X, (int)pos.Y, size.X, size.Y);
         }
 
         public void add_element(string name, UIElement element) {
             element.parent = this;
             element.name = name;
             elements.Add(name, element);
+            elements[name].added();
         }
 
         public void remove_element(string name) {
