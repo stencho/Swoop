@@ -147,14 +147,14 @@ namespace SwoopLib.UIElements {
         }
 
         internal override void draw_rt() {
-            draw_internal(Vector2.Zero + anchor_offset(), text_justification);
+            draw_internal(Vector2.Zero, text_justification);
         }
 
         internal override void draw() {
             if (!_auto_size) {
                 Drawing.image(draw_target, position, size);
             } else {
-                draw_internal(position + anchor_offset(), text_justification);
+                draw_internal(position, text_justification);
             }
         }
         internal override void added() {}
