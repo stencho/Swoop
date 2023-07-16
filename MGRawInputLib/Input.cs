@@ -16,8 +16,6 @@ namespace MGRawInputLib {
         public static List<InputHandler> handlers = new List<InputHandler>();
         static Game parent;
 
-        public static void kill() { run_thread = false; }
-
         public static bool num_lock => keyboard_state.NumLock;
         public static bool caps_lock => keyboard_state.CapsLock;
 
@@ -94,6 +92,8 @@ namespace MGRawInputLib {
             control_update_thread.Start();
         }
 
+        public static void end() { run_thread = false; }
+
         static void update() {
             while (run_thread) {
                 start_dt = DateTime.Now;
@@ -140,7 +140,6 @@ namespace MGRawInputLib {
                     }
                 }
                 if (lock_mouse && parent.IsActive) {
-                    reset_mouse(parent.Window.ClientBounds.Size);
                     if (poll_method == input_method.RawInput) {
                         var wpos = Externs.get_window_pos();
                         Externs.set_cursor_pos(wpos.X + (parent.Window.ClientBounds.Size.X / 2), wpos.Y + (parent.Window.ClientBounds.Size.Y / 2));
@@ -182,9 +181,6 @@ namespace MGRawInputLib {
                     if (ts.TotalMilliseconds >= thread_ms) break;
                 }
             }
-        }
-
-        static void reset_mouse(Point resolution) {
         }
 
         public static bool is_pressed(Keys key) {

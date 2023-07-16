@@ -19,7 +19,8 @@ namespace Swoop {
     public class SwoopGame : Game {
         GraphicsDeviceManager graphics;
         public static double target_fps = 60;
-        
+        static float title_bar_height = 16f;
+
         FPSCounter fps;
 
         public static Vector2 resolution = new Vector2(850, 600);
@@ -58,7 +59,7 @@ namespace Swoop {
         }
 
         private void SwoopGame_Disposed(object sender, System.EventArgs e) {
-            Input.kill();
+            Input.end();
         }
 
         protected override void LoadContent() {
@@ -77,14 +78,14 @@ namespace Swoop {
             ui.elements["minimize_button"].ignore_dialog = true;
 
             ((Button)ui.elements["exit_button"]).click_action = () => {
-                Input.kill();
+                Input.end();
                 this.Exit();
             };
             ((Button)ui.elements["minimize_button"]).click_action = () => {
                 UIExterns.minimize_window();
             };
 
-            ui.add_element("title_bar", new TitleBar(Vector2.Zero, new Vector2(resolution.X - ((ui.elements["exit_button"].width*2)), top_bar_height)));
+            ui.add_element("title_bar", new TitleBar(Vector2.Zero, new Vector2(resolution.X - ((ui.elements["exit_button"].width*2)), title_bar_height)));
             ui.elements["title_bar"].ignore_dialog = true;
 
             ui.add_element("big_ol_test_button", new Button("this is a really long test string to put on the button to test a thing for a moment", Vector2.One * 20 + (Vector2.UnitY * 300)));
@@ -102,22 +103,18 @@ namespace Swoop {
             ((TitleBar)ui.elements["title_bar"]).left_text = title_text;
             ((TitleBar)ui.elements["title_bar"]).right_text = FPS_text;
 
-
             ui.update();
 
             fps.update(gameTime);
             base.Update(gameTime);
         }
 
-
-        static float top_bar_height = 16f;
-
         protected override void Draw(GameTime gameTime) {
             GraphicsDevice.Clear(Color.Black);
 
             ui.draw();
 
-            Drawing.rect(Vector2.UnitX, (Vector2.UnitY * top_bar_height) + (Vector2.UnitX * resolution.X), Color.White, 1f);
+            Drawing.rect(Vector2.UnitX, (Vector2.UnitY * title_bar_height) + (Vector2.UnitX * resolution.X), Color.White, 1f);
             Drawing.rect(Vector2.Zero, resolution, Color.White, 2f);
 
             //Drawing.text($"[{Input.RAWINPUT_DEBUG_STRING}]", Vector2.UnitX * 200 + (Vector2.One * 3f), Color.White);
