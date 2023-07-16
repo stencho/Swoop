@@ -70,11 +70,12 @@ namespace SwoopLib {
         internal abstract void draw();
         internal abstract void draw_rt();
 
-        internal bool click_update(Rectangle bounds) {
+        internal bool click_update(Rectangle bounds, bool mouse_over_hit) {
             bool hit_bounds = Collision2D.v2_intersects_rect(Input.cursor_pos.ToVector2(),
                     bounds.Location.ToVector2(), bounds.Location.ToVector2() + bounds.Size.ToVector2());
 
-            mouse_over = hit_bounds && Collision2D.v2_intersects_rect(Input.cursor_pos.ToVector2(), bounds.Location.ToVector2() + position, bounds.Location.ToVector2() + position + (size - Vector2.One));
+            if (mouse_over_hit) mouse_over = false;
+            else mouse_over = hit_bounds && Collision2D.v2_intersects_rect(Input.cursor_pos.ToVector2(), bounds.Location.ToVector2() + position, bounds.Location.ToVector2() + position + (size - Vector2.One));
 
             mouse_was_down = mouse_down;
             mouse_down = Input.is_pressed(InputStructs.MouseButtons.Left);

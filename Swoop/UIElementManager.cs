@@ -37,45 +37,51 @@ namespace SwoopLib {
         bool mouse_down_prev = false;
         public void update() {
             bool hit = false;
+            bool mouse_over_hit = false;
             bool mouse_down = Input.is_pressed(InputStructs.MouseButtons.Left);
             if (in_dialog) {
-                if (elements[dialog_element].click_update(bounds)) {
+                if (elements[dialog_element].click_update(bounds, mouse_over_hit)) {
                     if (!hit) hit = true;
 
                     focused_element = elements[dialog_element];
-
                 }
 
                 elements[dialog_element].update();
 
-                foreach (string k in elements.Keys) {
+                foreach (string k in elements.Keys.Reverse()) {
                     if (k == dialog_element) continue;
                     if (elements[k].ignore_dialog) {
-                        if (elements[k].click_update(bounds)) {
+                        if (elements[k].click_update(bounds, mouse_over_hit)) {
                             if (!hit) hit = true;
 
                             focused_element = elements[k];
                         }
 
+                        if (elements[k].mouse_over) mouse_over_hit = true;
+
                         if (!hit && mouse_down && !mouse_down_prev) {
                             focused_element = null;
                         }
-
                         elements[k].update();
                     }
                 }
+
             } else {
-                foreach (string k in elements.Keys) {
-                    if (elements[k].click_update(bounds)) {
+                foreach (string k in elements.Keys.Reverse()) {
+
+                    if (elements[k].click_update(bounds, mouse_over_hit)) {
                         if (!hit) hit = true;
 
                         focused_element = elements[k];
                     }
 
+                    if (elements[k].mouse_over) mouse_over_hit = true;
+
+                    hit = false;
+
                     if (!hit && mouse_down && !mouse_down_prev) {
                         focused_element = null;
                     }
-
                     elements[k].update();
                 }
             }
