@@ -42,7 +42,7 @@ namespace SwoopLib.UIElements {
 
 
         internal override void draw() { 
-            bool col_toggle = (mouse_over && !mouse_down) || (is_focused && Swoop.input_handler.just_pressed(Microsoft.Xna.Framework.Input.Keys.Enter));
+            bool col_toggle = (mouse_over && !mouse_down) || (is_focused && Swoop.input_handler.is_pressed(Microsoft.Xna.Framework.Input.Keys.Enter));
             Drawing.fill_rect_outline(position, position + size, col_toggle ? Swoop.get_color(this) : Swoop.UIBackgroundColor, Swoop.get_color(this), 1f);
             Drawing.text(_text, position + margin, col_toggle ? Swoop.UIBackgroundColor : Swoop.get_color(this));
         }
