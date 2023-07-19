@@ -32,6 +32,7 @@ namespace SwoopLib.UIElements {
             this.text = text;
             this.position = position;
             this.size = size;
+            can_be_focused = false;
         }
 
         public Label(string name, string text, Vector2 position, Vector2 size, anchor_point anchor)
@@ -41,6 +42,7 @@ namespace SwoopLib.UIElements {
             this.position = position;
             this.size = size;
             this.anchor = anchor;
+            can_be_focused = false;
         }
 
         public Label(string name, string text, Vector2 position)
@@ -49,6 +51,7 @@ namespace SwoopLib.UIElements {
             this.text = text;
             this.position = position;
             this.size = Drawing.measure_string_profont(text);
+            can_be_focused = false;
         }
 
         public Label(string name, string text, Vector2 position, anchor_point anchor)
@@ -58,6 +61,7 @@ namespace SwoopLib.UIElements {
             this.position = position;
             this.size = Drawing.measure_string_profont(text);
             this.anchor = anchor;
+            can_be_focused = false;
         }
 
         internal override void update() { }

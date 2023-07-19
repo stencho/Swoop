@@ -17,9 +17,11 @@ namespace SwoopLib.UIElements
         bool auto_height = false;
         public TitleBar(string name, Vector2 position, int width) : base(name, position, new Vector2(width, Drawing.measure_string_profont("A").Y + 3)) {
             auto_height = true;
+            can_be_focused = false;
         }
         public TitleBar(string name, Vector2 position, Vector2 size) : base(name, position, size) {
             auto_height = false;
+            can_be_focused = false;
         }
 
         internal override void update() {
