@@ -24,7 +24,7 @@ namespace SwoopLib {
         public static GraphicsDevice graphics_device;
         public static GraphicsDeviceManager graphics;
 
-        internal static RenderTarget2D main_render_target;
+        public static RenderTarget2D main_render_target;
 
         public static SpriteFont fnt_profont;
 

@@ -14,6 +14,7 @@ using MGRawInputLib;
 using static SwoopLib.Swoop;
 using System.ComponentModel;
 using System.Linq;
+using System.IO;
 
 namespace SwoopDemo {
     static class Extensions {
@@ -32,6 +33,8 @@ namespace SwoopDemo {
         FPSCounter fps;
 
         public static Point resolution = new Point(850, 600);
+
+        bool capture_demo_screenshot_on_startup = true;
 
         public SwoopGame() {
             graphics = new GraphicsDeviceManager(this);
@@ -82,6 +85,10 @@ namespace SwoopDemo {
             UI.elements["minimize_button"].can_be_focused = false;
 
             ((Button)UI.elements["exit_button"]).click_action = () => {
+                if (capture_demo_screenshot_on_startup) {
+                    Drawing.main_render_target.SaveAsPng(new FileStream("..\\..\\..\\..\\current.png", FileMode.OpenOrCreate), resolution.X, resolution.Y);
+                    capture_demo_screenshot_on_startup = false;
+                }
                 Swoop.End();
                 this.Exit();
             };
@@ -189,6 +196,7 @@ It's also gonna be a couple of lines long just to make sure everything works",
             Drawing.rect(Vector2.Zero, resolution.ToVector2(), Swoop.UIColor, 2f);
 
             Drawing.end();
+
             base.Draw(gameTime);
         }
 
