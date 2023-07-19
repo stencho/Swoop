@@ -166,10 +166,7 @@ It's also gonna be a couple of lines long just to make sure everything works",
                 })
             );
 
-            UI.add_element(new ToggleButton("toggle_button", "disabled", (Vector2.UnitY * 18) + (Vector2.UnitX * 3)));            
-            ((ToggleButton)UI.elements["toggle_button"]).toggled = (ToggleButton tb, bool state) => {
-                tb.change_text((state ? "enabled" : "disabled"));
-            };
+            UI.add_element(new ToggleButton("toggle_button", (Vector2.UnitY * 18) + (Vector2.UnitX * 3)));    
 
         }
 
