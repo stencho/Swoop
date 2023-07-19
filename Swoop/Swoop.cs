@@ -22,10 +22,15 @@ namespace SwoopLib {
 
         public static UIElementManager UI;
 
-        public static InputHandler input_handler;
+        internal static InputHandler input_handler;
 
         static Point current_resolution;
+
+        public static RenderTarget2D render_target_output => Drawing.main_render_target;
         
+        public static bool clear_rt_to_background_color { get; set; } = false;
+        public static bool draw_UI_border { get; set; } = true;
+
         public static void Initialize(Game parent, Point resolution) {
             Input.initialize(parent);
             input_handler = new InputHandler();
@@ -48,9 +53,6 @@ namespace SwoopLib {
 
         public static void Draw() {
             UI.draw();
-
-            Drawing.graphics_device.SetRenderTarget(null);
-            Drawing.image(Drawing.main_render_target, Vector2.Zero, current_resolution);
         }
 
         public static void End() {

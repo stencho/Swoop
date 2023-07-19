@@ -108,7 +108,12 @@ namespace SwoopLib {
 
         public void draw() {
             Drawing.graphics_device.SetRenderTarget(Drawing.main_render_target);
-            Drawing.graphics_device.Clear(Swoop.UIBackgroundColor);
+
+            if (Swoop.clear_rt_to_background_color) {
+                Drawing.graphics_device.Clear(Swoop.UIBackgroundColor);
+            } else {
+                Drawing.graphics_device.Clear(Color.Transparent);
+            }
 
             foreach (string k in elements.Keys) {
                 if (in_dialog && k == dialog_element) continue;
@@ -153,9 +158,12 @@ namespace SwoopLib {
             if (in_dialog) {
                 Drawing.graphics_device.SetRenderTarget(Drawing.main_render_target);
                 Drawing.end();
-                elements[dialog_element].draw();                
+                elements[dialog_element].draw();
             }
-
+            
+            if (Swoop.draw_UI_border) {
+                Drawing.rect(Vector2.Zero, Drawing.main_render_target.Bounds.Size.ToVector2(), Swoop.UIColor, 2f);
+            }
         }
     }
 }

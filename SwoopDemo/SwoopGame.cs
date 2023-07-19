@@ -79,14 +79,14 @@ namespace SwoopDemo {
             UI.elements["exit_button"].can_be_focused = false;
 
             UI.add_element(new Button("minimize_button", "_", 
-                    resolution.ToVector2().X_only() - ((text_length.X_only() + (Vector2.UnitX * 10f)) * 2), 
+                    resolution.ToVector2().X_only() - ((text_length.X_only() + (Vector2.UnitX * 9f)) * 2), 
                     UI.elements["exit_button"].size));
             UI.elements["minimize_button"].ignore_dialog = true;
             UI.elements["minimize_button"].can_be_focused = false;
 
             ((Button)UI.elements["exit_button"]).click_action = () => {
                 if (capture_demo_screenshot_on_startup) {
-                    Drawing.main_render_target.SaveAsPng(new FileStream("..\\..\\..\\..\\current.png", FileMode.OpenOrCreate), resolution.X, resolution.Y);
+                    Swoop.render_target_output.SaveAsPng(new FileStream("..\\..\\..\\..\\current.png", FileMode.OpenOrCreate), resolution.X, resolution.Y);
                     capture_demo_screenshot_on_startup = false;
                 }
                 Swoop.End();
@@ -98,7 +98,7 @@ namespace SwoopDemo {
             };
 
             UI.add_element(new TitleBar("title_bar", 
-                Vector2.Zero, (int)(resolution.X - (UI.elements["exit_button"].width*2))));
+                Vector2.Zero, (int)(resolution.X - (UI.elements["exit_button"].width*2)) + 3));
             UI.elements["title_bar"].ignore_dialog = true;
 
             UI.add_element(new Button("big_ol_test_button", 
@@ -166,8 +166,8 @@ It's also gonna be a couple of lines long just to make sure everything works",
                 })
             );
 
-            UI.add_element(new ToggleButton("toggle_button", (Vector2.UnitY * 18) + (Vector2.UnitX * 3)));    
-
+            UI.add_element(new ToggleButton("toggle_button", (Vector2.UnitY * 26) + (Vector2.UnitX * 50)));
+            UI.elements["toggle_button"].anchor = UIElement.anchor_point.CENTER;
         }
 
         protected override void Update(GameTime gameTime) {
@@ -186,11 +186,12 @@ It's also gonna be a couple of lines long just to make sure everything works",
         }
 
         protected override void Draw(GameTime gameTime) {
-            GraphicsDevice.Clear(Swoop.UIBackgroundColor);
+            GraphicsDevice.Clear(Color.Transparent);
 
             Swoop.Draw();
-            
-            Drawing.rect(Vector2.Zero, resolution.ToVector2(), Swoop.UIColor, 2f);
+
+            Drawing.graphics_device.SetRenderTarget(null);
+            Drawing.image(Swoop.render_target_output, Vector2.Zero, resolution);
 
             Drawing.end();
 
