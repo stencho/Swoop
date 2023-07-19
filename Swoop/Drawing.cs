@@ -24,7 +24,7 @@ namespace SwoopLib {
         public static GraphicsDevice graphics_device;
         public static GraphicsDeviceManager graphics;
 
-        public static RenderTarget2D main_render_target;
+        internal static RenderTarget2D main_render_target;
 
         public static SpriteFont fnt_profont;
 
@@ -142,7 +142,7 @@ namespace SwoopLib {
         }
 
         public static void rect(Vector2 min, Vector2 max, Color color, float thickness) {
-            min.Round(); max.Round();
+            min.Floor(); max.Floor();
             begin();
 
             var w = Vector2.UnitX * (max.X - min.X);
@@ -170,14 +170,14 @@ namespace SwoopLib {
         }
 
         public static void fill_rect(Vector2 min, Vector2 max, Color color) {
-            min.Round(); max.Round();
+            min.Floor(); max.Floor();
             begin();
             sb.Draw(OnePXWhite, min, null, color, 0f, Vector2.Zero, max-min, SpriteEffects.None, 0f);
         }
 
 
         public static void fill_rect_outline(Vector2 min, Vector2 max, Color color, Color outline, float outline_thickness) {
-            min.Round(); max.Round();
+            min.Floor(); max.Floor();
             fill_rect(min, max, color);
             rect(min, max, outline, outline_thickness);
         }
@@ -235,7 +235,7 @@ namespace SwoopLib {
 
         public static void text(string text, Vector2 position, Color color) {
             begin();
-            position.Round(); //this prevents half-pixel positioning which helps keep text crisp and artifact-free
+            position.Ceiling(); //this prevents half-pixel positioning which helps keep text crisp and artifact-free
             sb.DrawString(fnt_profont, text, position, color);            
         }
         public static void text_shadow(string text, Vector2 position, Color color) {
