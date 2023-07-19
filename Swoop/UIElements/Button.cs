@@ -12,6 +12,8 @@ namespace SwoopLib.UIElements {
         public string text => _text;
         Vector2 margin = (Vector2.UnitY * 1.5f) + (Vector2.UnitX * 5);
 
+        bool click_highlight = false;
+
         public Action click_action = null;
 
         public Button(string name, string text, Vector2 position, Vector2 size) : base(name, position, size) {
@@ -29,6 +31,7 @@ namespace SwoopLib.UIElements {
             size = (margin * 2) + Drawing.measure_string_profont(text);
         }
 
+
         internal override void update() {
             //successful click, released left mouse while over the button and clicking
             if (!clicking && was_clicking && mouse_over) {
@@ -36,15 +39,18 @@ namespace SwoopLib.UIElements {
             } 
 
             if (is_focused && Swoop.input_handler.just_pressed(Microsoft.Xna.Framework.Input.Keys.Enter)) {
-                if (click_action != null) click_action();
+                if (click_action != null) click_action();                
+            }
+            click_highlight = false;
+            if ((is_focused && Swoop.input_handler.is_pressed(Microsoft.Xna.Framework.Input.Keys.Enter)) || (mouse_over && !mouse_down)) {
+                click_highlight = true;
             }
         }
 
 
         internal override void draw() { 
-            bool col_toggle = (mouse_over && !mouse_down) || (is_focused && Swoop.input_handler.is_pressed(Microsoft.Xna.Framework.Input.Keys.Enter));
-            Drawing.fill_rect_outline(position, position + size, col_toggle ? Swoop.get_color(this) : Swoop.UIBackgroundColor, Swoop.get_color(this), 1f);
-            Drawing.text(_text, position + margin, col_toggle ? Swoop.UIBackgroundColor : Swoop.get_color(this));
+            Drawing.fill_rect_outline(position + Vector2.One, position + size, click_highlight ? Swoop.get_color(this) : Swoop.UIBackgroundColor, Swoop.get_color(this), 1f);
+            Drawing.text(_text, position + margin, click_highlight ? Swoop.UIBackgroundColor : Swoop.get_color(this));
         }
 
         internal override void draw_rt() { }

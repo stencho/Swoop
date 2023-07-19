@@ -13,6 +13,8 @@ namespace SwoopLib.UIElements {
 
         public string text => (toggled_on ? _text_on : _text_off);
 
+        bool click_highlight = false;
+
         Vector2 margin = (Vector2.UnitY * 1.5f) + (Vector2.UnitX * 5);
 
         public bool toggled_on;
@@ -58,18 +60,19 @@ namespace SwoopLib.UIElements {
                 change_text();
                 if (toggled != null) toggled(this, toggled_on);
             }
-            
+
+            click_highlight = false;
+            if ((is_focused && Swoop.input_handler.just_pressed(Microsoft.Xna.Framework.Input.Keys.Enter)) || (mouse_over && !mouse_down)) {
+                click_highlight = true;
+            }
+
         }
 
         internal override void draw() {
-            bool m = (mouse_over && !mouse_down) || (is_focused && Swoop.input_handler.just_pressed(Microsoft.Xna.Framework.Input.Keys.Enter));
+            Drawing.fill_rect_outline(position + Vector2.One, position + size, toggled_on ? Swoop.get_color(this) : Swoop.UIBackgroundColor, Swoop.get_color(this), 1f);
+            Drawing.text(text, position + margin, toggled_on ? Swoop.UIBackgroundColor : Swoop.get_color(this));
 
-            bool col_toggle = toggled_on;
-
-            Drawing.fill_rect_outline(position, position + size, col_toggle ? Swoop.get_color(this) : Swoop.UIBackgroundColor, Swoop.get_color(this), 1f);
-            Drawing.text(text, position + margin, col_toggle ? Swoop.UIBackgroundColor : Swoop.get_color(this));
-
-            Drawing.rect(position + (Vector2.One * 1), (position + size) - (Vector2.One * 1), m ? Swoop.get_color(this) : Swoop.UIBackgroundColor, m ? 3f : 1f);
+            Drawing.rect(position + (Vector2.One*2), (position + size) - (Vector2.One), click_highlight ? Swoop.get_color(this) : Swoop.UIBackgroundColor, click_highlight ? 3f : 1f);
         }
 
         internal override void draw_rt() { }
