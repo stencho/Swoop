@@ -77,7 +77,7 @@ namespace SwoopLib {
         public float width => size.X;
         public float height => size.Y;
 
-        public bool is_focused => parent.focused_element == this;
+        public bool is_focused => UIElementManager.focused_element == this;
 
         public bool can_be_focused = true;
 

@@ -13,6 +13,7 @@ using SwoopLib.UIElements;
 using MGRawInputLib;
 using static SwoopLib.Swoop;
 using System.ComponentModel;
+using System.Linq;
 
 namespace SwoopDemo {
     static class Extensions {
@@ -72,11 +73,13 @@ namespace SwoopDemo {
             UI.add_element(new Button("exit_button", "x",
                 resolution.ToVector2().X_only() - text_length.X_only() - (Vector2.UnitX * 10f)));
             UI.elements["exit_button"].ignore_dialog = true;
+            UI.elements["exit_button"].can_be_focused = false;
 
             UI.add_element(new Button("minimize_button", "_", 
                     resolution.ToVector2().X_only() - ((text_length.X_only() + (Vector2.UnitX * 10f)) * 2), 
                     UI.elements["exit_button"].size));
             UI.elements["minimize_button"].ignore_dialog = true;
+            UI.elements["minimize_button"].can_be_focused = false;
 
             ((Button)UI.elements["exit_button"]).click_action = () => {
                 Swoop.End();
@@ -115,6 +118,8 @@ It's also gonna be a couple of lines long just to make sure everything works",
                     ((Button)sub_elements.elements["close"]).click_action = () => {
                         UI.remove_element(td.name);
                     };
+
+                    UIElementManager.focused_element = sub_elements.elements["close"];
                 }));
             UI.dialog_element = "test_dialog";
 
@@ -141,7 +146,10 @@ It's also gonna be a couple of lines long just to make sure everything works",
                             sub_elements.add_element(new Button("close", "close", new Vector2(td.size.X / 2, td.size.Y - 40)));
                             ((Button)sub_elements.elements["close"]).click_action = () => {
                                 UI.remove_element(td.name);
+                                UIElementManager.focused_element = UI.elements["test_panel"].sub_elements.elements["long_button"];
                             };
+
+                            UIElementManager.focused_element = sub_elements.elements["close"];
                         }));
                     };
 
@@ -150,20 +158,24 @@ It's also gonna be a couple of lines long just to make sure everything works",
                         Vector2.One * 5f));
                 })
             );
+
+            UI.add_element(new ToggleButton("toggle_button", "disabled", (Vector2.UnitY * 18) + (Vector2.UnitX * 3)));            
+            ((ToggleButton)UI.elements["toggle_button"]).toggled = (ToggleButton tb, bool state) => {
+                tb.change_text((state ? "enabled" : "disabled"));
+            };
+
         }
 
         protected override void Update(GameTime gameTime) {
+            Swoop.Update();
             StringBuilder sb = new StringBuilder();
 
             string title_text = $"{UIExterns.get_window_title()}";
             string FPS_text = $"{Input.frame_rate} Hz poll/{fps.frame_rate} FPS draw";
-            string focus_info = $"{(Swoop.UI.focused_element != null ? Swoop.UI.focused_element.name : "")}";
-            string more_focus_info = $"{(Swoop.UI.elements["test_panel"].sub_elements.focused_element != null ? Swoop.UI.elements["test_panel"].sub_elements.focused_element.name : "")}";
+            string focus_info = $"{(UIElementManager.focused_element != null ? UIElementManager.focused_element.name : "")}";            
 
             ((TitleBar)UI.elements["title_bar"]).left_text = title_text;
-            ((TitleBar)UI.elements["title_bar"]).right_text = FPS_text + " " + focus_info + " " + more_focus_info;
-
-            Swoop.Update();
+            ((TitleBar)UI.elements["title_bar"]).right_text = FPS_text + " " + focus_info + " " +  Input.poll_method;
 
             fps.update(gameTime);
             base.Update(gameTime);

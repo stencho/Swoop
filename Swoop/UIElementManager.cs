@@ -14,7 +14,7 @@ namespace SwoopLib {
         public string dialog_element = "";
         public bool in_dialog => !string.IsNullOrEmpty(dialog_element);
 
-        public UIElement? focused_element = null;
+        public static UIElement? focused_element = null;
 
         Rectangle bounds = Rectangle.Empty;
         public UIElementManager(Vector2 pos, Point size) {
@@ -83,7 +83,7 @@ namespace SwoopLib {
             }
             
             if (mouse_down && !mouse_down_prev && !click_hit && UIExterns.in_foreground()) {
-                focused_element = null;
+                //focused_element = null; 
             }
 
 
