@@ -142,7 +142,7 @@ namespace SwoopLib {
         }
 
         public static void rect(Vector2 min, Vector2 max, Color color, float thickness) {
-            min.Floor(); max.Floor();
+            min.Floor(); max.Ceiling();
             begin();
 
             var w = Vector2.UnitX * (max.X - min.X);
@@ -170,14 +170,14 @@ namespace SwoopLib {
         }
 
         public static void fill_rect(Vector2 min, Vector2 max, Color color) {
-            min.Floor(); max.Floor();
+            min.Floor(); max.Ceiling();
             begin();
             sb.Draw(OnePXWhite, min, null, color, 0f, Vector2.Zero, max-min, SpriteEffects.None, 0f);
         }
 
 
         public static void fill_rect_outline(Vector2 min, Vector2 max, Color color, Color outline, float outline_thickness) {
-            min.Floor(); max.Floor();
+            min.Floor(); max.Ceiling();
             fill_rect(min, max, color);
             rect(min, max, outline, outline_thickness);
         }
