@@ -194,6 +194,12 @@ namespace SwoopLib {
             begin();
             sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), Color.White);
         }
+
+        public static void image(Texture2D image, Vector2 position, Vector2 size, SpriteEffects flip_mode) {
+            begin();
+            sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), null, Color.White, 0f, Vector2.Zero, flip_mode, 1f);
+        }
+
         public static void image(Texture2D image, Vector2 position, Point size) {
             begin();
             sb.Draw(image, new Rectangle(position.ToPoint(), size), Color.White);

@@ -34,7 +34,11 @@ namespace SwoopDemo {
 
         public static Point resolution = new Point(800, 600);
 
-        bool capture_demo_screenshot_on_startup = true;
+        bool capture_demo_screenshot_on_exit = true;
+
+        Texture2D logo;
+
+        RenderTarget2D output_rt;
 
         public SwoopGame() {
             graphics = new GraphicsDeviceManager(this);
@@ -66,7 +70,12 @@ namespace SwoopDemo {
         }
 
         protected override void LoadContent() {
+            output_rt = new RenderTarget2D(GraphicsDevice, resolution.X, resolution.Y);
+
             Swoop.Load(GraphicsDevice, graphics, Content, resolution);
+
+            logo = Content.Load<Texture2D>("swoop_logo");
+             
             build_UI();
         }
 
@@ -85,9 +94,9 @@ namespace SwoopDemo {
             UI.elements["minimize_button"].can_be_focused = false;
 
             ((Button)UI.elements["exit_button"]).click_action = () => {
-                if (capture_demo_screenshot_on_startup) {
-                    Swoop.render_target_output.SaveAsPng(new FileStream("..\\..\\..\\..\\current.png", FileMode.OpenOrCreate), resolution.X, resolution.Y);
-                    capture_demo_screenshot_on_startup = false;
+                if (capture_demo_screenshot_on_exit) {
+                    output_rt.SaveAsPng(new FileStream("..\\..\\..\\..\\current.png", FileMode.OpenOrCreate), resolution.X, resolution.Y);
+                    capture_demo_screenshot_on_exit = false;
                 }
                 Swoop.End();
                 this.Exit();
@@ -179,14 +188,21 @@ namespace SwoopDemo {
         }
 
         protected override void Draw(GameTime gameTime) {
-            GraphicsDevice.Clear(Color.Transparent);
 
             Swoop.Draw();
 
-            Drawing.graphics_device.SetRenderTarget(null);
+            Drawing.graphics_device.SetRenderTarget(output_rt);
+
+            GraphicsDevice.Clear(Color.FromNonPremultiplied(25,25,25,255));
+            
+            Drawing.image(logo, (resolution.ToVector2()) - (logo.Bounds.Size.ToVector2() * 0.5f), logo.Bounds.Size.ToVector2() * 0.5f, SpriteEffects.FlipHorizontally);
             Drawing.image(Swoop.render_target_output, Vector2.Zero, resolution);
 
             Drawing.end();
+
+
+            Drawing.graphics_device.SetRenderTarget(null);
+            Drawing.image(output_rt, Vector2.Zero, resolution);
 
             base.Draw(gameTime);
         }
