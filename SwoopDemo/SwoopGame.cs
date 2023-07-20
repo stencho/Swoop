@@ -32,7 +32,7 @@ namespace SwoopDemo {
 
         FPSCounter fps;
 
-        public static Point resolution = new Point(850, 600);
+        public static Point resolution = new Point(800, 600);
 
         bool capture_demo_screenshot_on_startup = true;
 
@@ -101,13 +101,43 @@ namespace SwoopDemo {
                 Vector2.Zero, (int)(resolution.X - (UI.elements["exit_button"].width*2)) + 3));
             UI.elements["title_bar"].ignore_dialog = true;
 
-            UI.add_element(new Button("big_ol_test_button", 
-                @"this is a really long test string to put on the button to test a thing
-It's also gonna be a couple of lines long just to make sure everything works",
-                Vector2.One * 20 + (Vector2.UnitY * 300)));
 
-            var dialog_size = new Vector2(340, 200);
-            UI.add_element(new Dialog("test_dialog",
+                
+            UI.add_element(new Button("test_button",
+                "this button should display a test dialog window",
+                (Vector2.One * 20) + (Vector2.UnitY * 15)));
+
+            UI.add_element(new Label("toggle_label", "This is a toggle button:", (Vector2.UnitY * 20) + (Vector2.UnitX * 15)));
+
+            UI.add_element(new ToggleButton("toggle_button", "Toggled On", "Toggled Off", (Vector2.UnitY * 26) + (Vector2.UnitX * 200)));
+            UI.elements["toggle_button"].anchor = UIElement.anchor_point.CENTER;
+
+
+
+            UI.add_element(new Button("behind_button",
+                @"this button should be behind the test panel",
+                Vector2.One * 5 + (Vector2.UnitY * 230)));
+
+            UI.add_element(new Panel("test_panel", Vector2.One * 30 + (Vector2.UnitY * 150), new Vector2(400, 100),
+                (Panel panel, UIElementManager sub_elements) => {
+                    sub_elements.add_element(new Button("long_button",
+                        "this is a really really really really really really long test button that should be far longer than the width of the panel",
+                        Vector2.One * 5f + (Vector2.UnitY * 25)));
+
+                    sub_elements.add_element(new Label("label",
+                        $"this label is a sub element of a Panel called \'{panel.name}\'",
+                        Vector2.One * 5f));
+
+                    sub_elements.add_element(new Label("behind_label",
+                        "<- that button should always be behind this panel\n     (and only the visible portion should be clickable)", 
+                        Vector2.One * 2f + (Vector2.UnitY * 55)));
+                })
+            );
+
+
+            var dialog_size = new Vector2(340, 160);
+            ((Button)UI.elements["test_button"]).click_action = () => {
+                UI.add_element(new Dialog("test_dialog",
                 (resolution.ToVector2() / 2) - (dialog_size * 0.5f),
                 dialog_size,
                 "test dialog title text",
@@ -116,58 +146,21 @@ It's also gonna be a couple of lines long just to make sure everything works",
                         td.size / 2, Label.anchor_point.CENTER));
 
                     ((Label)sub_elements.elements["test_label"]).text_justification = Label.alignment.CENTER;
-                    ((Label)sub_elements.elements["test_label"]).draw_outline = true;
 
                     sub_elements.add_element(new Label("test_label_2", $"this is another test label with an outline\nalso this dialog is called {td.name}", Vector2.One * 10));
                     ((Label)sub_elements.elements["test_label_2"]).draw_outline = true;
 
-                    sub_elements.add_element(new Button("close", "close", new Vector2(td.size.X / 2, td.size.Y - 40)));
+                    sub_elements.add_element(new Button("close", "close", new Vector2(td.size.X / 2, td.size.Y - 25)));
+                    sub_elements.elements["close"].anchor = UIElement.anchor_point.CENTER;
                     ((Button)sub_elements.elements["close"]).click_action = () => {
                         UI.remove_element(td.name);
+                        UIElementManager.focused_element = UI.elements["test_button"];
                     };
 
                     UIElementManager.focused_element = sub_elements.elements["close"];
                 }));
-            UI.dialog_element = "test_dialog";
+            };
 
-            UI.add_element(new Panel("test_panel", Vector2.One * 60, Vector2.One * 500, 
-                (Panel panel, UIElementManager sub_elements) => {
-                    sub_elements.add_element(new Button("long_button", 
-                        "this is a really really really really really really long test button that should be far longer than the width of the panel", 
-                        Vector2.One * 5f + (Vector2.UnitY * 25)));
-
-                    ((Button)sub_elements.elements["long_button"]).click_action = () => {
-                        UI.add_element(new Dialog("test_dialog",
-                        (resolution.ToVector2() / 2) - (dialog_size * 0.5f),
-                        dialog_size,
-                        "test dialog title text",
-                        (Dialog td, UIElementManager sub_elements) => {
-                            sub_elements.add_element(new Label("test_label", "this is a test label for testing\nall sorts of different text\n\nthis is a bit of extra text for testing\nabcdefghijklmnopqrstuvwxyz",
-                                td.size / 2, Label.anchor_point.CENTER));
-
-                            ((Label)sub_elements.elements["test_label"]).text_justification = Label.alignment.CENTER;
-
-                            sub_elements.add_element(new Label("test_label_2", $"this is another test label with an outline\nalso this dialog is called {td.name}", Vector2.One * 10));
-                            ((Label)sub_elements.elements["test_label_2"]).draw_outline = true;
-
-                            sub_elements.add_element(new Button("close", "close", new Vector2(td.size.X / 2, td.size.Y - 40)));
-                            ((Button)sub_elements.elements["close"]).click_action = () => {
-                                UI.remove_element(td.name);
-                                UIElementManager.focused_element = UI.elements["test_panel"].sub_elements.elements["long_button"];
-                            };
-
-                            UIElementManager.focused_element = sub_elements.elements["close"];
-                        }));
-                    };
-
-                    sub_elements.add_element(new Label("label",
-                        $"this label is a sub_element of a Panel called \'{panel.name}\'", 
-                        Vector2.One * 5f));
-                })
-            );
-
-            UI.add_element(new ToggleButton("toggle_button", (Vector2.UnitY * 26) + (Vector2.UnitX * 50)));
-            UI.elements["toggle_button"].anchor = UIElement.anchor_point.CENTER;
         }
 
         protected override void Update(GameTime gameTime) {
