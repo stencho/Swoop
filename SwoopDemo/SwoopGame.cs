@@ -111,23 +111,29 @@ namespace SwoopDemo {
             UI.elements["title_bar"].ignore_dialog = true;
 
 
-                
-            UI.add_element(new Button("test_button",
-                "this button should display a test dialog window",
-                (Vector2.One * 20) + (Vector2.UnitY * 15)));
 
-            UI.add_element(new Label("toggle_label", "This is a toggle button:", (Vector2.UnitY * 20) + (Vector2.UnitX * 15)));
+            UI.add_element(new Label("toggle_label", "a toggle button:", (Vector2.UnitY * 20) + (Vector2.UnitX * 15)));
 
-            UI.add_element(new ToggleButton("toggle_button", "Toggled On", "Toggled Off", (Vector2.UnitY * 26) + (Vector2.UnitX * 200)));
+            UI.add_element(new ToggleButton("toggle_button", "Toggled On", "Toggled Off", (Vector2.UnitY * 26) + (Vector2.UnitX * 155)));
             UI.elements["toggle_button"].anchor = UIElement.anchor_point.CENTER;
 
+
+            UI.add_element(new Button("test_button",
+                "this button should display a test dialog window",
+                (Vector2.UnitY * 40) + (Vector2.UnitX * 15)));
+
+            UI.add_element(new Checkbox("test_checkbox", "a checkbox",
+                (Vector2.One * 20) + (Vector2.UnitY * 53)));
+
+            UI.add_element(new Checkbox("test_checkbox_ml", "a multi-line-\ntext testing\ncheckbox",
+                (Vector2.One * 20) + (Vector2.UnitY * 40) + (Vector2.UnitX * 89)));
 
 
             UI.add_element(new Button("behind_button",
                 @"this button should be behind the test panel",
-                Vector2.One * 5 + (Vector2.UnitY * 230)));
+                (resolution.ToVector2().Y_only() - (Vector2.UnitY * 94)) + (Vector2.UnitX * 5)));
 
-            UI.add_element(new Panel("test_panel", Vector2.One * 30 + (Vector2.UnitY * 150), new Vector2(400, 100),
+            UI.add_element(new Panel("test_panel", (resolution.ToVector2().Y_only() - (Vector2.UnitY * 150)) + (Vector2.UnitX * 30), new Vector2(400, 100),
                 (Panel panel, UIElementManager sub_elements) => {
                     sub_elements.add_element(new Button("long_button",
                         "this is a really really really really really really long test button that should be far longer than the width of the panel",

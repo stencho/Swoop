@@ -12,6 +12,13 @@ using Microsoft.Xna.Framework.Graphics;
 using static System.Formats.Asn1.AsnWriter;
 
 namespace SwoopLib {
+    static class Extensions {
+        public static Vector2 X_only(this Vector2 v) => new Vector2(v.X, 0);
+        public static Vector2 Y_only(this Vector2 v) => new Vector2(0, v.Y);
+        public static Point X_only(this Point p) => new Point(p.X, 0);
+        public static Point Y_only(this Point p) => new Point(0, p.Y);
+    }
+
     public static class Drawing {
         public static SpriteBatch sb;
 

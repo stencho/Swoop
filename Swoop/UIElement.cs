@@ -124,8 +124,8 @@ namespace SwoopLib {
             this.size = size;
         }
 
-        internal abstract void update();
         internal abstract void added();
+        internal abstract void update();
         internal abstract void draw();
         internal abstract void draw_rt();
 
