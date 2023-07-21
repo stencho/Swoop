@@ -21,6 +21,10 @@ namespace SwoopLib {
             bounds = new Rectangle((int)pos.X, (int)pos.Y, size.X, size.Y);
         }
 
+        public void change_size(Vector2 pos, Point size) {
+            bounds = new Rectangle((int)pos.X, (int)pos.Y, size.X, size.Y);
+        }
+
         public void add_element(UIElement element) {
             element.parent = this;
 

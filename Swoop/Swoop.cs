@@ -30,11 +30,12 @@ namespace SwoopLib {
         
         public static bool fill_background { get; set; } = false;
         public static bool draw_UI_border { get; set; } = true;
+        public static bool enable_draw { get; set; } = true;
 
         public static void Initialize(Game parent, Point resolution) {
             Input.initialize(parent);
             input_handler = new InputHandler();
-
+            
             current_resolution = resolution;
         }
 
@@ -52,13 +53,27 @@ namespace SwoopLib {
         }
 
         public static void Draw() {
-            UI.draw();
+            if (enable_draw) {
+                UI.draw();
+            } else {
+
+                Drawing.graphics_device.SetRenderTarget(Drawing.main_render_target);
+                Drawing.graphics_device.Clear(Color.Transparent);
+                
+            }
         }
 
         public static void End() {
             Input.end();
         }
 
-        static void change_resolution() { }
+        public static void change_resolution(Point resolution) {
+            current_resolution = resolution;
+            UI.change_size(Vector2.Zero, current_resolution);
+            Drawing.main_render_target.Dispose();
+            Drawing.main_render_target = new RenderTarget2D(Drawing.graphics_device, current_resolution.X, current_resolution.Y,
+                false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+            GC.Collect();
+        }
     }
 }

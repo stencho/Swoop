@@ -20,7 +20,7 @@ This project will not work as-is and requires MGRawInputLib from [MGRawInput](ht
 - [x] Panel
 - [ ] Progress Bar (+ combined TrackBar)
 - [ ] Radio Buttons
-- [ ] Resize Handle
+- [x] Resize Handle
 - [ ] Tab Control
 - [ ] Text Box
 - [x] Title Bar (with window dragging)

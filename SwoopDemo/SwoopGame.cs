@@ -15,6 +15,9 @@ using static SwoopLib.Swoop;
 using System.ComponentModel;
 using System.Linq;
 using System.IO;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using static SwoopLib.UIExterns;
 
 namespace SwoopDemo {
     static class Extensions {
@@ -28,7 +31,6 @@ namespace SwoopDemo {
         GraphicsDeviceManager graphics;
 
         public static double target_fps = 60;
-        static float title_bar_height = 16f;
 
         FPSCounter fps;
 
@@ -59,6 +61,8 @@ namespace SwoopDemo {
             graphics.PreferredBackBufferHeight = resolution.Y;
 
             graphics.ApplyChanges();
+
+            Window.AllowUserResizing = true;
         }
 
         protected override void Initialize() {
@@ -78,7 +82,8 @@ namespace SwoopDemo {
              
             build_UI();
         }
-
+        [DllImport("user32.dll", SetLastError = true)] public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+        [DllImport("user32.dll")][return: MarshalAs(UnmanagedType.Bool)] static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
         protected void build_UI() {
             var text_length = Drawing.measure_string_profont("x") ;
 
@@ -136,8 +141,12 @@ namespace SwoopDemo {
             UI.add_element(new Panel("test_panel", (resolution.ToVector2().Y_only() - (Vector2.UnitY * 150)) + (Vector2.UnitX * 30), new Vector2(400, 100),
                 (Panel panel, UIElementManager sub_elements) => {
                     sub_elements.add_element(new Button("long_button",
-                        "this is a really really really really really really long test button that should be far longer than the width of the panel",
-                        Vector2.One * 5f + (Vector2.UnitY * 25)));
+                        "this is a really really really really really really long test button that should be far longer than the width of the panel\nunless you click this a bunch",
+                        Vector2.One * 5f + (Vector2.UnitY * 17)));
+
+                    ((Button)sub_elements.elements["long_button"]).click_action = () => {
+                        UI.elements["test_panel"].size += Vector2.One * 20f;
+                    };
 
                     sub_elements.add_element(new Label("label",
                         $"this label is a sub element of a Panel called \'{panel.name}\'",
@@ -176,6 +185,31 @@ namespace SwoopDemo {
                 }));
             };
 
+
+            UI.add_element(new ResizeHandle("resize_handle", resolution.ToVector2() - (Vector2.One * 15), Vector2.One * 15));
+            MGRawInputLib.Window.resize_start = (Point size) => {
+                Swoop.enable_draw = false;
+            };
+            MGRawInputLib.Window.resize_end = (Point size) => {
+                resolution = size;
+
+                graphics.PreferredBackBufferWidth = resolution.X;
+                graphics.PreferredBackBufferHeight = resolution.Y;
+                graphics.ApplyChanges();
+
+                output_rt.Dispose();
+                output_rt = new RenderTarget2D(GraphicsDevice, resolution.X, resolution.Y);
+
+                Swoop.change_resolution(resolution);
+
+                UI.elements["exit_button"].position = resolution.ToVector2().X_only() - text_length.X_only() - (Vector2.UnitX * 10f);
+                UI.elements["minimize_button"].position = resolution.ToVector2().X_only() - ((text_length.X_only() + (Vector2.UnitX * 9f)) * 2);
+                UI.elements["title_bar"].size = new Vector2((int)(resolution.X - (UI.elements["exit_button"].width * 2)) + 3, UI.elements["title_bar"].size.Y);
+
+                UI.elements["resize_handle"].position = size.ToVector2() - (Vector2.One * 15);     
+
+                Swoop.enable_draw = true;
+            };
         }
 
         protected override void Update(GameTime gameTime) {
@@ -194,13 +228,28 @@ namespace SwoopDemo {
         }
 
         protected override void Draw(GameTime gameTime) {
+           if (!Swoop.enable_draw) {
+                GraphicsDevice.SetRenderTarget(null);
+                if (Swoop.fill_background) {
+                    Drawing.graphics_device.Clear(Swoop.UI_background_color);
+                } else {
+                    Drawing.graphics_device.Clear(Color.Transparent);
+                }
+
+                base.Draw(gameTime);
+                return;
+            }
+           
             Swoop.Draw();
 
             Drawing.graphics_device.SetRenderTarget(output_rt);
 
             GraphicsDevice.Clear(Swoop.UI_background_color);
             
-            Drawing.image(logo, (resolution.ToVector2()) - (logo.Bounds.Size.ToVector2() * 0.5f), logo.Bounds.Size.ToVector2() * 0.5f, SpriteEffects.FlipHorizontally);
+            Drawing.image(logo, 
+                (resolution.ToVector2()) - (logo.Bounds.Size.ToVector2() * 0.5f) - (Vector2.One * 8f), 
+                logo.Bounds.Size.ToVector2() * 0.5f,
+                SpriteEffects.FlipHorizontally);
             Drawing.image(Swoop.render_target_output, Vector2.Zero, resolution);
 
             Drawing.end();
