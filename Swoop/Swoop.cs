@@ -18,7 +18,7 @@ namespace SwoopLib {
 
         public static Color UIColor = Color.White;
         public static Color UIHighlightColor = Color.FromNonPremultiplied(235, 140, 195, 255);
-        public static Color UIBackgroundColor = Color.FromNonPremultiplied(0x15,0x15,0x15, 255);
+        public static Color UIBackgroundColor = Color.FromNonPremultiplied(25, 25, 25, 255);
 
         public static UIElementManager UI;
 

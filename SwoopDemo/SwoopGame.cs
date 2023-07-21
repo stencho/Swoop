@@ -188,12 +188,11 @@ namespace SwoopDemo {
         }
 
         protected override void Draw(GameTime gameTime) {
-
             Swoop.Draw();
 
             Drawing.graphics_device.SetRenderTarget(output_rt);
 
-            GraphicsDevice.Clear(Color.FromNonPremultiplied(25,25,25,255));
+            GraphicsDevice.Clear(Swoop.UIBackgroundColor);
             
             Drawing.image(logo, (resolution.ToVector2()) - (logo.Bounds.Size.ToVector2() * 0.5f), logo.Bounds.Size.ToVector2() * 0.5f, SpriteEffects.FlipHorizontally);
             Drawing.image(Swoop.render_target_output, Vector2.Zero, resolution);
