@@ -77,7 +77,7 @@ public class demo_element : UIElement {
         //if this is enabled, the element will first draw everything in draw_rt
         //to this.draw_target, then run draw() later
         enable_render_target = true;
-        //can be targeted by 
+        //can be targeted by the focus system
         can_be_focused = true;
         //can still be interacted with when a dialog object is set
         ignore_dialog = false;
