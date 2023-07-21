@@ -72,7 +72,11 @@ namespace SwoopLib {
         public Vector2 position { get { return _position + anchor_offset(); } set { _position = value; } }
         public Vector2 position_actual => _position;
 
-        public Vector2 size { get; set; }
+        Vector2 _size;
+        public Vector2 size { get { return _size; } set {
+                _size = value;
+                resize_finish();
+            } }
 
         public float X => position.X;
         public float Y => position.Y;
@@ -108,7 +112,7 @@ namespace SwoopLib {
 
                     if (value) {
                         draw_target = new RenderTarget2D(Drawing.graphics_device, (int)width, (int)height, false, 
-                            SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PlatformContents);
+                            SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
                     } else {
                         draw_target = null;
                     }
@@ -155,6 +159,15 @@ namespace SwoopLib {
             if (mouse_over && mouse_down && !mouse_was_down) this.clicking = true;
             
             return (mouse_over && mouse_down && !mouse_was_down);
+        }
+
+        internal void resize_finish() {
+            if (_enable_rt) {
+                draw_target.Dispose();
+                draw_target = new RenderTarget2D(Drawing.graphics_device, (int)width, (int)height, false,
+                    SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+                GC.Collect();
+            }
         }
     }
 }
