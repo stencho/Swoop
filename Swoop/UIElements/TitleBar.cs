@@ -29,7 +29,7 @@ namespace SwoopLib.UIElements
         }
 
         internal override void draw() {
-            Drawing.fill_rect_outline(position + Vector2.One, position + size, Swoop.UIBackgroundColor, Swoop.get_color(this), 1f);
+            Drawing.fill_rect_outline(position + Vector2.One, position + size, Swoop.UI_background_color, Swoop.get_color(this), 1f);
 
             if (!string.IsNullOrEmpty(left_text))
                 Drawing.text(left_text, position + Vector2.One * 3, Swoop.get_color(this));

@@ -40,7 +40,7 @@ namespace SwoopLib.UIElements {
         }
 
         internal override void draw_rt() {
-            Drawing.fill_rect(Vector2.Zero, size.X, size.Y, Swoop.UIBackgroundColor);
+            Drawing.fill_rect(Vector2.Zero, size.X, size.Y, Swoop.UI_background_color);
             sub_elements.sub_draw(draw_target);
             Drawing.rect(Vector2.One, size, Swoop.get_color(this), 1f);
         }
@@ -51,7 +51,7 @@ namespace SwoopLib.UIElements {
             Vector2 tl = position + (Vector2.UnitX * 6) - (Vector2.UnitY * Drawing.measure_string_profont("A").Y);
 
             if (!String.IsNullOrWhiteSpace(title)) {
-                Drawing.fill_rect_outline(tl - (Vector2.UnitX * 3) - (Vector2.UnitY * 1), tl + Drawing.measure_string_profont(title) + (Vector2.UnitX * 3) + (Vector2.UnitY * 1), Swoop.UIBackgroundColor, Swoop.get_color(this), 1f);
+                Drawing.fill_rect_outline(tl - (Vector2.UnitX * 3) - (Vector2.UnitY * 1), tl + Drawing.measure_string_profont(title) + (Vector2.UnitX * 3) + (Vector2.UnitY * 1), Swoop.UI_background_color, Swoop.get_color(this), 1f);
                 Drawing.text(title, tl, Swoop.get_color(this));
             }
         }

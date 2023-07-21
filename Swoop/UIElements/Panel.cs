@@ -26,7 +26,7 @@ namespace SwoopLib.UIElements {
         }
 
         internal override void draw_rt() {
-            Drawing.fill_rect(Vector2.Zero, size.X, size.Y, Swoop.UIBackgroundColor);
+            Drawing.fill_rect(Vector2.Zero, size.X, size.Y, Swoop.UI_background_color);
             sub_elements.sub_draw(draw_target);
             Drawing.rect(Vector2.One, size, Swoop.get_color(this), 1f);
         }

@@ -49,8 +49,8 @@ namespace SwoopLib.UIElements {
 
 
         internal override void draw() { 
-            Drawing.fill_rect_outline(position + Vector2.One, position + size, click_highlight ? Swoop.get_color(this) : Swoop.UIBackgroundColor, Swoop.get_color(this), 1f);
-            Drawing.text(_text, position + margin, click_highlight ? Swoop.UIBackgroundColor : Swoop.get_color(this));
+            Drawing.fill_rect_outline(position + Vector2.One, position + size, click_highlight ? Swoop.get_color(this) : Swoop.UI_background_color, Swoop.get_color(this), 1f);
+            Drawing.text(_text, position + margin, click_highlight ? Swoop.UI_background_color : Swoop.get_color(this));
         }
 
         internal override void draw_rt() { }

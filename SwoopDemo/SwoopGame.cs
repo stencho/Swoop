@@ -198,7 +198,7 @@ namespace SwoopDemo {
 
             Drawing.graphics_device.SetRenderTarget(output_rt);
 
-            GraphicsDevice.Clear(Swoop.UIBackgroundColor);
+            GraphicsDevice.Clear(Swoop.UI_background_color);
             
             Drawing.image(logo, (resolution.ToVector2()) - (logo.Bounds.Size.ToVector2() * 0.5f), logo.Bounds.Size.ToVector2() * 0.5f, SpriteEffects.FlipHorizontally);
             Drawing.image(Swoop.render_target_output, Vector2.Zero, resolution);
@@ -206,7 +206,7 @@ namespace SwoopDemo {
             Drawing.end();
 
 
-            Drawing.graphics_device.SetRenderTarget(null);
+            GraphicsDevice.SetRenderTarget(null);
             Drawing.image(output_rt, Vector2.Zero, resolution);
 
             base.Draw(gameTime);

@@ -58,7 +58,7 @@ namespace SwoopLib.UIElements {
             Vector2 mid_left = position + (size.Y_only() * 0.5f) ;
             Drawing.fill_rect_outline(
                 mid_left - (checkbox_size.Y_only() * 0.5f), mid_left - (checkbox_size.Y_only() * 0.5f) + checkbox_size, 
-                Swoop.UIBackgroundColor, Swoop.get_color(this), 1f);
+                Swoop.UI_background_color, Swoop.get_color(this), 1f);
 
             if (mouse_over) {
                 Drawing.rect(

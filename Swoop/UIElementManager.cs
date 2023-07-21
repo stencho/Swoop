@@ -95,7 +95,7 @@ namespace SwoopLib {
                 if (elements[k].enable_render_target) {
                     Drawing.end();
                     Drawing.graphics_device.SetRenderTarget(elements[k].draw_target);
-                    Drawing.fill_rect(Vector2.Zero, elements[k].size, Swoop.UIBackgroundColor);
+                    Drawing.fill_rect(Vector2.Zero, elements[k].size, Swoop.UI_background_color);
                     elements[k].draw_rt();
                 }
             }
@@ -109,8 +109,8 @@ namespace SwoopLib {
         public void draw() {
             Drawing.graphics_device.SetRenderTarget(Drawing.main_render_target);
 
-            if (Swoop.clear_rt_to_background_color) {
-                Drawing.graphics_device.Clear(Swoop.UIBackgroundColor);
+            if (Swoop.fill_background) {
+                Drawing.graphics_device.Clear(Swoop.UI_background_color);
             } else {
                 Drawing.graphics_device.Clear(Color.Transparent);
             }
@@ -162,7 +162,7 @@ namespace SwoopLib {
             }
             
             if (Swoop.draw_UI_border) {
-                Drawing.rect(Vector2.Zero, Drawing.main_render_target.Bounds.Size.ToVector2(), Swoop.UIColor, 2f);
+                Drawing.rect(Vector2.Zero, Drawing.main_render_target.Bounds.Size.ToVector2(), Swoop.UI_color, 2f);
             }
         }
     }

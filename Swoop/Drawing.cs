@@ -252,7 +252,7 @@ namespace SwoopLib {
             sb.DrawString(fnt_profont, text, position, color);            
         }
         public static void text_shadow(string text, Vector2 position, Color color) {
-            Drawing.text(text, position + (Vector2.One), Swoop.UIBackgroundColor);
+            Drawing.text(text, position + (Vector2.One), Swoop.UI_background_color);
             Drawing.text(text, position, color);
         }
         public static Vector2 measure_string_profont(string text) {

@@ -12,13 +12,13 @@ using MGRawInputLib;
 namespace SwoopLib {
     public static class Swoop {
         public static Color get_color(UIElement element) {
-            if (UIElementManager.focused_element == element) return UIHighlightColor;
-            else return UIColor;
+            if (UIElementManager.focused_element == element) return UI_highlight_color;
+            else return UI_color;
         }
 
-        public static Color UIColor = Color.White;
-        public static Color UIHighlightColor = Color.FromNonPremultiplied(235, 140, 195, 255);
-        public static Color UIBackgroundColor = Color.FromNonPremultiplied(25, 25, 25, 255);
+        public static Color UI_color = Color.White;
+        public static Color UI_highlight_color = Color.FromNonPremultiplied(235, 140, 195, 255);
+        public static Color UI_background_color = Color.FromNonPremultiplied(25, 25, 25, 255);
 
         public static UIElementManager UI;
 
@@ -28,7 +28,7 @@ namespace SwoopLib {
 
         public static RenderTarget2D render_target_output => Drawing.main_render_target;
         
-        public static bool clear_rt_to_background_color { get; set; } = false;
+        public static bool fill_background { get; set; } = false;
         public static bool draw_UI_border { get; set; } = true;
 
         public static void Initialize(Game parent, Point resolution) {

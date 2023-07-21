@@ -61,6 +61,9 @@ namespace SwoopLib {
             return o;
         }
 
+        public readonly string name;
+
+        internal UIElementManager parent { get; set; }
 
         public UIElementManager sub_elements;
         public bool has_sub_elements => (sub_elements != null && sub_elements.elements.Count > 0);
@@ -77,10 +80,6 @@ namespace SwoopLib {
         public float width => size.X;
         public float height => size.Y;
 
-        public bool is_focused => UIElementManager.focused_element == this;
-
-        public bool can_be_focused = true;
-
         public bool mouse_over { get; set; } = false;
         public bool mouse_down { get; set; } = false;
         public bool mouse_was_down { get; set; } = false;
@@ -90,11 +89,11 @@ namespace SwoopLib {
         public bool clicking { get; set; } = false;
         public bool was_clicking { get; set; } = false;
 
+
+        public bool is_focused => UIElementManager.focused_element == this;
+
         public bool ignore_dialog { get; set; } = false;
-
-        internal UIElementManager parent { get; set; }
-
-        public readonly string name;
+        public bool can_be_focused { get; set; } = true;
 
         bool _enable_rt = false;
         public bool enable_render_target {
