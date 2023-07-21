@@ -1,0 +1,1 @@
+![Most current major change screenshot](https://raw.githubusercontent.com/stencho/Swoop/master/current.png)
