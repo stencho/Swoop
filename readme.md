@@ -1,4 +1,4 @@
-##Swoop
+## Swoop
 
 A set of UI elements and systems to manage them, for creating user interfaces. Allows for building things like debug overlays, editor UIs, or even entire applications (a questionable idea). Absolutely not immediate mode. Hella state. 
 
@@ -6,7 +6,7 @@ Everything is implemented as small ProFont and extreme minimalist 1px bright-lin
 
 This project will not work as-is and requires MGRawInputLib from [MGRawInput](https://github.com/stencho/MGRawInput) (for handling input and additional things, such as window dragging and threaded input handling)
 
-####Implemented UI Elements
+#### Implemented UI Elements
 - [x] Button
 - [x] Check Box
 - [ ] Combo Box
@@ -27,11 +27,11 @@ This project will not work as-is and requires MGRawInputLib from [MGRawInput](ht
 - [x] Toggle Button
 
 
-####Most current SwoopDemo screenshot
+#### Most current SwoopDemo screenshot
 ![Most current major change screenshot](current.png)
 
 
-####Usage:
+#### Usage:
 ```csharp
 using SwoopLib;
 
@@ -70,7 +70,7 @@ void Draw() {
 }
 ```
 
-####Creating elements:
+#### Creating elements:
 ```csharp
 public class demo_element : UIElement {
     public demo_element(string name, Vector2 position, Vector2 size) : base(name, position, size) {
