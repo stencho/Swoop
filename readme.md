@@ -35,7 +35,8 @@ This project will not work as-is and requires MGRawInputLib from [MGRawInput](ht
 ```csharp
 using SwoopLib;
 
-internal static Point resolution = new Point(800, 600);
+//XYPair is effectively just an integer Vector2, like Point, but with far more functionality
+internal static XYPair resolution = new XYPair(800, 600);
 
 void Initialize() {
   Swoop.Initialize(this, resolution);
@@ -48,7 +49,7 @@ void LoadContent() {
 
 void build_UI() {
   //add a button
-  Swoop.UI.add_element(new Button("demo_button", "demo", Vector2.One * 10f));
+  Swoop.UI.add_element(new Button("demo_button", "demo", XYPair.One * 20f));
 
   ((Button)Swoop.UI.elements["demo_button"]).click_action = () => {
     //do something when the button is clicked
@@ -66,14 +67,14 @@ void Draw() {
   //to Swoop.UI_background_color, otherwise it'll be transparent
   Swoop.Draw();
   GraphicsDevice.SetRenderTarget(null);
-  Drawing.image(Swoop.render_target_output, Vector2.Zero, resolution);
+  Drawing.image(Swoop.render_target_output, XYPair.Zero, resolution);
 }
 ```
 
 #### Creating elements:
 ```csharp
 public class demo_element : UIElement {
-    public demo_element(string name, Vector2 position, Vector2 size) : base(name, position, size) {
+    public demo_element(string name, XYPair position, XYPair size) : base(name, position, size) {
         //if this is enabled, the element will first draw everything in draw_rt
         //to this.draw_target, then run draw() later
         enable_render_target = true;
@@ -89,11 +90,11 @@ public class demo_element : UIElement {
     internal override void update() { /*update*/ }        
     internal override void draw_rt() {
       //fill element with color
-      Drawing.fill_rect(Vector2.Zero, size, Swoop.get_color(this));
+      Drawing.fill_rect(XYPair.Zero, size, Swoop.get_color(this));
     }
     internal override void draw() {          
       //draw the rendertarget to the output
-      Drawing.image(draw_target, Vector2.Zero, size);
+      Drawing.image(draw_target, XYPair.Zero, size);
     }
 }
 ```

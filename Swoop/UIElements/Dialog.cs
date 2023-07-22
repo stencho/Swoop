@@ -35,9 +35,13 @@ namespace SwoopLib.UIElements {
             parent.dialog_element = this.name;
         }
 
-        internal override void update() {
-            sub_elements.update();
+        internal override void update() {            
+            this.position = parent.size / 2 - (this.size / 2);
+
             sub_elements.size = this.size;
+            sub_elements.position = this.position;
+
+            sub_elements.update();
         }
 
         internal override void draw_rt() {

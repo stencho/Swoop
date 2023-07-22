@@ -22,8 +22,10 @@ namespace SwoopLib.UIElements {
         }
 
         internal override void update() {
-            sub_elements.update();
             sub_elements.size = this.size;
+            sub_elements.position = this.position;
+
+            sub_elements.update();
         }
 
         internal override void draw_rt() {

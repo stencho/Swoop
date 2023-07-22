@@ -78,19 +78,7 @@ namespace SwoopDemo {
         [DllImport("user32.dll", SetLastError = true)] public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
         [DllImport("user32.dll")][return: MarshalAs(UnmanagedType.Bool)] static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
         protected void build_UI() {
-            var text_length = Drawing.measure_string_profont_xy("x") ;
-
-            UI.add_element(new Button("exit_button", "x",
-                resolution.X_only - text_length.X_only - (Vector2.UnitX * 10f)));
-            UI.elements["exit_button"].ignore_dialog = true;
-            UI.elements["exit_button"].can_be_focused = false;
-
-            UI.add_element(new Button("minimize_button", "_", 
-                    resolution.X_only - ((text_length.X_only + (Vector2.UnitX * 9f)) * 2), 
-                    UI.elements["exit_button"].size));
-            UI.elements["minimize_button"].ignore_dialog = true;
-            UI.elements["minimize_button"].can_be_focused = false;
-
+            
             ((Button)UI.elements["exit_button"]).click_action = () => {
                 if (capture_demo_screenshot_on_exit) {
                     output_rt.SaveAsPng(new FileStream("..\\..\\..\\..\\current.png", FileMode.OpenOrCreate), resolution.X, resolution.Y);
@@ -99,15 +87,6 @@ namespace SwoopDemo {
                 Swoop.End();
                 this.Exit();
             };
-
-            ((Button)UI.elements["minimize_button"]).click_action = () => {
-                UIExterns.minimize_window();
-            };
-
-            UI.add_element(new TitleBar("title_bar",
-                XYPair.Zero, (int)(resolution.X - (UI.elements["exit_button"].width*2)) + 3));
-            UI.elements["title_bar"].ignore_dialog = true;
-
 
 
             UI.add_element(new Label("toggle_label", "a toggle button:", (XYPair.UnitY * 20) + (XYPair.UnitX * 15)));
@@ -178,34 +157,19 @@ namespace SwoopDemo {
                 }));
             };
 
+            Swoop.resize_end = (XYPair size) => {
+                resolution = size;
 
-            UI.add_element(new ResizeHandle("resize_handle", resolution - (XYPair.One * 15), XYPair.One * 15));
-
-            MGRawInputLib.Window.resize_start = (Point size) => {
-                Swoop.enable_draw = false;
-            };
-
-            MGRawInputLib.Window.resize_end = (Point size) => {
-                resolution = size.ToXYPair();
+                output_rt.Dispose();
+                output_rt = new RenderTarget2D(GraphicsDevice, resolution.X, resolution.Y);
 
                 graphics.PreferredBackBufferWidth = resolution.X;
                 graphics.PreferredBackBufferHeight = resolution.Y;
                 graphics.ApplyChanges();
 
-                output_rt.Dispose();
-                output_rt = new RenderTarget2D(GraphicsDevice, resolution.X, resolution.Y);
-
-                Swoop.change_resolution(resolution);
-
-                UI.elements["exit_button"].position = resolution.X_only - text_length.X_only - (XYPair.UnitX * 10f);
-                UI.elements["minimize_button"].position = resolution.X_only - ((text_length.X_only + (XYPair.UnitX * 9f)) * 2);
-                UI.elements["title_bar"].size = new XYPair((int)(resolution.X - (UI.elements["exit_button"].width * 2)) + 3, UI.elements["title_bar"].size.Y);
-
-                UI.elements["resize_handle"].position = size.ToXYPair() - (XYPair.One * 15);     
-
-                Swoop.enable_draw = true;
             };
         }
+
 
         protected override void Update(GameTime gameTime) {
             Swoop.Update();
@@ -216,7 +180,7 @@ namespace SwoopDemo {
             string focus_info = $"{(UIElementManager.focused_element != null ? UIElementManager.focused_element.name : "")}";            
 
             ((TitleBar)UI.elements["title_bar"]).left_text = title_text;
-            ((TitleBar)UI.elements["title_bar"]).right_text = FPS_text + " " + focus_info + " " +  Input.poll_method;
+            ((TitleBar)UI.elements["title_bar"]).right_text = FPS_text + " | " +  Input.poll_method;
 
             fps.update(gameTime);
             base.Update(gameTime);
@@ -230,6 +194,8 @@ namespace SwoopDemo {
                 } else {
                     Drawing.graphics_device.Clear(Color.Transparent);
                 }
+
+                Drawing.graphics_device.Clear(Swoop.UI_background_color);
 
                 base.Draw(gameTime);
                 return;
