@@ -11,22 +11,22 @@ namespace SwoopLib.UIElements {
     public class Dialog : UIElement {
         string title = "";
 
-        public Dialog(string name, Vector2 position, Vector2 size, string title, Action<Dialog, UIElementManager>? build_action)
+        public Dialog(string name, XYPair position, XYPair size, string title, Action<Dialog, UIElementManager>? build_action)
             : base(name, position, size) {
             this.enable_render_target = true;
             this.title = title;
             build(position, size, build_action);
         }
 
-        public Dialog(string name, Vector2 position, Vector2 size, Action<Dialog, UIElementManager>? build_action)
+        public Dialog(string name, XYPair position, XYPair size, Action<Dialog, UIElementManager>? build_action)
             : base(name, position, size) {
             this.enable_render_target = true;
             build(position, size, build_action);
         }
 
-        void build(Vector2 position, Vector2 size, Action<Dialog, UIElementManager>? build_action) {
+        void build(XYPair position, XYPair size, Action<Dialog, UIElementManager>? build_action) {
             can_be_focused = false;
-            sub_elements = new UIElementManager(position, size.ToPoint());
+            sub_elements = new UIElementManager(position, size);
 
             if (build_action != null) build_action(this, sub_elements);
         }
@@ -37,21 +37,24 @@ namespace SwoopLib.UIElements {
 
         internal override void update() {
             sub_elements.update();
+            sub_elements.size = this.size;
         }
 
         internal override void draw_rt() {
-            Drawing.fill_rect(Vector2.Zero, size.X, size.Y, Swoop.UI_background_color);
+            Drawing.fill_rect(XYPair.Zero, size.X, size.Y, Swoop.UI_background_color);
             sub_elements.sub_draw(draw_target);
-            Drawing.rect(Vector2.One, size, Swoop.get_color(this), 1f);
+            Drawing.rect(XYPair.One, size, Swoop.get_color(this), 1f);
         }
 
         internal override void draw() {
             Drawing.image(draw_target, position, size);
 
-            Vector2 tl = position + (Vector2.UnitX * 6) - (Vector2.UnitY * Drawing.measure_string_profont("A").Y);
+            XYPair tl = position + (XYPair.UnitX * 6) - (XYPair.UnitY * Drawing.measure_string_profont("A").Y);
 
             if (!String.IsNullOrWhiteSpace(title)) {
-                Drawing.fill_rect_outline(tl - (Vector2.UnitX * 3) - (Vector2.UnitY * 1), tl + Drawing.measure_string_profont(title) + (Vector2.UnitX * 3) + (Vector2.UnitY * 1), Swoop.UI_background_color, Swoop.get_color(this), 1f);
+                Drawing.fill_rect_outline(tl - (XYPair.UnitX * 3) - (XYPair.UnitY * 1), 
+                    tl + Drawing.measure_string_profont_xy(title) + (XYPair.UnitX * 3) + (XYPair.UnitY * 1),
+                    Swoop.UI_background_color, Swoop.get_color(this), 1f);
                 Drawing.text(title, tl, Swoop.get_color(this));
             }
         }

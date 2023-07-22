@@ -9,7 +9,7 @@ using SwoopLib;
 
 namespace SwoopLib.UIElements {
     public class ResizeHandle : UIElement {
-        public ResizeHandle(string name, Vector2 position, Vector2 size) : base(name, position, size) {
+        public ResizeHandle(string name, XYPair position, XYPair size) : base(name, position, size) {
             can_be_focused = false;
             ignore_dialog = true;
         } 
@@ -27,9 +27,9 @@ namespace SwoopLib.UIElements {
             var mid = position + (size * 0.5f);
             var qs = size * 0.25f;
             Drawing.tri(
-                mid + (Vector2.UnitX * qs.X) + (Vector2.UnitY * qs.Y),
-                mid + (Vector2.UnitX * qs.X) - (Vector2.UnitY * qs.Y),
-                mid - (Vector2.UnitX * qs.X) + (Vector2.UnitY * qs.Y),
+                mid + (XYPair.UnitX * qs.X) + (XYPair.UnitY * qs.Y),
+                mid + (XYPair.UnitX * qs.X) - (XYPair.UnitY * qs.Y),
+                mid - (XYPair.UnitX * qs.X) + (XYPair.UnitY * qs.Y),
                 Swoop.get_color(this), 1f);
         }
 

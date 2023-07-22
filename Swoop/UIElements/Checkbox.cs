@@ -12,8 +12,8 @@ namespace SwoopLib.UIElements {
         string _text;
         public string text { get { return _text; } set { _text = value; update_size(); } }
 
-        Vector2 checkbox_size = Vector2.One * 12f;
-        Vector2 text_size = Vector2.Zero;
+        XYPair checkbox_size = XYPair.One * 12f;
+        XYPair text_size = XYPair.Zero;
         
         const int margin = 4;
 
@@ -23,18 +23,18 @@ namespace SwoopLib.UIElements {
         public Action<Checkbox, bool> checked_changed;
 
         void update_size() {
-            text_size = Drawing.measure_string_profont(text);
+            text_size = Drawing.measure_string_profont_xy(text);
 
             if (text_size.Y > checkbox_size.Y) {
                 text_taller_than_box = true;
-                size = text_size + (Vector2.UnitX * (checkbox_size.X + margin));
+                size = text_size + (XYPair.UnitX * (checkbox_size.X + margin));
             } else {
                 text_taller_than_box = false;
-                size = checkbox_size + (Vector2.UnitX * (text_size.X + margin));
+                size = checkbox_size + (XYPair.UnitX * (text_size.X + margin));
             }
         }
 
-        public Checkbox(string name, string text, Vector2 position) : base(name, position, Vector2.Zero) {
+        public Checkbox(string name, string text, XYPair position) : base(name, position, XYPair.Zero) {
             this.text = text;
         }
 
@@ -55,26 +55,26 @@ namespace SwoopLib.UIElements {
         }
 
         internal override void draw() {
-            Vector2 mid_left = position + (size.Y_only() * 0.5f) ;
+            XYPair mid_left = position + (size.Y_only * 0.5f) ;
             Drawing.fill_rect_outline(
-                mid_left - (checkbox_size.Y_only() * 0.5f), mid_left - (checkbox_size.Y_only() * 0.5f) + checkbox_size, 
+                mid_left - (checkbox_size.Y_only * 0.5f), mid_left - (checkbox_size.Y_only * 0.5f) + checkbox_size, 
                 Swoop.UI_background_color, Swoop.get_color(this), 1f);
 
             if (mouse_over) {
                 Drawing.rect(
-                    mid_left - (checkbox_size.Y_only() * 0.5f) + Vector2.One, 
-                    mid_left - (checkbox_size.Y_only() * 0.5f) + checkbox_size - Vector2.One,
+                    mid_left - (checkbox_size.Y_only * 0.5f) + XYPair.One, 
+                    mid_left - (checkbox_size.Y_only * 0.5f) + checkbox_size - XYPair.One,
                     Swoop.get_color(this), 1f);
             }
 
             if (Checked) {
                 Drawing.fill_rect(
-                    mid_left - (checkbox_size.Y_only() * 0.5f) + Vector2.One,
-                    mid_left - (checkbox_size.Y_only() * 0.5f) + checkbox_size - (Vector2.One * 2),
+                    mid_left - (checkbox_size.Y_only * 0.5f) + XYPair.One,
+                    mid_left - (checkbox_size.Y_only * 0.5f) + checkbox_size - (XYPair.One * 2),
                     Swoop.get_color(this));                    
             }
 
-            Drawing.text(_text, mid_left + checkbox_size.X_only() + (Vector2.UnitX * margin) - (text_size.Y_only() * 0.5f), Swoop.get_color(this));
+            Drawing.text(_text, mid_left + checkbox_size.X_only + (XYPair.UnitX * margin) - (text_size.Y_only * 0.5f), Swoop.get_color(this));
         }
 
         internal override void draw_rt() {}

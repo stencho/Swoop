@@ -16,13 +16,12 @@ namespace SwoopLib {
 
         public static UIElement? focused_element = null;
 
-        Rectangle bounds = Rectangle.Empty;
-        public UIElementManager(Vector2 pos, Point size) {
-            bounds = new Rectangle((int)pos.X, (int)pos.Y, size.X, size.Y);
-        }
+        public XYPair position;
+        public XYPair size;
 
-        public void change_size(Vector2 pos, Point size) {
-            bounds = new Rectangle((int)pos.X, (int)pos.Y, size.X, size.Y);
+        public UIElementManager(XYPair pos, XYPair size) {
+            this.position = pos;
+            this.size = size;
         }
 
         public void add_element(UIElement element) {
@@ -45,7 +44,7 @@ namespace SwoopLib {
             bool mouse_down = Input.is_pressed(InputStructs.MouseButtons.Left);
 
             if (in_dialog) {
-                if (elements[dialog_element].click_update(bounds, mouse_over_hit)) {
+                if (elements[dialog_element].click_update(position, size, mouse_over_hit)) {
                     if (elements[dialog_element].can_be_focused) {
                         focused_element = elements[dialog_element];
                         click_hit = true;
@@ -57,7 +56,7 @@ namespace SwoopLib {
                 foreach (string k in elements.Keys.Reverse()) {
                     if (k == dialog_element) continue;
                     if (elements[k].ignore_dialog) {
-                        if (elements[k].click_update(bounds, mouse_over_hit)) {
+                        if (elements[k].click_update(position, size, mouse_over_hit)) {
                             if (elements[k].can_be_focused) {
                                 focused_element = elements[k];
                                 click_hit = true;
@@ -73,7 +72,7 @@ namespace SwoopLib {
             } else {
                 foreach (string k in elements.Keys.Reverse()) {
 
-                    if (elements[k].click_update(bounds, mouse_over_hit)) {
+                    if (elements[k].click_update(position, size, mouse_over_hit)) {
                         if (elements[k].can_be_focused) {
                             focused_element = elements[k];
                             click_hit = true;
@@ -99,7 +98,7 @@ namespace SwoopLib {
                 if (elements[k].enable_render_target) {
                     Drawing.end();
                     Drawing.graphics_device.SetRenderTarget(elements[k].draw_target);
-                    Drawing.fill_rect(Vector2.Zero, elements[k].size, Swoop.UI_background_color);
+                    Drawing.fill_rect(XYPair.Zero, elements[k].size, Swoop.UI_background_color);
                     elements[k].draw_rt();
                 }
             }
@@ -150,7 +149,7 @@ namespace SwoopLib {
             Drawing.end();
 
             if (in_dialog)
-                Drawing.fill_rect(bounds.Location.ToVector2(), bounds.Location.ToVector2() + bounds.Size.ToVector2(), Color.FromNonPremultiplied(0, 0, 0, 128));
+                Drawing.fill_rect(position, position + size, Color.FromNonPremultiplied(0, 0, 0, 128));
 
             foreach (string k in elements.Keys) {
                 if (k == dialog_element) continue;

@@ -26,7 +26,7 @@ namespace SwoopLib.UIElements {
 
         bool line_wrap = true;
 
-        public Label(string name, string text, Vector2 position, Vector2 size)
+        public Label(string name, string text, XYPair position, XYPair size)
             : base(name, position, size) {
             auto_size = false;
             this.text = text;
@@ -35,7 +35,7 @@ namespace SwoopLib.UIElements {
             can_be_focused = false;
         }
 
-        public Label(string name, string text, Vector2 position, Vector2 size, anchor_point anchor)
+        public Label(string name, string text, XYPair position, XYPair size, anchor_point anchor)
             : base(name, position, size) {
             auto_size = false;
             this.text = text;
@@ -45,21 +45,21 @@ namespace SwoopLib.UIElements {
             can_be_focused = false;
         }
 
-        public Label(string name, string text, Vector2 position)
-            : base(name, position, Vector2.Zero) {
+        public Label(string name, string text, XYPair position)
+            : base(name, position, XYPair.Zero) {
             auto_size = true;
             this.text = text;
             this.position = position;
-            this.size = Drawing.measure_string_profont(text);
+            this.size = Drawing.measure_string_profont_xy(text);
             can_be_focused = false;
         }
 
-        public Label(string name, string text, Vector2 position, anchor_point anchor)
-            : base(name, position, Vector2.Zero) {
+        public Label(string name, string text, XYPair position, anchor_point anchor)
+            : base(name, position, XYPair.Zero) {
             auto_size = true;
             this.text = text;
             this.position = position;
-            this.size = Drawing.measure_string_profont(text);
+            this.size = Drawing.measure_string_profont_xy(text);
             this.anchor = anchor;
             can_be_focused = false;
         }
@@ -69,7 +69,7 @@ namespace SwoopLib.UIElements {
         public enum alignment { LEFT, CENTER, RIGHT }
         public alignment text_justification = alignment.LEFT;
 
-        private void draw_internal(Vector2 offset, alignment tj) {
+        private void draw_internal(XYPair offset, alignment tj) {
             StringReader sr = new StringReader(text);
             int line_num = 0;
             float line_height = Drawing.measure_string_profont("A").Y;
@@ -79,12 +79,12 @@ namespace SwoopLib.UIElements {
                 string line = sr.ReadLine();
                 float line_width = Drawing.measure_string_profont(line).X;
 
-                Vector2 line_offset = Vector2.Zero;
+                XYPair line_offset = XYPair.Zero;
 
                 if (tj == alignment.CENTER)
-                    line_offset = new Vector2((size.X / 2) - (line_width / 2), 0);
+                    line_offset = new XYPair((size.X / 2) - (line_width / 2), 0);
                 else if (tj == alignment.RIGHT)
-                    line_offset = new Vector2(size.X - line_width, 0);
+                    line_offset = new XYPair(size.X - line_width, 0);
 
                 if (line_wrap) {
                     if (line_width > size.X) {
@@ -97,7 +97,7 @@ namespace SwoopLib.UIElements {
                         still_too_long:
 
                         if (!line.Contains(' ')) {
-                            Drawing.text(line, offset + line_offset + (line_height * line_num * Vector2.UnitY), Swoop.get_color(this));
+                            Drawing.text(line, offset + line_offset + (line_height * line_num * XYPair.UnitY), Swoop.get_color(this));
                             line_num++;
                             continue;
                         }
@@ -120,9 +120,9 @@ namespace SwoopLib.UIElements {
                         line_width = Drawing.measure_string_profont(line).X;
 
                         if (tj == alignment.CENTER)
-                            line_offset = new Vector2((size.X / 2) - (line_width / 2), 0);
+                            line_offset = new XYPair((size.X / 2) - (line_width / 2), 0);
                         else if (tj == alignment.RIGHT)
-                            line_offset = new Vector2(size.X - line_width, 0);
+                            line_offset = new XYPair(size.X - line_width, 0);
 
                         if (line_width > size.X) {
                             working_string = "";
@@ -131,27 +131,27 @@ namespace SwoopLib.UIElements {
 
                             goto still_too_long;
                         } else {
-                            Drawing.text(line, offset + line_offset + (line_height * line_num * Vector2.UnitY), Swoop.get_color(this));
+                            Drawing.text(line, offset + line_offset + (line_height * line_num * XYPair.UnitY), Swoop.get_color(this));
                             line_num++;
                         }
 
                     } else {
-                        Drawing.text(line, offset + line_offset + (line_height * line_num * Vector2.UnitY), Swoop.get_color(this));
+                        Drawing.text(line, offset + line_offset + (line_height * line_num * XYPair.UnitY), Swoop.get_color(this));
                     }
 
                 } else {
-                    Drawing.text(line, offset + line_offset + (line_height * line_num * Vector2.UnitY), Swoop.get_color(this));
+                    Drawing.text(line, offset + line_offset + (line_height * line_num * XYPair.UnitY), Swoop.get_color(this));
                 }
 
                 line_num++;
             }
 
             if (draw_outline)
-                Drawing.rect(offset - (Vector2.UnitX * 2), size.X + 5, size.Y, Swoop.get_color(this), 1f);
+                Drawing.rect(offset - (XYPair.UnitX * 2), size.X + 5, size.Y, Swoop.get_color(this), 1f);
         }
 
         internal override void draw_rt() {
-            draw_internal(Vector2.Zero, text_justification);
+            draw_internal(XYPair.Zero, text_justification);
         }
 
         internal override void draw() {

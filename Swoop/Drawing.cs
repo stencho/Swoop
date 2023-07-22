@@ -12,18 +12,12 @@ using Microsoft.Xna.Framework.Graphics;
 using static System.Formats.Asn1.AsnWriter;
 
 namespace SwoopLib {
-    static class Extensions {
-        public static Vector2 X_only(this Vector2 v) => new Vector2(v.X, 0);
-        public static Vector2 Y_only(this Vector2 v) => new Vector2(0, v.Y);
-        public static Point X_only(this Point p) => new Point(p.X, 0);
-        public static Point Y_only(this Point p) => new Point(0, p.Y);
-    }
 
     public static class Drawing {
         public static SpriteBatch sb;
 
         private static bool _sb_drawing = false;
-        public static bool sb_drawing { 
+        public static bool sb_drawing {
             get { return _sb_drawing; }
             private set { _sb_drawing = value; }
         }
@@ -40,13 +34,13 @@ namespace SwoopLib {
         public static Texture2D sdf_circle;
         private static int sdf_circle_res = 256;
 
-        public static void load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, Point resolution) {
+        public static void load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, XYPair resolution) {
             sb = new SpriteBatch(gd);
 
             graphics_device = gd;
             graphics = gdm;
 
-            main_render_target = new RenderTarget2D(graphics_device, resolution.X, resolution.Y, 
+            main_render_target = new RenderTarget2D(graphics_device, resolution.X, resolution.Y,
                 false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
             //create a 1x1 white texture
             OnePXWhite = new Texture2D(gd, 1, 1);
@@ -116,8 +110,8 @@ namespace SwoopLib {
 
         public static void cross(Vector2 center, float size, Color color) {
             center.Round();
-            line(center - (Vector2.UnitX * (size+1)), center + (Vector2.UnitX * size), color, 1f);
-            line(center - (Vector2.UnitY * (size+1)), center + (Vector2.UnitY * size), color, 1f);
+            line(center - (Vector2.UnitX * (size + 1)), center + (Vector2.UnitX * size), color, 1f);
+            line(center - (Vector2.UnitY * (size + 1)), center + (Vector2.UnitY * size), color, 1f);
         }
 
         public static void poly(Color color, float thickness, bool close_polygon, params Vector2[] points) {
@@ -136,34 +130,43 @@ namespace SwoopLib {
 
             for (var i = 0; i < points.Length; i++) {
                 //fill_circle(points[i], thickness, color);
-            }            
+            }
         }
 
         public static void tri(Vector2 A, Vector2 B, Vector2 C, Color color, float thickness) {
             begin();
             poly(color, thickness, true, A, B, C);
         }
-        
+        public static void tri(XYPair A, XYPair B, XYPair C, Color color, float thickness) {
+            begin();
+            poly(color, thickness, true, A.ToVector2(), B.ToVector2(), C.ToVector2());
+        }
+
         public static void rect(Vector2 min, float size_x, float size_y, Color color, float thickness) {
             rect(min, min + new Vector2(size_x, size_y), color, thickness);
         }
-
+        public static void rect(XYPair min, float size_x, float size_y, Color color, float thickness) {
+            rect(min.ToVector2(), min.ToVector2() + new Vector2(size_x, size_y), color, thickness);
+        }
+        public static void rect(XYPair min, XYPair max, Color color, float thickness) {
+            rect(min.ToVector2(), max.ToVector2(), color, thickness);
+        }
         public static void rect(Vector2 min, Vector2 max, Color color, float thickness) {
             min.Floor(); max.Ceiling();
             begin();
 
             var w = Vector2.UnitX * (max.X - min.X);
             var h = Vector2.UnitY * (max.Y - min.Y);
-            
+
             var half_line_x = Vector2.UnitX * (thickness/2f);
 
             //draw sides
             //top
-            line(min - half_line_x, 
-                (min + half_line_x) + w, 
+            line(min - half_line_x,
+                (min + half_line_x) + w,
                 color, thickness);
             //bottom
-            line((min - half_line_x) + h, 
+            line((min - half_line_x) + h,
                 (min + half_line_x) + h + w,
                 color, thickness);
             //left
@@ -175,16 +178,29 @@ namespace SwoopLib {
         public static void fill_rect(Vector2 min, float size_x, float size_y, Color color) {
             fill_rect(min, min + new Vector2(size_x, size_y), color);
         }
+        public static void fill_rect(XYPair min, float size_x, float size_y, Color color) {
+            fill_rect(min.ToVector2(), min.ToVector2() + new Vector2(size_x, size_y), color);
+        }
+
 
         public static void fill_rect(Vector2 min, Vector2 max, Color color) {
             min.Floor(); max.Ceiling();
             begin();
-            sb.Draw(OnePXWhite, min, null, color, 0f, Vector2.Zero, max-min, SpriteEffects.None, 0f);
+            sb.Draw(OnePXWhite, min, null, color, 0f, Vector2.Zero, max - min, SpriteEffects.None, 0f);
+        }
+
+        public static void fill_rect(XYPair min, XYPair max, Color color) {
+            begin();
+            sb.Draw(OnePXWhite, min.ToVector2(), null, color, 0f, Vector2.Zero, (max - min).ToVector2(), SpriteEffects.None, 0f);
         }
 
 
         public static void fill_rect_outline(Vector2 min, Vector2 max, Color color, Color outline, float outline_thickness) {
             min.Floor(); max.Ceiling();
+            fill_rect(min, max, color);
+            rect(min, max, outline, outline_thickness);
+        }
+        public static void fill_rect_outline(XYPair min, XYPair max, Color color, Color outline, float outline_thickness) {
             fill_rect(min, max, color);
             rect(min, max, outline, outline_thickness);
         }
@@ -215,6 +231,10 @@ namespace SwoopLib {
             begin();
             sb.Draw(image, new Rectangle(position, size), Color.White);
         }
+        public static void image(Texture2D image, XYPair position, XYPair size) {
+            begin();
+            sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), Color.White);
+        }
         public static void image(Texture2D image, Vector2 position, Vector2 size, Color tint) {
             begin();
             sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), tint);
@@ -232,8 +252,8 @@ namespace SwoopLib {
 
         public static void image(Texture2D image, Vector2 position, Vector2 size, int source_rect_x, int source_rect_y, int source_rect_w, int source_rect_h) {
             begin();
-            sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), 
-                new Rectangle(source_rect_x, source_rect_y, source_rect_w, source_rect_h), 
+            sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()),
+                new Rectangle(source_rect_x, source_rect_y, source_rect_w, source_rect_h),
                 Color.White);
         }
 
@@ -246,17 +266,28 @@ namespace SwoopLib {
                 Color.White);
         }
 
+        public static void text(string text, XYPair position, Color color) {
+            Drawing.text(text, position.ToVector2(), color);
+        }
+
         public static void text(string text, Vector2 position, Color color) {
             begin();
             position.Ceiling(); //this prevents half-pixel positioning which helps keep text crisp and artifact-free
             sb.DrawString(fnt_profont, text, position, color);            
         }
+
         public static void text_shadow(string text, Vector2 position, Color color) {
             Drawing.text(text, position + (Vector2.One), Swoop.UI_background_color);
             Drawing.text(text, position, color);
         }
         public static Vector2 measure_string_profont(string text) {
             return fnt_profont.MeasureString(text);
+        }
+        public static Point measure_string_profont_pt(string text) {
+            return fnt_profont.MeasureString(text).ToPoint();
+        }
+        public static XYPair measure_string_profont_xy(string text) {
+            return fnt_profont.MeasureString(text).ToXYPair();
         }
     }
 }

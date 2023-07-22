@@ -10,25 +10,35 @@ namespace SwoopLib.UIElements {
     public class Button : UIElement {
         string _text = "button";
         public string text => _text;
-        Vector2 margin = (Vector2.UnitY * 1.5f) + (Vector2.UnitX * 5);
+        XYPair margin = (XYPair.UnitY * 2f) + (XYPair.UnitX * 5);
 
         bool click_highlight = false;
 
         public Action click_action = null;
 
-        public Button(string name, string text, Vector2 position, Vector2 size) : base(name, position, size) {
-            _text = text;
+        bool _auto_size = false;
+        public bool auto_size {
+            get => _auto_size; set {
+
+            }
         }
 
-        public Button(string name, string text, Vector2 position) : base(name, position, Vector2.Zero) {
+        public Button(string name, string text, XYPair position, XYPair size) : base(name, position, size) {
+            _text = text;
+            _auto_size = false;
+        }
+
+        public Button(string name, string text, XYPair position) : base(name, position, XYPair.Zero) {
             _text = text;
             this.position = position;
-            size = (margin * 2) + Drawing.measure_string_profont(text);
+            size = (margin * 2) - XYPair.UnitY + Drawing.measure_string_profont_pt(text);
+
+            _auto_size = true;
         }
 
         public void change_text(string text) {
             _text = text;
-            size = (margin * 2) + Drawing.measure_string_profont(text);
+            size = (margin * 2) - XYPair.UnitY + Drawing.measure_string_profont_pt(text);
         }
 
 
@@ -49,7 +59,7 @@ namespace SwoopLib.UIElements {
 
 
         internal override void draw() { 
-            Drawing.fill_rect_outline(position + Vector2.One, position + size, click_highlight ? Swoop.get_color(this) : Swoop.UI_background_color, Swoop.get_color(this), 1f);
+            Drawing.fill_rect_outline(position + XYPair.One, position + size, click_highlight ? Swoop.get_color(this) : Swoop.UI_background_color, Swoop.get_color(this), 1f);
             Drawing.text(_text, position + margin, click_highlight ? Swoop.UI_background_color : Swoop.get_color(this));
         }
 

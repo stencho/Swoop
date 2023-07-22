@@ -24,7 +24,7 @@ namespace SwoopLib {
 
         internal static InputHandler input_handler;
 
-        static Point current_resolution;
+        static XYPair current_resolution;
 
         public static RenderTarget2D render_target_output => Drawing.main_render_target;
         
@@ -32,18 +32,18 @@ namespace SwoopLib {
         public static bool draw_UI_border { get; set; } = true;
         public static bool enable_draw { get; set; } = true;
 
-        public static void Initialize(Game parent, Point resolution) {
+        public static void Initialize(Game parent, XYPair resolution) {
             Input.initialize(parent);
             input_handler = new InputHandler();
             
             current_resolution = resolution;
         }
 
-        public static void Load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, Point resolution) {
+        public static void Load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, XYPair resolution) {
             Drawing.load(gd, gdm, content, resolution);
             SDF.load(content);
 
-            UI = new UIElementManager(Vector2.Zero, resolution);
+            UI = new UIElementManager(XYPair.Zero, resolution);
         }
 
         public static void Update() {
@@ -56,10 +56,8 @@ namespace SwoopLib {
             if (enable_draw) {
                 UI.draw();
             } else {
-
                 Drawing.graphics_device.SetRenderTarget(Drawing.main_render_target);
-                Drawing.graphics_device.Clear(Color.Transparent);
-                
+                Drawing.graphics_device.Clear(Color.Transparent);                
             }
         }
 
@@ -67,9 +65,9 @@ namespace SwoopLib {
             Input.end();
         }
 
-        public static void change_resolution(Point resolution) {
+        public static void change_resolution(XYPair resolution) {
             current_resolution = resolution;
-            UI.change_size(Vector2.Zero, current_resolution);
+            UI.size = current_resolution;
             Drawing.main_render_target.Dispose();
             Drawing.main_render_target = new RenderTarget2D(Drawing.graphics_device, current_resolution.X, current_resolution.Y,
                 false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);

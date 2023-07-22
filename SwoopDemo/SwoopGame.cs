@@ -20,13 +20,6 @@ using System.Runtime.InteropServices;
 using static SwoopLib.UIExterns;
 
 namespace SwoopDemo {
-    static class Extensions {
-        public static Vector2 X_only(this Vector2 v) => new Vector2(v.X, 0);
-        public static Vector2 Y_only(this Vector2 v) => new Vector2(0, v.Y);
-        public static Point X_only(this Point p) => new Point(p.X, 0);
-        public static Point Y_only(this Point p) => new Point(0, p.Y);
-    }
-
     public class SwoopGame : Game {
         GraphicsDeviceManager graphics;
 
@@ -34,7 +27,7 @@ namespace SwoopDemo {
 
         FPSCounter fps;
 
-        public static Point resolution = new Point(800, 600);
+        public static XYPair resolution = new XYPair(800, 600);
 
         bool capture_demo_screenshot_on_exit = true;
 
@@ -85,15 +78,15 @@ namespace SwoopDemo {
         [DllImport("user32.dll", SetLastError = true)] public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
         [DllImport("user32.dll")][return: MarshalAs(UnmanagedType.Bool)] static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
         protected void build_UI() {
-            var text_length = Drawing.measure_string_profont("x") ;
+            var text_length = Drawing.measure_string_profont_xy("x") ;
 
             UI.add_element(new Button("exit_button", "x",
-                resolution.ToVector2().X_only() - text_length.X_only() - (Vector2.UnitX * 10f)));
+                resolution.X_only - text_length.X_only - (Vector2.UnitX * 10f)));
             UI.elements["exit_button"].ignore_dialog = true;
             UI.elements["exit_button"].can_be_focused = false;
 
             UI.add_element(new Button("minimize_button", "_", 
-                    resolution.ToVector2().X_only() - ((text_length.X_only() + (Vector2.UnitX * 9f)) * 2), 
+                    resolution.X_only - ((text_length.X_only + (Vector2.UnitX * 9f)) * 2), 
                     UI.elements["exit_button"].size));
             UI.elements["minimize_button"].ignore_dialog = true;
             UI.elements["minimize_button"].can_be_focused = false;
@@ -111,58 +104,58 @@ namespace SwoopDemo {
                 UIExterns.minimize_window();
             };
 
-            UI.add_element(new TitleBar("title_bar", 
-                Vector2.Zero, (int)(resolution.X - (UI.elements["exit_button"].width*2)) + 3));
+            UI.add_element(new TitleBar("title_bar",
+                XYPair.Zero, (int)(resolution.X - (UI.elements["exit_button"].width*2)) + 3));
             UI.elements["title_bar"].ignore_dialog = true;
 
 
 
-            UI.add_element(new Label("toggle_label", "a toggle button:", (Vector2.UnitY * 20) + (Vector2.UnitX * 15)));
+            UI.add_element(new Label("toggle_label", "a toggle button:", (XYPair.UnitY * 20) + (XYPair.UnitX * 15)));
 
-            UI.add_element(new ToggleButton("toggle_button", "Toggled On", "Toggled Off", (Vector2.UnitY * 26) + (Vector2.UnitX * 155)));
+            UI.add_element(new ToggleButton("toggle_button", "Toggled On", "Toggled Off", (XYPair.UnitY * 26) + (XYPair.UnitX * 155)));
             UI.elements["toggle_button"].anchor = UIElement.anchor_point.CENTER;
 
 
             UI.add_element(new Button("test_button",
                 "this button should display a test dialog window",
-                (Vector2.UnitY * 40) + (Vector2.UnitX * 15)));
+                (XYPair.UnitY * 40) + (XYPair.UnitX * 15)));
 
             UI.add_element(new Checkbox("test_checkbox", "a checkbox",
-                (Vector2.One * 20) + (Vector2.UnitY * 53)));
+                (XYPair.One * 20) + (XYPair.UnitY * 53)));
 
             UI.add_element(new Checkbox("test_checkbox_ml", "a multi-line-\ntext testing\ncheckbox",
-                (Vector2.One * 20) + (Vector2.UnitY * 40) + (Vector2.UnitX * 89)));
+                (XYPair.One * 20) + (XYPair.UnitY * 40) + (XYPair.UnitX * 89)));
 
 
             UI.add_element(new Button("behind_button",
                 @"this button should be behind the test panel",
-                (resolution.ToVector2().Y_only() - (Vector2.UnitY * 94)) + (Vector2.UnitX * 5)));
+                (resolution.Y_only - (XYPair.UnitY * 94)) + (XYPair.UnitX * 5)));
 
-            UI.add_element(new Panel("test_panel", (resolution.ToVector2().Y_only() - (Vector2.UnitY * 150)) + (Vector2.UnitX * 30), new Vector2(400, 100),
+            UI.add_element(new Panel("test_panel", (resolution.Y_only - (XYPair.UnitY * 150)) + (Vector2.UnitX * 30), new XYPair(400, 100),
                 (Panel panel, UIElementManager sub_elements) => {
                     sub_elements.add_element(new Button("long_button",
                         "this is a really really really really really really long test button that should be far longer than the width of the panel\nunless you click this a bunch",
-                        Vector2.One * 5f + (Vector2.UnitY * 17)));
+                        XYPair.One * 5f + (XYPair.UnitY * 17)));
 
                     ((Button)sub_elements.elements["long_button"]).click_action = () => {
-                        UI.elements["test_panel"].size += Vector2.One * 20f;
+                        UI.elements["test_panel"].size += XYPair.One * 20f;
                     };
 
                     sub_elements.add_element(new Label("label",
                         $"this label is a sub element of a Panel called \'{panel.name}\'",
-                        Vector2.One * 5f));
+                        XYPair.One * 5f));
 
                     sub_elements.add_element(new Label("behind_label",
-                        "<- that button should always be behind this panel\n     (and only the visible portion should be clickable)", 
-                        Vector2.One * 2f + (Vector2.UnitY * 55)));
+                        "<- that button should always be behind this panel\n     (and only the visible portion should be clickable)",
+                        XYPair.One * 2f + (XYPair.UnitY * 55)));
                 })
             );
 
 
-            var dialog_size = new Vector2(340, 160);
+            var dialog_size = new XYPair(340, 160);
             ((Button)UI.elements["test_button"]).click_action = () => {
                 UI.add_element(new Dialog("test_dialog",
-                (resolution.ToVector2() / 2) - (dialog_size * 0.5f),
+                (resolution / 2) - (dialog_size * 0.5f),
                 dialog_size,
                 "test dialog title text",
                 (Dialog td, UIElementManager sub_elements) => {
@@ -171,10 +164,10 @@ namespace SwoopDemo {
 
                     ((Label)sub_elements.elements["test_label"]).text_justification = Label.alignment.CENTER;
 
-                    sub_elements.add_element(new Label("test_label_2", $"this is another test label with an outline\nalso this dialog is called {td.name}", Vector2.One * 10));
+                    sub_elements.add_element(new Label("test_label_2", $"this is another test label with an outline\nalso this dialog is called {td.name}", XYPair.One * 10));
                     ((Label)sub_elements.elements["test_label_2"]).draw_outline = true;
 
-                    sub_elements.add_element(new Button("close", "close", new Vector2(td.size.X / 2, td.size.Y - 25)));
+                    sub_elements.add_element(new Button("close", "close", new XYPair(td.size.X / 2, td.size.Y - 25)));
                     sub_elements.elements["close"].anchor = UIElement.anchor_point.CENTER;
                     ((Button)sub_elements.elements["close"]).click_action = () => {
                         UI.remove_element(td.name);
@@ -186,12 +179,14 @@ namespace SwoopDemo {
             };
 
 
-            UI.add_element(new ResizeHandle("resize_handle", resolution.ToVector2() - (Vector2.One * 15), Vector2.One * 15));
+            UI.add_element(new ResizeHandle("resize_handle", resolution - (XYPair.One * 15), XYPair.One * 15));
+
             MGRawInputLib.Window.resize_start = (Point size) => {
                 Swoop.enable_draw = false;
             };
+
             MGRawInputLib.Window.resize_end = (Point size) => {
-                resolution = size;
+                resolution = size.ToXYPair();
 
                 graphics.PreferredBackBufferWidth = resolution.X;
                 graphics.PreferredBackBufferHeight = resolution.Y;
@@ -202,11 +197,11 @@ namespace SwoopDemo {
 
                 Swoop.change_resolution(resolution);
 
-                UI.elements["exit_button"].position = resolution.ToVector2().X_only() - text_length.X_only() - (Vector2.UnitX * 10f);
-                UI.elements["minimize_button"].position = resolution.ToVector2().X_only() - ((text_length.X_only() + (Vector2.UnitX * 9f)) * 2);
-                UI.elements["title_bar"].size = new Vector2((int)(resolution.X - (UI.elements["exit_button"].width * 2)) + 3, UI.elements["title_bar"].size.Y);
+                UI.elements["exit_button"].position = resolution.X_only - text_length.X_only - (XYPair.UnitX * 10f);
+                UI.elements["minimize_button"].position = resolution.X_only - ((text_length.X_only + (XYPair.UnitX * 9f)) * 2);
+                UI.elements["title_bar"].size = new XYPair((int)(resolution.X - (UI.elements["exit_button"].width * 2)) + 3, UI.elements["title_bar"].size.Y);
 
-                UI.elements["resize_handle"].position = size.ToVector2() - (Vector2.One * 15);     
+                UI.elements["resize_handle"].position = size.ToXYPair() - (XYPair.One * 15);     
 
                 Swoop.enable_draw = true;
             };
@@ -250,13 +245,13 @@ namespace SwoopDemo {
                 (resolution.ToVector2()) - (logo.Bounds.Size.ToVector2() * 0.5f) - (Vector2.One * 8f), 
                 logo.Bounds.Size.ToVector2() * 0.5f,
                 SpriteEffects.FlipHorizontally);
-            Drawing.image(Swoop.render_target_output, Vector2.Zero, resolution);
+            Drawing.image(Swoop.render_target_output, XYPair.Zero, resolution);
 
             Drawing.end();
 
 
             GraphicsDevice.SetRenderTarget(null);
-            Drawing.image(output_rt, Vector2.Zero, resolution);
+            Drawing.image(output_rt, XYPair.Zero, resolution);
 
             base.Draw(gameTime);
         }

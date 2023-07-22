@@ -10,25 +10,26 @@ namespace SwoopLib.UIElements {
 
         public Action<UIElementManager> build_action;
 
-        public Panel(string name, Vector2 position, Vector2 size, Action<Panel, UIElementManager>? build_action) : base(name, position, size) {
+        public Panel(string name, XYPair position, XYPair size, Action<Panel, UIElementManager>? build_action) : base(name, position, size) {
             this.enable_render_target = true;
             build(position, size, build_action);
         }
 
-        void build(Vector2 position, Vector2 size, Action<Panel, UIElementManager>? build_action) {
+        void build(XYPair position, XYPair size, Action<Panel, UIElementManager>? build_action) {
             can_be_focused = false;
-            sub_elements = new UIElementManager(position, size.ToPoint());
+            sub_elements = new UIElementManager(position, size);
             if (build_action != null) build_action(this, sub_elements);            
         }
 
         internal override void update() {
             sub_elements.update();
+            sub_elements.size = this.size;
         }
 
         internal override void draw_rt() {
-            Drawing.fill_rect(Vector2.Zero, size.X, size.Y, Swoop.UI_background_color);
+            Drawing.fill_rect(XYPair.Zero, size.X, size.Y, Swoop.UI_background_color);
             sub_elements.sub_draw(draw_target);
-            Drawing.rect(Vector2.One, size, Swoop.get_color(this), 1f);
+            Drawing.rect(XYPair.One, size, Swoop.get_color(this), 1f);
         }
 
         internal override void draw() {

@@ -24,8 +24,8 @@ namespace SwoopLib {
 
         public anchor_point anchor = anchor_point.TOP_LEFT;
 
-        internal Vector2 anchor_offset() {
-            Vector2 o = Vector2.Zero;
+        internal XYPair anchor_offset() {
+            XYPair o = XYPair.Zero;
             switch (anchor) {
                 case anchor_point.TOP:
                     o.X -= size.X / 2;
@@ -68,12 +68,12 @@ namespace SwoopLib {
         public UIElementManager sub_elements;
         public bool has_sub_elements => (sub_elements != null && sub_elements.elements.Count > 0);
 
-        Vector2 _position = Vector2.Zero;
-        public Vector2 position { get { return _position + anchor_offset(); } set { _position = value; } }
-        public Vector2 position_actual => _position;
+        XYPair _position = XYPair.Zero;
+        public XYPair position { get { return _position + anchor_offset(); } set { _position = value; } }
+        public XYPair position_actual => _position;
 
-        Vector2 _size;
-        public Vector2 size { get { return _size; } set {
+        XYPair _size;
+        public XYPair size { get { return _size; } set {
                 _size = value;
                 resize_finish();
             } }
@@ -121,7 +121,7 @@ namespace SwoopLib {
         }
         internal RenderTarget2D draw_target;
 
-        public UIElement(string name, Vector2 position, Vector2 size) {
+        public UIElement(string name, XYPair position, XYPair size) {
             this.name = name;
             this.position = position;
             this.size = size;
@@ -132,15 +132,15 @@ namespace SwoopLib {
         internal abstract void draw();
         internal abstract void draw_rt();
 
-        internal bool click_update(Rectangle bounds, bool mouse_over_hit) {
+        internal bool click_update(XYPair manager_position, XYPair manager_size, bool mouse_over_hit) {
 
-            bool hit_bounds = Collision2D.v2_intersects_rect(Input.cursor_pos.ToVector2(),
-                    bounds.Location.ToVector2(), bounds.Location.ToVector2() + bounds.Size.ToVector2());
+            bool hit_bounds = Collision2D.point_intersects_rect(Input.cursor_pos,
+                    manager_position, manager_position + manager_size);
 
             if (mouse_over_hit) mouse_over = false;
             else mouse_over = hit_bounds 
-                    && Collision2D.v2_intersects_rect(Input.cursor_pos.ToVector2(), bounds.Location.ToVector2() + position, 
-                    bounds.Location.ToVector2() + position + (size - Vector2.One));
+                    && Collision2D.point_intersects_rect(Input.cursor_pos, manager_position + position,
+                    manager_position + position + (size - XYPair.One));
 
             mouse_was_down = mouse_down;
             mouse_down = Input.is_pressed(InputStructs.MouseButtons.Left);
@@ -165,7 +165,7 @@ namespace SwoopLib {
             if (_enable_rt) {
                 draw_target.Dispose();
                 draw_target = new RenderTarget2D(Drawing.graphics_device, (int)width, (int)height, false,
-                    SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+                    SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PlatformContents);
                 GC.Collect();
             }
         }
