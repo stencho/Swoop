@@ -4,7 +4,7 @@ A set of UI elements and systems to manage them, for creating user interfaces. A
 
 Everything is implemented as small ProFont and extreme minimalist 1px bright-lines-on-dark-backgrounds, because I first used bbLean at a formative age. The goal is to eventually make it possible to globally 'swap out' important parts of different elements- for example, assigning textures for a button's standard, mouseover, and clicked states, to effectively "skin" all buttons belonging to a UIElementManager. Until at least most elements are implemented and working though, 20/20 vision or better only.
 
-This project will not work as-is and requires MGRawInputLib from [MGRawInput](https://github.com/stencho/MGRawInput) (for handling input and additional things, such as window dragging and threaded input handling)
+This project will not work as-is and requires MGRawInputLib from [MGRawInput](https://github.com/stencho/MGRawInput) (for handling input and additional things, such as window dragging/resizing and threaded input handling)
 
 #### Implemented UI Elements
 - [x] Button
