@@ -75,7 +75,7 @@ void Draw() {
 ```csharp
 public class demo_element : UIElement {
     public demo_element(string name, XYPair position, XYPair size) : base(name, position, size) {
-        //if this is enabled, the element will first draw everything in draw_rt
+        //if this is enabled, the element will first draw everything in draw_rt()
         //to this.draw_target, then run draw() later
         enable_render_target = true;
         //can be targeted by the focus system
