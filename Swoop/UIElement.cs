@@ -138,7 +138,7 @@ namespace SwoopLib {
                     manager_position, manager_position + manager_size);
 
             if (mouse_over_hit) mouse_over = false;
-            else mouse_over = hit_bounds 
+            else mouse_over = hit_bounds && Window.mouse_over_window
                     && Collision2D.point_intersects_rect(Input.cursor_pos, manager_position + position,
                     manager_position + position + (size - XYPair.One));
 

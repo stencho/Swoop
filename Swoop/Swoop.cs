@@ -111,6 +111,7 @@ namespace SwoopLib {
         }
 
         public static void Update() {
+            Window.is_active = parent.IsActive;
             input_handler.update();
 
             UI.update();            

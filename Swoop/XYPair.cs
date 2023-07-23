@@ -57,41 +57,31 @@ namespace SwoopLib {
         public XYPair Y_only => new XYPair(0, this.Y);
 
         public int Length() {
-            var y2 = this.Y;
-            var x2 = this.X;
+            float y2 = this.Y;
+            float x2 = this.X;
 
-            y2 = (int)Math.Pow((double)y2, 2.0);
-            x2 = (int)Math.Pow((double)x2, 2.0);
+            y2 = (float)Math.Pow(y2, 2.0);
+            x2 = (float)Math.Pow(x2, 2.0);
 
             return (int)Math.Sqrt(x2 + y2);
         }
 
         public static int Length(XYPair a, XYPair b) {
-            var y2 = b.Y - a.Y;
-            var x2 = b.X - a.X;
+            float y2 = b.Y - a.Y;
+            float x2 = b.X - a.X;
 
-            y2 = (int)Math.Pow((double)y2, 2.0);
-            x2 = (int)Math.Pow((double)x2, 2.0);
+            y2 = (float)Math.Pow(y2, 2.0);
+            x2 = (float)Math.Pow(x2, 2.0);
 
             return (int)Math.Sqrt(x2 + y2);
         }
 
         public static int Length(XYPair a, Vector2 b) {
-            var y2 = (int)b.Y - a.Y;
-            var x2 = (int)b.X - a.X;
+            float y2 = b.Y - a.Y;
+            float x2 = b.X - a.X;
 
-            y2 = (int)Math.Pow((double)y2, 2.0);
-            x2 = (int)Math.Pow((double)x2, 2.0);
-
-            return (int)Math.Sqrt(x2 + y2);
-        }
-
-        public static int Length(XYPair a, Vector3 b) {
-            var y2 = (int)b.Y - a.Y;
-            var x2 = (int)b.Z - a.X;
-
-            y2 = (int)Math.Pow((double)y2, 2.0);
-            x2 = (int)Math.Pow((double)x2, 2.0);
+            y2 = (float)Math.Pow(y2, 2.0);
+            x2 = (float)Math.Pow(x2, 2.0);
 
             return (int)Math.Sqrt(x2 + y2);
         }
