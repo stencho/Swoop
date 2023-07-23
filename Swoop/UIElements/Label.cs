@@ -64,6 +64,12 @@ namespace SwoopLib.UIElements {
             can_be_focused = false;
         }
 
+        public void change_text(string text) {
+            this.text = text;
+            if (auto_size)
+                this.size = Drawing.measure_string_profont_xy(text);
+        }
+
         internal override void update() { }
 
         public enum alignment { LEFT, CENTER, RIGHT }
