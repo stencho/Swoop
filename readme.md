@@ -49,7 +49,7 @@ void LoadContent() {
 
 void build_UI() {
   //add a button
-  Swoop.UI.add_element(new Button("demo_button", "demo", XYPair.One * 20f));
+  Swoop.UI.add_element(new Button("demo_button", "demo", XYPair.One * 20));
 
   ((Button)Swoop.UI.elements["demo_button"]).click_action = () => {
     //do something when the button is clicked
