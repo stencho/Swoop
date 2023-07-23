@@ -75,8 +75,10 @@ namespace SwoopDemo {
              
             build_UI();
         }
+
         [DllImport("user32.dll", SetLastError = true)] public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
         [DllImport("user32.dll")][return: MarshalAs(UnmanagedType.Bool)] static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
         protected void build_UI() {
             
             ((Button)UI.elements["exit_button"]).click_action = () => {
@@ -168,6 +170,11 @@ namespace SwoopDemo {
                 graphics.ApplyChanges();
 
             };
+
+            UI.add_element(new Label("ri_info_label",
+                $"{Swoop.input_handler.ri_info()}",
+                XYPair.One * 20f + (XYPair.UnitX * 300)));
+
         }
 
 
@@ -181,6 +188,8 @@ namespace SwoopDemo {
 
             ((TitleBar)UI.elements["title_bar"]).left_text = title_text;
             ((TitleBar)UI.elements["title_bar"]).right_text = FPS_text + " | " +  Input.poll_method;
+
+            ((Label)UI.elements["ri_info_label"]).change_text(Swoop.input_handler.ri_info());
 
             fps.update(gameTime);
             base.Update(gameTime);

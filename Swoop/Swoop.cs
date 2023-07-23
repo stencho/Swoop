@@ -23,7 +23,7 @@ namespace SwoopLib {
 
         public static UIElementManager UI;
 
-        internal static InputHandler input_handler;
+        public static InputHandler input_handler;
 
         static XYPair resolution;
 
