@@ -106,17 +106,17 @@ namespace SwoopLib {
 
         #endregion
         #region float
-        public static Vector2 operator *(float b, XYPair a) => new Vector2(a.X * b, a.Y * b);
+        public static Vector2 operator *(float b, XYPair a) => new Vector2(b * a.X, b * a.Y);
         public static Vector2 operator /(XYPair a, float b) => new Vector2(a.X / b, a.Y / b);
         public static Vector2 operator -(XYPair a, float b) => new Vector2(a.X - b, a.Y - b);
         public static Vector2 operator +(XYPair a, float b) => new Vector2(a.X + b, a.Y + b);
 
         #endregion
         #region Vector2
-        public static Vector2 operator *(Vector2 b, XYPair a) => new Vector2(a.X * b.X, a.Y * b.Y);
-        public static Vector2 operator /(Vector2 b, XYPair a) => new Vector2(a.X / b.X, a.Y / b.Y);
-        public static Vector2 operator -(Vector2 b, XYPair a) => new Vector2(a.X - b.X, a.Y - b.Y);
-        public static Vector2 operator +(Vector2 b, XYPair a) => new Vector2(a.X + b.X, a.Y + b.Y);
+        public static Vector2 operator *(Vector2 a, XYPair b) => new Vector2(a.X * b.X, a.Y * b.Y);
+        public static Vector2 operator /(Vector2 a, XYPair b) => new Vector2(a.X / b.X, a.Y / b.Y);
+        public static Vector2 operator -(Vector2 a, XYPair b) => new Vector2(a.X - b.X, a.Y - b.Y);
+        public static Vector2 operator +(Vector2 a, XYPair b) => new Vector2(a.X + b.X, a.Y + b.Y);
 
         public static XYPair operator *(XYPair a, Vector2 b) => new XYPair(a.X * (int)b.X, a.Y * (int)b.Y);
         public static XYPair operator /(XYPair a, Vector2 b) => new XYPair(a.X / (int)b.X, a.Y / (int)b.Y);
