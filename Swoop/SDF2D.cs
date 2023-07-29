@@ -11,11 +11,38 @@ using Microsoft.Xna.Framework.Graphics;
 namespace SwoopLib {
     public static class SDF {
         private static Effect sdf_effect;
+        private static Effect sdf_circle_effect;
 
         internal static bool effect_unloaded => sdf_effect == null;
         internal static void load(ContentManager Content) {
+            if (effect_unloaded) sdf_circle_effect = Content.Load<Effect>("sdf_circle");
             if (effect_unloaded) sdf_effect = Content.Load<Effect>("sdf");
         }
+
+
+        public static void draw_circle(Vector2 position, float radius, float line_width, Color color) {
+            Drawing.end();
+            Drawing.begin(sdf_circle_effect);
+            sdf_circle_effect.Parameters["size"].SetValue(Vector2.One * radius * 2);
+            sdf_circle_effect.Parameters["fill"].SetValue(false);
+            sdf_circle_effect.Parameters["line_width"].SetValue(line_width);
+            Drawing.sb.Draw(Drawing.OnePXWhite, position, null,
+                    color, 0f, Vector2.One * 0.5f, Vector2.One * radius * 2,
+                SpriteEffects.None, 1f);
+            Drawing.end();
+        }
+
+        public static void fill_circle(Vector2 position, float radius, Color color) {
+            Drawing.end();
+            Drawing.begin(sdf_circle_effect);
+            sdf_circle_effect.Parameters["size"].SetValue(Vector2.One * radius * 2);
+            sdf_circle_effect.Parameters["fill"].SetValue(true);
+            Drawing.sb.Draw(Drawing.OnePXWhite, position, null,
+                    color, 0f, Vector2.One * 0.5f, Vector2.One * radius * 2,
+                SpriteEffects.None, 1f);
+            Drawing.end();
+        }
+
 
         public static void draw(Texture2D sdf, Vector2 position, Vector2 scale, Color color) {
             draw(sdf, position, scale, color, null, 0.99f, 0f, 1f, false);

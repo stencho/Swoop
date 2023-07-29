@@ -26,6 +26,12 @@
 /processorParam:DebugMode=Auto
 /build:sdf.fx
 
+#begin sdf_circle.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:sdf_circle.fx
+
 #begin swoop_logo.png
 /importer:TextureImporter
 /processor:TextureProcessor

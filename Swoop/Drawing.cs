@@ -71,7 +71,7 @@ namespace SwoopLib {
             fnt_profont = content.Load<SpriteFont>("profont");
         }
 
-        static void begin() {
+        public static void begin() {
             if (!sb_drawing) {
                 //sb.Begin();
                 sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, null, null, null, null);
@@ -79,9 +79,14 @@ namespace SwoopLib {
             }
         }
 
-        /// <summary>
-        /// Call at the end of each frame
-        /// </summary>
+        public static void begin(Effect effect) {
+            if (!sb_drawing) {
+                //sb.Begin();
+                sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, null, null, effect, null);
+                sb_drawing = true;
+            }
+        }
+
         public static void end() {
             if (sb_drawing) {
                 sb.End();
@@ -206,11 +211,11 @@ namespace SwoopLib {
         }
 
 
-        public static void circle(Vector2 P, float outer_radius, float thickness, Color color) {
-            SDF.draw_centered(sdf_circle, P, Vector2.One * outer_radius, Color.Transparent, color, 0.99f, thickness / outer_radius, 1f, false);
+        public static void circle(Vector2 P, float radius, float thickness, Color color) {
+            SDF.draw_circle(P, radius, thickness, color);
         }
         public static void fill_circle(Vector2 P, float radius, Color color) {
-            SDF.draw_centered(sdf_circle, P, Vector2.One * radius, color);
+            SDF.fill_circle(P, radius, color);
         }
 
         public static void image(Texture2D image, Vector2 position, Vector2 size) {
