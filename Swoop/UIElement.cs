@@ -7,6 +7,7 @@ using System.Xml;
 using MGRawInputLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SwoopLib.Collision;
 
 namespace SwoopLib {
     public abstract class UIElement {

@@ -175,6 +175,8 @@ namespace SwoopDemo {
                 $"{Swoop.input_handler.ri_info()}",
                 XYPair.One * 20f + (XYPair.UnitX * 300)));
 
+            UI.add_element(new GJKTestPanel("gjk_panel", (XYPair.One * 20) + (XYPair.UnitY * 100), XYPair.One * 200));
+
         }
 
 
@@ -190,6 +192,8 @@ namespace SwoopDemo {
             ((TitleBar)UI.elements["title_bar"]).right_text = FPS_text + " | " +  Input.poll_method;
 
             ((Label)UI.elements["ri_info_label"]).change_text(Swoop.input_handler.ri_info());
+
+            if (Swoop.input_handler.is_pressed(Keys.Escape)) ((Button)UI.elements["exit_button"]).click_action();
 
             fps.update(gameTime);
             base.Update(gameTime);
