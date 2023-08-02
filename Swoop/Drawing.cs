@@ -94,6 +94,14 @@ namespace SwoopLib {
             }
         }
 
+        public static void pixel(Vector2 position, Color color) {
+            begin();
+            sb.Draw(OnePXWhite, position, color);
+        }
+        public static void pixel(XYPair position, Color color) {
+            begin();
+            sb.Draw(OnePXWhite, position.ToVector2(), color);
+        }
 
         public static void line(Vector2 A, Vector2 B, Color color, float thickness) {
             begin();
