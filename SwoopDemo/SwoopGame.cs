@@ -43,9 +43,10 @@ namespace SwoopDemo {
             this.IsFixedTimeStep = true;
             this.InactiveSleepTime = System.TimeSpan.Zero;
             this.TargetElapsedTime = System.TimeSpan.FromMilliseconds(1000.0 / target_fps);
-
+            
             Window.IsBorderless = true;
             Window.Title = "Swoop";
+
 
             graphics.PreferMultiSampling = false;
             graphics.SynchronizeWithVerticalRetrace = true;
@@ -152,10 +153,10 @@ namespace SwoopDemo {
                     sub_elements.elements["close"].anchor = UIElement.anchor_point.CENTER;
                     ((Button)sub_elements.elements["close"]).click_action = () => {
                         UI.remove_element(td.name);
-                        UIElementManager.focused_element = UI.elements["test_button"];
+                        UIElementManager.focus_element(UI, "test_button");
                     };
 
-                    UIElementManager.focused_element = sub_elements.elements["close"];
+                    UIElementManager.focus_element(sub_elements, "close");
                 }));
             };
 

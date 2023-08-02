@@ -7,14 +7,54 @@ using MGRawInputLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace SwoopLib {    
+namespace SwoopLib {
+
     public class UIElementManager {
+        //STATIC
+
+        static List<UIElementManager> managers = new List<UIElementManager>();
+
+        static void add_manager(UIElementManager manager) { managers.Add(manager); update_manager_indices(); }
+        static void remove_manager(UIElementManager manager) { managers.Remove(manager); update_manager_indices(); }
+
+        static void update_manager_indices() {
+            for (int i = 0; i < managers.Count; i++) {
+                managers[i].index = i;
+            }
+        }
+
+        static int focused_manager_index = 0;
+        public static UIElementManager? focused_manager => managers[focused_manager_index];
+
+        static string focused_element_name = "";
+        public static UIElement? focused_element => !string.IsNullOrWhiteSpace(focused_element_name) ? focused_manager?.elements[focused_element_name] : null;
+
+        static bool interacting_with_focused_element = false;
+
+        public static void focus_element(UIElementManager manager, string element_name) {
+            if (manager.elements.ContainsKey(element_name)) {
+                focused_manager_index = manager.index;
+                focused_element_name = element_name;
+
+            } else {
+                throw new Exception("Invalid element name");
+            }
+        }
+
+        static void find_element_in_direction() {
+
+        }
+
+        public static void update_UI_input() {}
+
+
+        //PER INSTANCE
         public Dictionary<string, UIElement> elements = new Dictionary<string, UIElement>();
+        
+        internal int index = 0;
 
         public string dialog_element = "";
         public bool in_dialog => !string.IsNullOrEmpty(dialog_element);
-
-        public static UIElement? focused_element = null;
 
         public XYPair position;
         public XYPair size;
@@ -22,6 +62,12 @@ namespace SwoopLib {
         public UIElementManager(XYPair pos, XYPair size) {
             this.position = pos;
             this.size = size;
+
+            add_manager(this);
+        }
+
+        ~UIElementManager() {
+            remove_manager(this);
         }
 
         public void add_element(UIElement element) {
@@ -46,7 +92,7 @@ namespace SwoopLib {
             if (in_dialog) {
                 if (elements[dialog_element].click_update(position, size, mouse_over_hit)) {
                     if (elements[dialog_element].can_be_focused) {
-                        focused_element = elements[dialog_element];
+                        focus_element(this, dialog_element);
                         click_hit = true;
                     }
                 }
@@ -58,7 +104,7 @@ namespace SwoopLib {
                     if (elements[k].ignore_dialog) {
                         if (elements[k].click_update(position, size, mouse_over_hit)) {
                             if (elements[k].can_be_focused) {
-                                focused_element = elements[k];
+                                focus_element(this, k);
                                 click_hit = true;
                             }
                         }
@@ -74,7 +120,7 @@ namespace SwoopLib {
 
                     if (elements[k].click_update(position, size, mouse_over_hit)) {
                         if (elements[k].can_be_focused) {
-                            focused_element = elements[k];
+                            focus_element(this, k);
                             click_hit = true;
                         }
                     }
@@ -89,9 +135,9 @@ namespace SwoopLib {
                 //focused_element = null; 
             }
 
-
             mouse_down_prev = mouse_down;
         }
+
 
         public void sub_draw(RenderTarget2D return_target) {
             foreach (string k in elements.Keys) {

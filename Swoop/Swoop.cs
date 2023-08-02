@@ -13,7 +13,7 @@ using SwoopLib.UIElements;
 namespace SwoopLib {
     public static class Swoop {
         public static Color get_color(UIElement element) {
-            if (UIElementManager.focused_element == element) return UI_highlight_color;
+            if (element.is_focused) return UI_highlight_color;
             else return UI_color;
         }
 
@@ -112,6 +112,9 @@ namespace SwoopLib {
 
         public static void Update() {
             Window.is_active = parent.IsActive;
+
+            UIElementManager.update_UI_input();
+
             input_handler.update();
 
             UI.update();            
