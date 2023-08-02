@@ -11,7 +11,6 @@ namespace SwoopLib {
 
     public class UIElementManager {
         //STATIC
-
         static List<UIElementManager> managers = new List<UIElementManager>();
 
         static void add_manager(UIElementManager manager) { managers.Add(manager); update_manager_indices(); }

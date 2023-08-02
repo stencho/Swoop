@@ -23,6 +23,8 @@ namespace SwoopLib.Collision {
     }
 
     public static class GJK2D {
+        public const bool SAVE_SIMPLICES = false;
+
         public struct gjk_result {
             public Shape2D? shape_A, shape_B;
 
@@ -222,7 +224,8 @@ namespace SwoopLib.Collision {
 
             closest_point(ref simplex, ref result);
 
-            result.simplices.Add(simplex.copy());
+            if (SAVE_SIMPLICES)
+                result.simplices.Add(simplex.copy());
 
             simplex.direction = simplex.AO;
 
@@ -231,12 +234,15 @@ namespace SwoopLib.Collision {
             int dist_count = 0;
 
             while (iterations < 24) {
-                result.simplices.Add(simplex.copy());
+                if (SAVE_SIMPLICES)
+                    result.simplices.Add(simplex.copy());
+
                 iterations++;
 
                 simplex.add_new_point(A.support(simplex.direction), B.support(-simplex.direction));
 
-                result.simplices.Add(simplex.copy());
+                if (SAVE_SIMPLICES)
+                    result.simplices.Add(simplex.copy());
 
                 if (simplex.stage == gjk_simplex.simplex_stage.line) {
                     //exit if A and B are touching
@@ -322,7 +328,9 @@ namespace SwoopLib.Collision {
                 result.distance = 0;
             }
 
-            result.simplices.Add(simplex.copy());
+            if (SAVE_SIMPLICES)
+                result.simplices.Add(simplex.copy());
+
             result.simplex = simplex;
             return result.hit;
         }
