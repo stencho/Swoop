@@ -7,7 +7,6 @@ using Microsoft.Xna.Framework;
 using SwoopLib;
 using SwoopLib.Collision;
 
-
 namespace SwoopLib.Shapes {
     public class Polygon : Shape2D {
         public Vector2 position { get; set; } = Vector2.Zero;
