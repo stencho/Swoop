@@ -12,6 +12,9 @@ namespace SwoopLib.Collision {
         public static Vector2 X_only(this Vector2 v) => new Vector2(v.X, 0);
         public static Vector2 Y_only(this Vector2 v) => new Vector2(0, v.Y);
 
+        public static bool contains_nan(this Vector2 v) => v.X == float.NaN || v.Y == float.NaN;
+        public static bool contains_nan(this Vector3 v) => v.X == float.NaN || v.Y == float.NaN || v.Z == float.NaN;
+
         public static float NextFloat(this Random r) => (float)r.NextDouble();
         public static float float_neg_one_to_one(this Random r) => (r.NextFloat() - 0.5f) * 2f;
 
@@ -47,8 +50,8 @@ namespace SwoopLib.Collision {
             float denom = f0 * f2 - f1 * f1;
             (float u, float v, float w) output = (0f,0f,0f);
 
-            output.v = (f2 * f3 - f1 * f4) / denom;
-            output.u = (f0 * f4 - f1 * f3) / denom;
+            output.u = (f2 * f3 - f1 * f4) / denom;
+            output.v = (f0 * f4 - f1 * f3) / denom;
             output.w = 1.0f - output.u - output.v;
 
             return output;

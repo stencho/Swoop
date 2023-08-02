@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MGRawInputLib;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using SwoopLib;
 using SwoopLib.Collision;
 using SwoopLib.Shapes;
@@ -47,8 +48,13 @@ namespace SwoopLib.UIElements {
             if (GJK2D.SAVE_SIMPLICES) {
                 results[selected_shape].simplices[selected_simplex].draw(size.ToVector2() / 2f);
                 var selected = results[selected_shape].simplices[selected_simplex];
+                (float u, float v, float w) b = (0f, 0f, 0f);
+                
+                if (selected.stage == GJK2D.gjk_simplex.simplex_stage.triangle)
+                    b = Collision2D.triangle_barycentric(Vector2.Zero, selected.A, selected.B, selected.C);
+
                 Drawing.text(
-    $"[{selected_simplex}] {selected.iteration} {selected.stage.ToString()} {results[selected_shape].hit}\n{results
+    $"[{selected_simplex}] {selected.iteration} {selected.stage.ToString()} {results[selected_shape].hit}\n{b.u}x{b.v}x{b.w}\n{results
     [selected_shape].distance}", Vector2.One * 3f, Color.White);
             }
         }
@@ -77,7 +83,7 @@ namespace SwoopLib.UIElements {
                 if (Swoop.input_handler.just_pressed(Microsoft.Xna.Framework.Input.Keys.E)) {
                     selected_simplex++;
 
-                    if (selected_simplex > results[1].simplices.Count - 1) selected_simplex = results[1].simplices.Count - 1;
+                    if (selected_simplex > results[selected_shape].simplices.Count - 1) selected_simplex = results[selected_shape].simplices.Count - 1;
                 }
             }
 
@@ -95,7 +101,23 @@ namespace SwoopLib.UIElements {
                     else cursor.radius = 5;
                 }
             }
-            cursor.position = Input.cursor_pos.ToVector2() - position;
+
+            var p = Vector2.Zero;
+            if (Swoop.input_handler.is_pressed(Keys.Up)) {
+                p += -Vector2.UnitY;
+            }
+            if (Swoop.input_handler.is_pressed(Keys.Down)) {
+                p += Vector2.UnitY;
+            }
+            if (Swoop.input_handler.is_pressed(Keys.Left)) {
+                p += -Vector2.UnitX;
+            }
+            if (Swoop.input_handler.is_pressed(Keys.Right)) {
+                p += Vector2.UnitX;
+            }
+
+            cursor.position += p;
+            //cursor.position = Input.cursor_pos.ToVector2() - position;
 
             results.Clear();
             bool hit = false;

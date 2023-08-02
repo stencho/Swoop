@@ -23,7 +23,11 @@ namespace SwoopLib.Collision {
     }
 
     public static class GJK2D {
-        public const bool SAVE_SIMPLICES = false;
+        public const bool SAVE_SIMPLICES = true;
+        
+        const float EPSILON = 0.00001f;
+
+        const int MAX_ITERATIONS = 20;
 
         public struct gjk_result {
             public Shape2D? shape_A, shape_B;
@@ -151,7 +155,7 @@ namespace SwoopLib.Collision {
                     var ac_dir = Vector2.Normalize(triple_product(AB, BC, AC));
 
                     var abc = offset + (A + B) / 2;
-                    var ab_dir = Vector2.Normalize(-triple_product(AC, BC, AB));
+                    var ab_dir = Vector2.Normalize(triple_product(BC, AC, AB));
 
                     if (Vector2.Dot(ab_dir, AO) > Vector2.Dot(ac_dir, AO)) {
                         Drawing.line(abc, abc + (ab_dir * 10f), Color.Red, 2f);
@@ -233,26 +237,27 @@ namespace SwoopLib.Collision {
             float l_dist = float.MaxValue;
             int dist_count = 0;
 
-            while (iterations < 24) {
+            while (iterations < MAX_ITERATIONS) {
                 if (SAVE_SIMPLICES)
                     result.simplices.Add(simplex.copy());
 
                 iterations++;
 
                 simplex.add_new_point(A.support(simplex.direction), B.support(-simplex.direction));
+                simplex.iteration = iterations;
 
                 if (SAVE_SIMPLICES)
                     result.simplices.Add(simplex.copy());
 
                 if (simplex.stage == gjk_simplex.simplex_stage.line) {
                     //exit if A and B are touching
-                    if (Vector2.Distance(simplex.A, simplex.B) <= float.Epsilon) {
+                    if (Vector2.Distance(simplex.A, simplex.B) <= EPSILON) {
                         simplex.move_to_stage(spoint.B);
                         break;
                     }
 
                     //early exit if origin is on the A->B line
-                    if (closest_point_on_line(simplex.A, simplex.B, Vector2.Zero).Length() <= float.Epsilon) {
+                    if (closest_point_on_line(simplex.A, simplex.B, Vector2.Zero).Length() <= EPSILON) {
                         result.hit = true;
                         break;
                     }
@@ -270,45 +275,38 @@ namespace SwoopLib.Collision {
 
                 } else if (simplex.stage == gjk_simplex.simplex_stage.triangle) {
                     //exit if A and B or A and C are basically touching
-                    if (Vector2.Distance(simplex.A, simplex.B) <= float.Epsilon
-                        || Vector2.Distance(simplex.A, simplex.C) <= float.Epsilon) {
+                    if (Vector2.Distance(simplex.A, simplex.B) <= EPSILON
+                        || Vector2.Distance(simplex.A, simplex.C) <= EPSILON) {
                         simplex.move_to_stage(spoint.B, spoint.C);
                         break;
                     }
 
                     //exit if A is on BC
-                    if (closest_point_on_line(simplex.C, simplex.B, simplex.A).Length() <= float.Epsilon) {
+                    if (closest_point_on_line(simplex.C, simplex.B, simplex.A).Length() <= EPSILON) {
                         simplex.move_to_stage(spoint.B, spoint.C);
                         break;
                     }
 
                     var tb = triangle_barycentric(Vector2.Zero, simplex.A,simplex.B,simplex.C);
-                    
+
+                    //just in case
+                    if (float.IsInfinity(tb.u) || float.IsInfinity(tb.v) || float.IsInfinity(tb.w)) break;
+
                     //hit if origin is within triangle                    
                     if ((tb.u > 0 && tb.v > 0 && tb.w > 0) || (tb.u < 0 && tb.v < 0 && tb.w < 0)) {
                         result.hit = true;
                         break;
 
                     //otherwise find a new direction, either AB or AC, as A is always the newest, closest point  
-                    } else {                        
-                        //do a closest point calc and see if the new point added this iterationhas even moved us any closer
-                        closest_point(ref simplex, ref result);
-                        if (result.distance < l_dist) {
-                            l_dist = result.distance;
-                            dist_count = 0;
-
-                        //if the closest point hasn't changed, increase dist_count
-                        } else if (result.distance == l_dist) {
-                            dist_count++;
-                        }
-
-                        //been at the same distance for 2 triangle steps in a row, so exit                        
-                        if (dist_count == 2) { 
-                            break;
-                        }
+                    } else {
 
                         var ac_dir = Vector2.Normalize(triple_product(simplex.AB, simplex.BC, simplex.AC));
-                        var ab_dir = Vector2.Normalize(-triple_product(simplex.AC, simplex.BC, simplex.AB));
+                        var ab_dir = Vector2.Normalize(triple_product(simplex.BC, simplex.AC, simplex.AB));
+
+                        //also just in case
+                        if (ac_dir.contains_nan() || ab_dir.contains_nan()) {
+                            break;
+                        }
 
                         //move to AB or AC depending on which has the higher dot
                         if (Vector2.Dot(ab_dir, simplex.AO) >= Vector2.Dot(ac_dir, simplex.AO)) {
@@ -319,12 +317,28 @@ namespace SwoopLib.Collision {
                             simplex.move_to_stage(spoint.A, spoint.C);
                         }
                     }
-                }                
+                }
+
+                //do a closest point calc and see if the new point added this iteration has even moved us any closer
+                closest_point(ref simplex, ref result);
+                if (result.distance < l_dist) {
+                    l_dist = result.distance;
+                    dist_count = 0;
+
+                //if the closest point hasn't changed, increase dist_count
+                } else if (Math.Abs(result.distance - l_dist) <= EPSILON) {
+                    dist_count++;
+                }
+
+                //been at the same distance for 2 steps in a row, so exit                        
+                if (dist_count == 2) {
+                    break;
+                }
             }
 
-            if (!result.hit)
+            if (!result.hit) { 
                 closest_point(ref simplex, ref result);
-            else {
+            } else {
                 result.distance = 0;
             }
 
