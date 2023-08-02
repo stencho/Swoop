@@ -7,27 +7,26 @@ using Microsoft.Xna.Framework;
 using SwoopLib;
 using SwoopLib.Collision;
 
+
 namespace SwoopLib.Shapes {
-    public class Circle : Shape2D {
+    public class Square : Shape2D {
         public Vector2 position { get; set; } = Vector2.Zero;
 
-        public float radius { get; set; } = 1f;
+        public Vector2 size { get; set; }
 
         public Color debug_color { get; set; } = Color.White;
 
-        public Circle(Vector2 position, float radius) {
+        public Square(Vector2 position, Vector2 size) {
             this.position = position;
-            this.radius = radius;
+            this.size = size;
         }
 
         public void draw() {
-            Drawing.circle(position, radius, 1f, debug_color);
+            Drawing.rect(position, position + size, Color.White, 1f);
         }
 
         public Vector2 support(Vector2 direction) {
-            return position + (Vector2.Normalize(direction) * radius);
+            return position + Collision2D.highest_dot(direction, Vector2.Zero, size.X_only(), size.Y_only(), size);
         }
     }
-
-
 }

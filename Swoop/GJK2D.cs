@@ -24,7 +24,7 @@ namespace SwoopLib.Collision {
 
     public static class GJK2D {
         public struct gjk_result {
-            public Shape2D shape_A, shape_B;
+            public Shape2D? shape_A, shape_B;
 
             public Vector2 closest_A;
             public Vector2 closest_B;
@@ -220,7 +220,7 @@ namespace SwoopLib.Collision {
             simplex.direction = Vector2.UnitX;
             simplex.add_new_point(A.support(simplex.direction), B.support(-simplex.direction));
 
-            gjk_closest_point_calc(ref simplex, ref result);
+            closest_point(ref simplex, ref result);
 
             result.simplices.Add(simplex.copy());
 
@@ -228,6 +228,7 @@ namespace SwoopLib.Collision {
 
             int iterations = 0;
             float l_dist = float.MaxValue;
+            int dist_count = 0;
 
             while (iterations < 24) {
                 result.simplices.Add(simplex.copy());
@@ -277,24 +278,33 @@ namespace SwoopLib.Collision {
 
                     var tb = triangle_barycentric(Vector2.Zero, simplex.A,simplex.B,simplex.C);
                     
-                    //hit if origin is within triangle
+                    //hit if origin is within triangle                    
                     if ((tb.u > 0 && tb.v > 0 && tb.w > 0) || (tb.u < 0 && tb.v < 0 && tb.w < 0)) {
                         result.hit = true;
                         break;
-                    
-                    } else { //otherwise find a new direction, either AB or AC, as A is always the newest, closest point                       
-                        var ac_dir = Vector2.Normalize(triple_product(simplex.AB, simplex.BC, simplex.AC));
-                        var ab_dir = Vector2.Normalize(-triple_product(simplex.AC, simplex.BC, simplex.AB));
 
+                    //otherwise find a new direction, either AB or AC, as A is always the newest, closest point  
+                    } else {                        
                         //do a closest point calc and see if the new point added this iterationhas even moved us any closer
-                        gjk_closest_point_calc(ref simplex, ref result);
+                        closest_point(ref simplex, ref result);
                         if (result.distance < l_dist) {
-                            l_dist = result.distance;                        
-                        } else { //if it hasn't, assume we're as close as possible and exit
+                            l_dist = result.distance;
+                            dist_count = 0;
+
+                        //if the closest point hasn't changed, increase dist_count
+                        } else if (result.distance == l_dist) {
+                            dist_count++;
+                        }
+
+                        //been at the same distance for 2 triangle steps in a row, so exit                        
+                        if (dist_count == 2) { 
                             break;
                         }
 
-                        //otherwise, move to AB or AC depending on which has the higher dot
+                        var ac_dir = Vector2.Normalize(triple_product(simplex.AB, simplex.BC, simplex.AC));
+                        var ab_dir = Vector2.Normalize(-triple_product(simplex.AC, simplex.BC, simplex.AB));
+
+                        //move to AB or AC depending on which has the higher dot
                         if (Vector2.Dot(ab_dir, simplex.AO) >= Vector2.Dot(ac_dir, simplex.AO)) {
                             simplex.direction = ab_dir;
                             simplex.move_to_stage(spoint.A, spoint.B);
@@ -307,7 +317,7 @@ namespace SwoopLib.Collision {
             }
 
             if (!result.hit)
-                gjk_closest_point_calc(ref simplex, ref result);
+                closest_point(ref simplex, ref result);
             else {
                 result.distance = 0;
             }
@@ -317,7 +327,7 @@ namespace SwoopLib.Collision {
             return result.hit;
         }
 
-        static void gjk_closest_point_calc(ref gjk_simplex simplex, ref gjk_result result) {
+        static void closest_point(ref gjk_simplex simplex, ref gjk_result result) {
             Vector2 closest_A = Vector2.Zero, closest_B = Vector2.Zero;
             
             float d = float.MaxValue;
