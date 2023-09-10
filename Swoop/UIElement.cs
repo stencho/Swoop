@@ -94,7 +94,6 @@ namespace SwoopLib {
         public bool clicking { get; set; } = false;
         public bool was_clicking { get; set; } = false;
 
-
         public bool is_focused => UIElementManager.focused_element == this;
 
         public bool ignore_dialog { get; set; } = false;

@@ -37,9 +37,6 @@ namespace SwoopLib.UIElements {
                 s.draw();
             }
 
-            foreach (GJK2D.gjk_result result in results) {
-                result.draw();
-            }
 
             cursor.draw();
 
@@ -55,7 +52,11 @@ namespace SwoopLib.UIElements {
 
                 Drawing.text(
     $"[{selected_simplex}] {selected.iteration} {selected.stage.ToString()} {results[selected_shape].hit}\n{b.u}x{b.v}x{b.w}\n{results
-    [selected_shape].distance}", Vector2.One * 3f, Color.White);
+    [selected_shape].distance}\n{results[selected_shape].penetration}", Vector2.One * 3f, Color.White);
+            }
+            foreach (GJK2D.gjk_result result in results) {
+                result.draw();
+
             }
         }
 
@@ -100,6 +101,7 @@ namespace SwoopLib.UIElements {
                         cursor.radius += sd / 120;
                     else cursor.radius = 5;
                 }
+                cursor.position = Input.cursor_pos.ToVector2() - position;
             }
 
             var p = Vector2.Zero;
@@ -117,7 +119,6 @@ namespace SwoopLib.UIElements {
             }
 
             cursor.position += p;
-            //cursor.position = Input.cursor_pos.ToVector2() - position;
 
             results.Clear();
             bool hit = false;

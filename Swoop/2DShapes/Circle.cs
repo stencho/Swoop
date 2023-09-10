@@ -28,6 +28,4 @@ namespace SwoopLib.Shapes {
             return position + (Vector2.Normalize(direction) * radius);
         }
     }
-
-
 }

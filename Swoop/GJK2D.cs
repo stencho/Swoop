@@ -10,15 +10,15 @@ using static SwoopLib.Collision.GJK2D.gjk_simplex;
 using static SwoopLib.Collision.Collision2D;
 using System.Net.Http.Headers;
 using System.Xml.XPath;
+using System.ComponentModel;
+using static SwoopLib.Collision.EPA2D;
 
 namespace SwoopLib.Collision {
     public interface Shape2D {
-        public Vector2 position { get; set; }
-        
+        public Vector2 position { get; set; }        
         public Color debug_color { get; set; }
 
         Vector2 support(Vector2 direction);
-
         void draw();
     }
 
@@ -40,6 +40,8 @@ namespace SwoopLib.Collision {
 
             public float distance = float.MaxValue;
             public float penetration = 0;
+
+            public polytope polytope;
 
             public gjk_simplex simplex;
             public List<gjk_simplex> simplices = new List<gjk_simplex>();
@@ -162,8 +164,6 @@ namespace SwoopLib.Collision {
                     } else {
                         Drawing.line(acc, acc + (ac_dir * 10f), Color.Green, 2f);
                     }
-
-                   // Drawing.text(tb.u.ToString("F2") + "\n" + tb.v.ToString("F2") + "\n" + tb.w.ToString("F2") + "\n" + Vector2.Dot(ac_dir, AO).ToString("F2") + "\n" + Vector2.Dot(ab_dir, AO).ToString("F2"), acc, Color.Red);
                 }
             }
 
@@ -216,15 +216,16 @@ namespace SwoopLib.Collision {
             public bool same_dir_as_AO(Vector2 v) => (Vector2.Dot(v, AO) >= 0);
         }
 
-        public static bool intersects(Shape2D A, Shape2D B, out gjk_result result) {
+        public static bool intersects(Shape2D shape_A, Shape2D shape_B, out gjk_result result) {
             result = new gjk_result();
-            if (A == null || B == null) { return false; }
-            result.shape_A = A; result.shape_B = B;
+
+            if (shape_A == null || shape_B == null) { return false; }
+            result.shape_A = shape_A; result.shape_B = shape_B;
 
             gjk_simplex simplex = new gjk_simplex();
 
             simplex.direction = Vector2.UnitX;
-            simplex.add_new_point(A.support(simplex.direction), B.support(-simplex.direction));
+            simplex.add_new_point(shape_A.support(simplex.direction), shape_B.support(-simplex.direction));
 
             closest_point(ref simplex, ref result);
 
@@ -243,7 +244,7 @@ namespace SwoopLib.Collision {
 
                 iterations++;
 
-                simplex.add_new_point(A.support(simplex.direction), B.support(-simplex.direction));
+                simplex.add_new_point(shape_A.support(simplex.direction), shape_B.support(-simplex.direction));
                 simplex.iteration = iterations;
 
                 if (SAVE_SIMPLICES)
@@ -340,6 +341,9 @@ namespace SwoopLib.Collision {
                 closest_point(ref simplex, ref result);
             } else {
                 result.distance = 0;
+                
+                if (simplex.stage == simplex_stage.triangle)
+                    EPA2D.expand_polytope(shape_A, shape_B, ref simplex, ref result);
             }
 
             if (SAVE_SIMPLICES)
