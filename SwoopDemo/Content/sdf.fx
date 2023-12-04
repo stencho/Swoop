@@ -1,4 +1,13 @@
-﻿float alpha_scissor = 0.5;
+﻿#if OPENGL
+	#define SV_POSITION POSITION
+	#define VS_SHADERMODEL vs_3_0
+	#define PS_SHADERMODEL ps_3_0
+#else
+	#define VS_SHADERMODEL vs_4_0_level_9_1
+	#define PS_SHADERMODEL ps_4_0_level_9_1
+#endif
+
+float alpha_scissor = 0.5;
 float opacity = 1;
 float outline_width = 0;
 
@@ -62,7 +71,7 @@ float4 PS(float4 position : SV_Position, float4 color : COLOR0, float2 TexCoords
 
 technique Default {
 	pass p0 {
-		PixelShader = compile ps_3_0 PS();
+		PixelShader = compile PS_SHADERMODEL PS();
 	}
 }
 

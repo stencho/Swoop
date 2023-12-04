@@ -85,6 +85,9 @@ namespace SwoopLib {
         public float width => size.X;
         public float height => size.Y;
 
+        public float right => position.X + size.X;
+        public float bottom => position.Y + size.Y;
+
         public bool mouse_over { get; set; } = false;
         public bool mouse_down { get; set; } = false;
         public bool mouse_was_down { get; set; } = false;

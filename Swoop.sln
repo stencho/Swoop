@@ -5,7 +5,7 @@ VisualStudioVersion = 17.4.33103.184
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SwoopDemo", "SwoopDemo\SwoopDemo.csproj", "{7DAE2D73-5749-4BB0-A1E1-BD17DADF36BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Swoop", "Swoop\Swoop.csproj", "{929F7A82-4567-4191-BB4E-2949C716C211}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SwoopLib", "Swoop\SwoopLib.csproj", "{929F7A82-4567-4191-BB4E-2949C716C211}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MGRawInputLib", "..\MGRawInput\MGRawInputLib\MGRawInputLib.csproj", "{AD91C91F-E2DE-42E9-A52C-D1BFC92A8211}"
 EndProject

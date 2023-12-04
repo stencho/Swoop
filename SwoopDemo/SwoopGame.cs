@@ -76,8 +76,7 @@ namespace SwoopDemo {
         [DllImport("user32.dll", SetLastError = true)] public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
         [DllImport("user32.dll")][return: MarshalAs(UnmanagedType.Bool)] static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
-        protected void build_UI() {
-            
+        protected void build_UI() {            
             ((Button)UI.elements["exit_button"]).click_action = () => {
                 if (capture_demo_screenshot_on_exit) {
                     output_rt.SaveAsPng(new FileStream("..\\..\\..\\..\\current.png", FileMode.OpenOrCreate), resolution.X, resolution.Y);
@@ -174,6 +173,23 @@ namespace SwoopDemo {
 
             UI.add_element(new GJKTestPanel("gjk_panel", (XYPair.One * 20) + (XYPair.UnitY * 100), XYPair.One * 200));
 
+            UI.add_element(new Label("rb_label", "radio buttons", new XYPair(UI.elements["gjk_panel"].right + 10, UI.elements["gjk_panel"].Y)));
+
+            RadioButton radio_button_a1 = new RadioButton("rba1", "a1", new XYPair(UI.elements["gjk_panel"].right + 15, UI.elements["gjk_panel"].Y + 20 ));
+            RadioButton radio_button_a2 = new RadioButton("rba2", "a2", new XYPair(UI.elements["gjk_panel"].right + 15, UI.elements["gjk_panel"].Y + 20 + 20));
+            RadioButton radio_button_a3 = new RadioButton("rba3", "a3", new XYPair(UI.elements["gjk_panel"].right + 15, UI.elements["gjk_panel"].Y + 20 + 40));
+
+            RadioButtons.link(radio_button_a1, radio_button_a2, radio_button_a3);
+
+
+            RadioButton radio_button_b1 = new RadioButton("rbb1", "b1", new XYPair(UI.elements["gjk_panel"].right + 60, UI.elements["gjk_panel"].Y + 20 ));
+            RadioButton radio_button_b2 = new RadioButton("rbb2", "b2", new XYPair(UI.elements["gjk_panel"].right + 60, UI.elements["gjk_panel"].Y + 20 + 20));
+            RadioButton radio_button_b3 = new RadioButton("rbb3", "b3", new XYPair(UI.elements["gjk_panel"].right + 60, UI.elements["gjk_panel"].Y + 20 + 40));
+                                                                                                                       
+            RadioButtons.link(radio_button_b1, radio_button_b2, radio_button_b3);
+
+            UI.add_elements(radio_button_a1, radio_button_a2, radio_button_a3);
+            UI.add_elements(radio_button_b1, radio_button_b2, radio_button_b3);
         }
 
 

@@ -23,12 +23,8 @@
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="MGRawInputLib">
-      <HintPath>..\..\MGRawInput\MGRawInputLib\bin\Debug\net7.0\MGRawInputLib.dll</HintPath>
-    </Reference>
-    <Reference Include="Swoop">
-      <HintPath>..\Swoop\bin\Debug\net7.0\Swoop.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\MGRawInput\MGRawInputLib\MGRawInputLib.csproj" />
+    <ProjectReference Include="..\Swoop\SwoopLib.csproj" />
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
     <Message Text="Restoring dotnet tools" Importance="High" />

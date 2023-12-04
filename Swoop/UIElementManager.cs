@@ -76,6 +76,11 @@ namespace SwoopLib {
 
             elements[element.name].added();
         }
+        public void add_elements(params UIElement[] elements) {
+            foreach (var element in elements) {
+                add_element(element);
+            }
+        }
 
         public void remove_element(string name) {
             if (dialog_element == name) dialog_element = null;
