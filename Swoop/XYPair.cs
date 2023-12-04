@@ -145,6 +145,8 @@ namespace SwoopLib {
         public static bool operator ==(XYPair a, XYPair b) => (a.X == b.X && a.Y == b.Y);
         public static bool operator !=(XYPair a, XYPair b) => (a.X != b.X || a.Y != b.Y);
 
+        public static XYPair operator -(XYPair a) { return _zero - a; }
+
         public override string ToString() => string.Format("{{ {0} : {1} }}", X, Y);
         public string ToXString() => string.Format("{0}x{1}", X, Y);
 
@@ -187,11 +189,11 @@ namespace SwoopLib {
         public static XYPair One => _one;
         public static XYPair Zero => _zero;
 
-        public static XYPair Up => _unitY;
-        public static XYPair Down => _zero - _unitY;
+        public static XYPair Up => -_unitY;
+        public static XYPair Down => _unitY;
 
         public static XYPair Right => _unitX;
-        public static XYPair Left => _zero - _unitX;        
+        public static XYPair Left => -_unitX;        
     }
 
 #pragma warning restore CS0661 // Type defines operator == or operator != but does not override Object.GetHashCode()
