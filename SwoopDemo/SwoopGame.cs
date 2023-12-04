@@ -1,30 +1,25 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Runtime.CompilerServices;
+﻿
+using MGRawInputLib;
+
+using SwoopLib;
+using SwoopLib.UIElements;
+using swoop = SwoopLib.Swoop;
+using static SwoopLib.UIExterns;
+
+using System;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-using SwoopLib;
-using SwoopLib.UIElements;
-using MGRawInputLib;
-using static SwoopLib.Swoop;
-using System.ComponentModel;
-using System.Linq;
 using System.IO;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
-using static SwoopLib.UIExterns;
 
 namespace SwoopDemo {
     public class SwoopGame : Game {
         GraphicsDeviceManager graphics;
 
         public static double target_fps = 60;
-
         FPSCounter fps;
 
         public static XYPair resolution = new XYPair(800, 600);
@@ -34,6 +29,8 @@ namespace SwoopDemo {
         Texture2D logo;
 
         RenderTarget2D output_rt;
+
+        SwoopLib.UIElementManager UI => swoop.UI;
 
         public SwoopGame() {
             graphics = new GraphicsDeviceManager(this);
@@ -60,8 +57,7 @@ namespace SwoopDemo {
         }
 
         protected override void Initialize() {
-            Swoop.Initialize(this, resolution);
-
+            swoop.Initialize(this, resolution);
             fps = new FPSCounter();
             this.Disposed += SwoopGame_Disposed;
             base.Initialize();
@@ -70,7 +66,7 @@ namespace SwoopDemo {
         protected override void LoadContent() {
             output_rt = new RenderTarget2D(GraphicsDevice, resolution.X, resolution.Y);
 
-            Swoop.Load(GraphicsDevice, graphics, Content, resolution);
+            swoop.Load(GraphicsDevice, graphics, Content, resolution);
 
             logo = Content.Load<Texture2D>("swoop_logo");
              
@@ -87,7 +83,7 @@ namespace SwoopDemo {
                     output_rt.SaveAsPng(new FileStream("..\\..\\..\\..\\current.png", FileMode.OpenOrCreate), resolution.X, resolution.Y);
                     capture_demo_screenshot_on_exit = false;
                 }
-                Swoop.End();
+                swoop.End();
                 this.Exit();
             };
 
@@ -160,7 +156,7 @@ namespace SwoopDemo {
                 }));
             };
 
-            Swoop.resize_end = (XYPair size) => {
+            swoop.resize_end = (XYPair size) => {
                 resolution = size;
 
                 output_rt.Dispose();
@@ -173,7 +169,7 @@ namespace SwoopDemo {
             };
 
             UI.add_element(new Label("ri_info_label",
-                $"{Swoop.input_handler.ri_info()}",
+                $"{swoop.input_handler.ri_info()}",
                 XYPair.One * 20f + (XYPair.UnitX * 300)));
 
             UI.add_element(new GJKTestPanel("gjk_panel", (XYPair.One * 20) + (XYPair.UnitY * 100), XYPair.One * 200));
@@ -182,7 +178,7 @@ namespace SwoopDemo {
 
 
         protected override void Update(GameTime gameTime) {
-            Swoop.Update();
+            swoop.Update();
             StringBuilder sb = new StringBuilder();
 
             string title_text = $"{UIExterns.get_window_title()}";
@@ -192,40 +188,40 @@ namespace SwoopDemo {
             ((TitleBar)UI.elements["title_bar"]).left_text = title_text;
             ((TitleBar)UI.elements["title_bar"]).right_text = FPS_text + " | " +  Input.poll_method;
 
-            ((Label)UI.elements["ri_info_label"]).change_text(Swoop.input_handler.ri_info());
+            ((Label)UI.elements["ri_info_label"]).change_text(swoop.input_handler.ri_info());
 
-            if (Swoop.input_handler.is_pressed(Keys.Escape)) ((Button)UI.elements["exit_button"]).click_action();
+            if (swoop.input_handler.is_pressed(Keys.Escape)) ((Button)UI.elements["exit_button"]).click_action();
 
             fps.update(gameTime);
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime) {
-           if (!Swoop.enable_draw) {
+           if (!swoop.enable_draw) {
                 GraphicsDevice.SetRenderTarget(null);
-                if (Swoop.fill_background) {
-                    Drawing.graphics_device.Clear(Swoop.UI_background_color);
+                if (swoop.fill_background) {
+                    Drawing.graphics_device.Clear(swoop.UI_background_color);
                 } else {
                     Drawing.graphics_device.Clear(Color.Transparent);
                 }
 
-                Drawing.graphics_device.Clear(Swoop.UI_background_color);
+                Drawing.graphics_device.Clear(swoop.UI_background_color);
 
                 base.Draw(gameTime);
                 return;
             }
-           
-            Swoop.Draw();
+
+            swoop.Draw();
 
             Drawing.graphics_device.SetRenderTarget(output_rt);
 
-            GraphicsDevice.Clear(Swoop.UI_background_color);
+            GraphicsDevice.Clear(swoop.UI_background_color);
             
             Drawing.image(logo, 
                 (resolution.ToVector2()) - (logo.Bounds.Size.ToVector2() * 0.5f) - (Vector2.One * 8f), 
                 logo.Bounds.Size.ToVector2() * 0.5f,
                 SpriteEffects.FlipHorizontally);
-            Drawing.image(Swoop.render_target_output, XYPair.Zero, resolution);
+            Drawing.image(swoop.render_target_output, XYPair.Zero, resolution);
 
             Drawing.end();
 
@@ -237,7 +233,7 @@ namespace SwoopDemo {
         }
 
         private void SwoopGame_Disposed(object sender, System.EventArgs e) {
-            Swoop.End();
+            swoop.End();
         }
     }
 }
