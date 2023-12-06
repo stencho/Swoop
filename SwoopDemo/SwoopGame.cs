@@ -79,7 +79,7 @@ namespace SwoopDemo {
         protected void build_UI() {            
             ((Button)UI.elements["exit_button"]).click_action = () => {
                 if (capture_demo_screenshot_on_exit) {
-                    output_rt.SaveAsPng(new FileStream("..\\..\\..\\..\\current.png", FileMode.OpenOrCreate), resolution.X, resolution.Y);
+                    output_rt.SaveAsPng(new FileStream("..\\..\\..\\current.png", FileMode.OpenOrCreate), resolution.X, resolution.Y);
                     capture_demo_screenshot_on_exit = false;
                 }
                 swoop.End();
