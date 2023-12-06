@@ -1,12 +1,12 @@
 ## Swoop
 
-A set of UI elements and systems to manage them, for creating user interfaces. Allows for building things like debug overlays, editor UIs, or even entire applications (a questionable idea).
+A set of UI elements and systems to manage them, for creating user interfaces. Allows for building things like debug overlays, editor UIs, or even entire applications (a questionable idea, but workable if you need something in between winforms and a full-on 2D/3D game engine).
 
-I intend to implement an invalidation rendering system eventually, but right now there are much bigger performance issues which need to be addressed
+I intend to implement an invalidation rendering system eventually, but right now there are much bigger performance issues which need to be addressed.
 
 Everything is implemented as small ProFont and extreme minimalist 1px bright-lines-on-dark-backgrounds, inspired by BlackBox/bbLean. 
 
-This project will not work as-is and requires MGRawInputLib from [MGRawInput](https://github.com/stencho/MGRawInput) (for handling input and additional things, such as window dragging/resizing and threaded input handling)
+This project will not work as-is and requires MGRawInputLib from [MGRawInput](https://github.com/stencho/MGRawInput) (for threaded input handling, RawInput support, window movement and resizing, and other winapi stuff)
 
 #### Implemented UI Elements
 - [x] Button
@@ -32,6 +32,14 @@ This project will not work as-is and requires MGRawInputLib from [MGRawInput](ht
 - [ ] Text Box
 - [x] Title Bar (with window dragging)
 - [x] Toggle Button
+
+#### Implemented useful features and effects
+- UIElements are simple to build, fully aware of mouse state, and can automatically draw all of their contents to a RenderTarget2D by setting a bool (then draw that to the screen later), to avoid things like text spilling out of boxes
+- Easy to use drawing library for images, text, and 2D primitives
+- 2D image-based SDFs
+- Circle SDFs
+- Dithering
+- A 2D GJK implementation
 
 
 #### Most current SwoopDemo screenshot
