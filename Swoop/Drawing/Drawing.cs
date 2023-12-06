@@ -6,6 +6,7 @@ using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.VisualBasic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -21,7 +22,7 @@ namespace SwoopLib
         private static bool _sb_drawing = false;
         public static bool sb_drawing {
             get { return _sb_drawing; }
-            private set { _sb_drawing = value; }
+            set { _sb_drawing = value; }
         }
 
         public static GraphicsDevice graphics_device;
@@ -35,6 +36,9 @@ namespace SwoopLib
 
         public static Texture2D sdf_circle;
         private static int sdf_circle_res = 256;
+
+        static Effects.Dither dither_effect;
+        static Effects.TwoColorFlip color_flip_effect;
 
         public static void load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, XYPair resolution) {
             sb = new SpriteBatch(gd);
@@ -80,16 +84,25 @@ namespace SwoopLib
                 sb_drawing = true;
             }
         }
-        static DitherEffect dither_effect;
         public static void begin_dither(Vector2 top_left, Vector2 bottom_right, Color col_a, Color col_b) {
-            if (dither_effect == null) dither_effect = new DitherEffect(Swoop.content);
-            dither_effect.color_a = col_a; dither_effect.color_b = col_b;
-            dither_effect.configure_shader(top_left, bottom_right);
+            if (dither_effect == null) dither_effect = new Dither(Swoop.content);
 
-            if (!sb_drawing) {
-                sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, null, null, DitherEffect.effect, null);
-                sb_drawing = true;
-            }
+            dither_effect.configure_shader(top_left, bottom_right, col_a, col_b);
+            dither_effect.begin_spritebatch(sb);
+        }
+
+        public static void begin_two_color_flip(Vector2 top_left, Vector2 bottom_right, Color col_a, Color col_b) {
+            if (color_flip_effect == null) color_flip_effect = new TwoColorFlip(Swoop.content);
+
+            color_flip_effect.configure_shader(top_left, bottom_right, col_a, col_b);
+            color_flip_effect.begin_spritebatch(sb);
+        }
+
+        public static void text_inverting(string text, Vector2 top_left, Vector2 bottom_right, Color col_a, Color col_b) {
+            begin_two_color_flip(top_left, bottom_right, col_a, col_b);
+
+            Drawing.text(text, top_left, Color.White);
+            end();
         }
 
         public static void begin(Effect effect) {
@@ -126,6 +139,19 @@ namespace SwoopLib
             var scale = new Vector2(tan.Length(), thickness);
 
             sb.Draw(OnePXWhite, A, null, color, rot, middlePoint, scale, SpriteEffects.None, 0f);
+        }
+
+
+        public static void line(XYPair A, XYPair B, Color color, float thickness) {
+            begin();
+
+            var tan = B - A;
+            var rot = (float)Math.Atan2(tan.Y, tan.X);
+
+            var middlePoint = new Vector2(0, 0.5f);
+            var scale = new Vector2(tan.Length(), thickness);
+
+            sb.Draw(OnePXWhite, A.ToVector2(), null, color, rot, middlePoint, scale, SpriteEffects.None, 0f);
         }
         public static void line_rounded_ends(Vector2 A, Vector2 B, Color color, float thickness) {
             line(A, B, color, thickness);
@@ -248,8 +274,16 @@ namespace SwoopLib
             begin();
             sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), Color.White);
         }
+        public static void image(RenderTarget2D image, Vector2 position, Vector2 size) {
+            begin();
+            sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), Color.White);
+        }
 
         public static void image(Texture2D image, Vector2 position, Vector2 size, SpriteEffects flip_mode) {
+            begin();
+            sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), null, Color.White, 0f, Vector2.Zero, flip_mode, 1f);
+        }
+        public static void image(RenderTarget2D image, Vector2 position, Vector2 size, SpriteEffects flip_mode) {
             begin();
             sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), null, Color.White, 0f, Vector2.Zero, flip_mode, 1f);
         }
@@ -258,7 +292,15 @@ namespace SwoopLib
             begin();
             sb.Draw(image, new Rectangle(position.ToPoint(), size), Color.White);
         }
+        public static void image(RenderTarget2D image, Vector2 position, Point size) {
+            begin();
+            sb.Draw(image, new Rectangle(position.ToPoint(), size), Color.White);
+        }
         public static void image(Texture2D image, Point position, Point size) {
+            begin();
+            sb.Draw(image, new Rectangle(position, size), Color.White);
+        }
+        public static void image(RenderTarget2D image, Point position, Point size) {
             begin();
             sb.Draw(image, new Rectangle(position, size), Color.White);
         }
@@ -266,16 +308,31 @@ namespace SwoopLib
             begin();
             sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), Color.White);
         }
+        public static void image(RenderTarget2D image, XYPair position, XYPair size) {
+            begin();
+            sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), Color.White);
+        }
         public static void image(Texture2D image, Vector2 position, Vector2 size, Color tint) {
             begin();
             sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), tint);
         }
-
+        public static void image(RenderTarget2D image, Vector2 position, Vector2 size, Color tint) {
+            begin();
+            sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), tint);
+        }
         public static void image(Texture2D image, Vector2 position, Vector2 size, float rotation) {
             begin();
             sb.Draw(image, new Rectangle((position + (image.Bounds.Size.ToVector2() / 2f)).ToPoint(), size.ToPoint()), null, Color.White, MathHelper.ToRadians(rotation), image.Bounds.Size.ToVector2() / 2f, SpriteEffects.None, 0f);
         }
+        public static void image(RenderTarget2D image, Vector2 position, Vector2 size, float rotation) {
+            begin();
+            sb.Draw(image, new Rectangle((position + (image.Bounds.Size.ToVector2() / 2f)).ToPoint(), size.ToPoint()), null, Color.White, MathHelper.ToRadians(rotation), image.Bounds.Size.ToVector2() / 2f, SpriteEffects.None, 0f);
+        }
         public static void image(Texture2D image, Vector2 position, Vector2 size, Color tint, float rotation) {
+            begin();
+            sb.Draw(image, new Rectangle((position + (image.Bounds.Size.ToVector2() / 2f)).ToPoint(), size.ToPoint()), null, tint, MathHelper.ToRadians(rotation), image.Bounds.Size.ToVector2() / 2f, SpriteEffects.None, 0f);
+        }
+        public static void image(RenderTarget2D image, Vector2 position, Vector2 size, Color tint, float rotation) {
             begin();
             sb.Draw(image, new Rectangle((position + (image.Bounds.Size.ToVector2() / 2f)).ToPoint(), size.ToPoint()), null, tint, MathHelper.ToRadians(rotation), image.Bounds.Size.ToVector2() / 2f, SpriteEffects.None, 0f);
         }

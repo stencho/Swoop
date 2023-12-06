@@ -76,7 +76,12 @@ namespace SwoopDemo {
         [DllImport("user32.dll", SetLastError = true)] public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
         [DllImport("user32.dll")][return: MarshalAs(UnmanagedType.Bool)] static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
-        protected void build_UI() {            
+        LateDrawRenderTarget trt;
+
+        protected void build_UI() {
+            trt = new LateDrawRenderTarget();
+            trt.position = resolution / 4;
+            trt.size     = resolution / 2;
             ((Button)UI.elements["exit_button"]).click_action = () => {
                 if (capture_demo_screenshot_on_exit) {
                     output_rt.SaveAsPng(new FileStream("..\\..\\..\\current.png", FileMode.OpenOrCreate), resolution.X, resolution.Y);
@@ -203,9 +208,9 @@ namespace SwoopDemo {
             //progress bars
             UI.add_element(new Label("pb_label", "progress bars",                   gjk_panel.bottom_xy + (XYPair.Right * 60f) + (XYPair.Down * 3f)));
 
-            UI.add_element(new ProgressBar("progress_bar", 0.5f,                    gjk_panel.bottom_xy + (XYPair.Right * 60f) + (XYPair.Down * 37f), new XYPair(150, 10)));
+            UI.add_element(new ProgressBar("progress_bar", 0.5f,                    gjk_panel.bottom_xy + (XYPair.Right * 60f) + (XYPair.Down * 30f), new XYPair(150, 10)));
             ((ProgressBar)UI.elements["progress_bar"]).text = "normal";
-            UI.add_element(new ProgressBar("progress_bar_inverted", 0.5f,           gjk_panel.bottom_xy + (XYPair.Right * 60f) + (XYPair.Down * 59f), new XYPair(150, 10)));
+            UI.add_element(new ProgressBar("progress_bar_inverted", 0.5f,           gjk_panel.bottom_xy + (XYPair.Right * 60f) + (XYPair.Down * 50f), new XYPair(150, 10)));
             ((ProgressBar)UI.elements["progress_bar_inverted"]).text = "inverted";
             ((ProgressBar)UI.elements["progress_bar_inverted"]).invert = true;
 
@@ -260,8 +265,10 @@ namespace SwoopDemo {
             base.Update(gameTime);
         }
 
+
         protected override void Draw(GameTime gameTime) {
-           if (!swoop.enable_draw) {
+            LateDrawRenderTarget.Manager.draw_rts();
+            if (!swoop.enable_draw) {
                 GraphicsDevice.SetRenderTarget(null);
                 if (swoop.fill_background) {
                     Drawing.graphics_device.Clear(swoop.UI_background_color);
@@ -280,11 +287,12 @@ namespace SwoopDemo {
             Drawing.graphics_device.SetRenderTarget(output_rt);
 
             GraphicsDevice.Clear(swoop.UI_background_color);
-            
+
             Drawing.image(logo, 
                 (resolution.ToVector2()) - (logo.Bounds.Size.ToVector2() * 0.5f) - (Vector2.One * 8f), 
                 logo.Bounds.Size.ToVector2() * 0.5f,
                 SpriteEffects.FlipHorizontally);
+
             Drawing.image(swoop.render_target_output, XYPair.Zero, resolution);
 
             Drawing.end();
@@ -292,6 +300,10 @@ namespace SwoopDemo {
 
             GraphicsDevice.SetRenderTarget(null);
             Drawing.image(output_rt, XYPair.Zero, resolution);
+            Drawing.image(trt.render_target, trt.position, trt.size);
+
+
+
 
             base.Draw(gameTime);
         }

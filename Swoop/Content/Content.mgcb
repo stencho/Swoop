@@ -19,6 +19,12 @@
 /processorParam:DebugMode=Auto
 /build:effects/dither.fx
 
+#begin effects/render_target_screen_pos.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:effects/render_target_screen_pos.fx
+
 #begin effects/sdf_circle.fx
 /importer:EffectImporter
 /processor:EffectProcessor
@@ -30,6 +36,12 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:effects/sdf.fx
+
+#begin effects/two_color_flip.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:effects/two_color_flip.fx
 
 #begin profont.spritefont
 /importer:FontDescriptionImporter

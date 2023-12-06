@@ -1,8 +1,10 @@
 ## Swoop
 
-A set of UI elements and systems to manage them, for creating user interfaces. Allows for building things like debug overlays, editor UIs, or even entire applications (a questionable idea). Absolutely not immediate mode. Hella state. 
+A set of UI elements and systems to manage them, for creating user interfaces. Allows for building things like debug overlays, editor UIs, or even entire applications (a questionable idea).
 
-Everything is implemented as small ProFont and extreme minimalist 1px bright-lines-on-dark-backgrounds, because I first used bbLean at a formative age. The goal is to eventually make it possible to globally 'swap out' important parts of different elements- for example, assigning textures for a button's standard, mouseover, and clicked states, to effectively "skin" all buttons belonging to a UIElementManager. Until at least most elements are implemented and working though, 20/20 vision or better only.
+I intend to implement an invalidation rendering system eventually, but right now there are much bigger performance issues which need to be addressed
+
+Everything is implemented as small ProFont and extreme minimalist 1px bright-lines-on-dark-backgrounds, inspired by BlackBox/bbLean. 
 
 This project will not work as-is and requires MGRawInputLib from [MGRawInput](https://github.com/stencho/MGRawInput) (for handling input and additional things, such as window dragging/resizing and threaded input handling)
 
@@ -14,7 +16,12 @@ This project will not work as-is and requires MGRawInputLib from [MGRawInput](ht
 - [x] Dialog Box
 - [x] Label
 - [ ] List Box
-- [ ] Menu Strip
+- [ ] Menu/Menu Strip
+- [ ] - Menu Bar
+- [ ] - Menu Button
+- [ ] - Submenu
+- [ ] - Menu Toggle
+- [ ] - Menu Slider?
 - [ ] Numeric Up/Down
 - [ ] Multi-choice Option Slider
 - [x] Panel

@@ -32,6 +32,7 @@ namespace SwoopLib {
         public static XYPair resolution => _resolution;
         public static RenderTarget2D render_target_output => Drawing.main_render_target;
         
+
         public static bool fill_background { get; set; } = false;
         public static bool draw_UI_border { get; set; } = true;
         public static bool enable_draw { get; set; } = true;

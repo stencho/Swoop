@@ -42,26 +42,67 @@ namespace SwoopLib.UIElements {
         public float value { get { return this._value; } set { this._value = value; } }
         
         internal override void added() {}
-
+        LateDrawRenderTarget sfp = new LateDrawRenderTarget();
         internal override void draw() {
             if (!visible) return;
 
+            float relative_mouse_value = mouse_relative.ToVector2().X / size.ToVector2().X;
+            float.Clamp(relative_mouse_value, 0f, 1f);
+
             if (!vertical) {
+
                 if (!invert) {
-                    Drawing.fill_rect_dither(
-                        position, 
-                        (position + size.Y_only) + (size.X_only * draw_value()), 
-                        Swoop.get_color(this), Swoop.UI_background_color);
+                    Drawing.fill_rect(
+                        position,
+                        (position + size.Y_only) + (size.X_only * draw_value()),
+                        Swoop.get_color(this));
 
                     if (!string.IsNullOrWhiteSpace(text))
                         Drawing.text(text, (position + (XYPair.Up * 12f)).ToVector2(), Swoop.UI_background_color);
 
                 } else {
                     Drawing.fill_rect(
-                        position + (size.X_only * (1.0f-draw_value())), 
-                       (position + (size.X_only * (1.0f - draw_value())) + size.Y_only) + (size.X_only * draw_value()), 
-                       Swoop.get_color(this));
+                        position + (size.X_only * (1.0f - draw_value())),
+                        (position + (size.X_only * (1.0f - draw_value())) + size.Y_only) + (size.X_only * draw_value()),
+                        Swoop.get_color(this));
                 }
+
+                Drawing.end();
+
+
+
+                if (clickable && mouse_down && mouse_over) {
+                    if (!invert) {
+                        if (relative_mouse_value > draw_value()) {
+                            Drawing.fill_rect_dither(
+                                (position) + (size.X_only * draw_value()),
+                                position + size.Y_only + mouse_relative.X_only,
+                                Swoop.get_color(this), Swoop.UI_background_color);
+                        } else {
+                            Drawing.fill_rect_dither(
+                                position  + mouse_relative.X_only,
+                                position + size.Y_only + (size.X_only * draw_value()),
+                                Swoop.get_color(this), Swoop.UI_background_color);
+                        }
+
+                        Drawing.line(
+                            position + mouse_relative.X_only,
+                            position + size.Y_only + mouse_relative.X_only,
+                            Swoop.get_color(this), 1f);
+                    } else {
+                        Drawing.fill_rect_dither(
+                            position + (size.X_only * (1.0f - draw_value())),
+                            (position + (size.X_only * (1.0f - draw_value())) + size.Y_only) + (size.X_only * draw_value()),
+                            Swoop.get_color(this), Swoop.UI_background_color);
+                    }
+                    
+                } else {
+                }
+
+                if (clickable) {
+                    Drawing.text_inverting("test", position.ToVector2(), position.ToVector2() + Drawing.measure_string_profont("test"), Swoop.get_color(this), Swoop.UI_background_color);
+                }
+
 
 
                 if (!string.IsNullOrEmpty(text))
@@ -83,7 +124,8 @@ namespace SwoopLib.UIElements {
                     Drawing.text_vertical(text, (position + size.X_only + (XYPair.Right*12f)).ToVector2(), Swoop.get_color(this));
             }
              
-            Drawing.rect(position, position + size, Swoop.get_color(this), 1f); 
+            Drawing.rect(position, position + size, Swoop.get_color(this), 1f);
+
         }
 
 
@@ -91,9 +133,27 @@ namespace SwoopLib.UIElements {
 
         internal override void draw_rt() {}
 
+
+        bool clicking = false;
+        bool was_clicking = false;
+
         internal override void update() {
             if (!visible) return;
 
+            float relative_mouse_value = mouse_relative.ToVector2().X / size.ToVector2().X;
+            float.Clamp(relative_mouse_value, 0f, 1f);
+
+            if (clickable && mouse_down) clicking = true;
+            if (!mouse_down) clicking = false;
+
+            //mouse just released
+            if (was_clicking && !clicking) {
+                if (mouse_over) {
+                    _value = relative_mouse_value;
+                }
+            }
+
+            was_clicking = clicking;
         }
     }
 }
