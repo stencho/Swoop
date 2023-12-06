@@ -9,9 +9,11 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using SwoopLib.Effects;
 using static System.Formats.Asn1.AsnWriter;
 
-namespace SwoopLib {
+namespace SwoopLib
+{
 
     public static class Drawing {
         public static SpriteBatch sb;
@@ -75,6 +77,17 @@ namespace SwoopLib {
             if (!sb_drawing) {
                 //sb.Begin();
                 sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, null, null, null, null);
+                sb_drawing = true;
+            }
+        }
+        static DitherEffect dither_effect;
+        public static void begin_dither(Vector2 top_left, Vector2 bottom_right, Color col_a, Color col_b) {
+            if (dither_effect == null) dither_effect = new DitherEffect(Swoop.content);
+            dither_effect.color_a = col_a; dither_effect.color_b = col_b;
+            dither_effect.configure_shader(top_left, bottom_right);
+
+            if (!sb_drawing) {
+                sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, null, null, DitherEffect.effect, null);
                 sb_drawing = true;
             }
         }
@@ -206,6 +219,11 @@ namespace SwoopLib {
             begin();
             sb.Draw(OnePXWhite, min.ToVector2(), null, color, 0f, Vector2.Zero, (max - min).ToVector2(), SpriteEffects.None, 0f);
         }
+        public static void fill_rect_dither(XYPair min, XYPair max, Color color_a, Color color_b) {
+            begin_dither(min.ToVector2(), max.ToVector2(), color_a, color_b);
+            sb.Draw(OnePXWhite, min.ToVector2(), null, Color.White, 0f, Vector2.Zero, (max - min).ToVector2(), SpriteEffects.None, 0f);
+            end();
+        }
 
 
         public static void fill_rect_outline(Vector2 min, Vector2 max, Color color, Color outline, float outline_thickness) {
@@ -286,7 +304,12 @@ namespace SwoopLib {
         public static void text(string text, Vector2 position, Color color) {
             begin();
             position.Ceiling(); //this prevents half-pixel positioning which helps keep text crisp and artifact-free
-            sb.DrawString(fnt_profont, text, position, color);            
+            sb.DrawString(fnt_profont, text, position, color);
+        }
+        public static void text_vertical(string text, Vector2 position, Color color) {
+            begin();
+            position.Ceiling(); //this prevents half-pixel positioning which helps keep text crisp and artifact-free
+            sb.DrawString(fnt_profont, text, position, color, MathHelper.ToRadians(90f), Vector2.Zero, 1f, SpriteEffects.None, 1f);
         }
 
         public static void text_shadow(string text, Vector2 position, Color color) {

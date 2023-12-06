@@ -41,10 +41,11 @@ namespace SwoopLib.UIElements {
         internal override void added() { }
 
         internal override void update() {
+            if (!visible) return;
             bool interacted = false;
 
             if (!clicking && was_clicking && mouse_over) interacted = true;
-            if (is_focused && Swoop.input_handler.just_pressed(Microsoft.Xna.Framework.Input.Keys.Enter))
+            if (focused && Swoop.input_handler.just_pressed(Microsoft.Xna.Framework.Input.Keys.Enter))
                 interacted = true;
 
             if (interacted) {
@@ -55,16 +56,32 @@ namespace SwoopLib.UIElements {
         }
 
         internal override void draw() {
+            if (!visible) return;
             XYPair mid_left = position + (size.Y_only * 0.5f) ;
             Drawing.fill_rect_outline(
                 mid_left - (checkbox_size.Y_only * 0.5f), mid_left - (checkbox_size.Y_only * 0.5f) + checkbox_size, 
                 Swoop.UI_background_color, Swoop.get_color(this), 1f);
 
             if (mouse_over) {
-                Drawing.rect(
-                    mid_left - (checkbox_size.Y_only * 0.5f) + XYPair.One, 
-                    mid_left - (checkbox_size.Y_only * 0.5f) + checkbox_size - XYPair.One,
-                    Swoop.get_color(this), 1f);
+                if (!Checked && mouse_down) {
+
+                    Drawing.fill_rect(
+                        mid_left - (checkbox_size.Y_only * 0.5f) + XYPair.One,
+                        mid_left - (checkbox_size.Y_only * 0.5f) + checkbox_size - (XYPair.One * 2),
+                        Swoop.get_color(this));
+                } else if (Checked && mouse_down) {
+
+                    Drawing.fill_rect(
+                        mid_left - (checkbox_size.Y_only * 0.5f) + (XYPair.One * 4),
+                        mid_left - (checkbox_size.Y_only * 0.5f) + checkbox_size - (XYPair.One * 8),
+                        Swoop.get_color(this));
+                } else {
+
+                    Drawing.rect(
+                        mid_left - (checkbox_size.Y_only * 0.5f) + XYPair.One,
+                        mid_left - (checkbox_size.Y_only * 0.5f) + checkbox_size - XYPair.One,
+                        Swoop.get_color(this), 1f);
+                }
             }
 
             if (Checked) {

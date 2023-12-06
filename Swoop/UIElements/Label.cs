@@ -76,6 +76,7 @@ namespace SwoopLib.UIElements {
         public alignment text_justification = alignment.LEFT;
 
         private void draw_internal(XYPair offset, alignment tj) {
+            if (!visible) return;
             StringReader sr = new StringReader(text);
             int line_num = 0;
             float line_height = Drawing.measure_string_profont("A").Y;
@@ -157,10 +158,12 @@ namespace SwoopLib.UIElements {
         }
 
         internal override void draw_rt() {
+            if (!visible) return;
             draw_internal(XYPair.Zero, text_justification);
         }
 
         internal override void draw() {
+            if (!visible) return;
             if (!_auto_size) {
                 Drawing.image(draw_target, position, size);
             } else {

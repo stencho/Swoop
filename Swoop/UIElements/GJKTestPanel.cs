@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MGRawInputLib;
+﻿using MGRawInputLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using SwoopLib;
 using SwoopLib.Collision;
 using SwoopLib.Shapes;
-using SwoopLib.UIElements;
 
 namespace SwoopLib.UIElements {
     public class GJKTestPanel : Panel {
@@ -17,8 +10,7 @@ namespace SwoopLib.UIElements {
 
         List<Shape2D> shapes = new List<Shape2D>();
         List<GJK2D.gjk_result> results = new List<GJK2D.gjk_result>();
-
-        
+                
         public GJKTestPanel(string name, XYPair position, XYPair size) 
             : base(name, position, size, null) {
 
@@ -31,12 +23,12 @@ namespace SwoopLib.UIElements {
         int selected_shape = 1;
 
         internal override void draw_rt() {
+            if (!visible) return;
             base.draw_rt();
 
             foreach (Shape2D s in shapes) {                
                 s.draw();
             }
-
 
             cursor.draw();
 
@@ -56,15 +48,16 @@ namespace SwoopLib.UIElements {
             }
             foreach (GJK2D.gjk_result result in results) {
                 result.draw();
-
             }
         }
 
         internal override void draw() {
+            if (!visible) return;
             base.draw();
         }
 
         internal override void update() {
+            if (!visible) return;
 
             if (GJK2D.SAVE_SIMPLICES) {
                 if (Swoop.input_handler.just_pressed(Microsoft.Xna.Framework.Input.Keys.A)) {
@@ -87,7 +80,6 @@ namespace SwoopLib.UIElements {
                     if (selected_simplex > results[selected_shape].simplices.Count - 1) selected_simplex = results[selected_shape].simplices.Count - 1;
                 }
             }
-
 
             if (mouse_over) {
                 var sd = Swoop.input_handler.rawinput_mouse_state.ScrollDelta;
@@ -131,7 +123,6 @@ namespace SwoopLib.UIElements {
 
             if (hit) cursor.debug_color = Color.Red;
             else cursor.debug_color = Color.White;
-
             base.update();
         }
     }

@@ -48,11 +48,12 @@ namespace SwoopLib.UIElements {
         }
 
         internal override void update() {
+            if (!visible) return;
             bool interacted = false;
 
             if (!clicking && was_clicking && mouse_over) interacted = true;            
 
-            if (is_focused && Swoop.input_handler.just_pressed(Microsoft.Xna.Framework.Input.Keys.Enter)) 
+            if (focused && Swoop.input_handler.just_pressed(Microsoft.Xna.Framework.Input.Keys.Enter)) 
                 interacted = true;
 
             if (interacted) { 
@@ -62,13 +63,14 @@ namespace SwoopLib.UIElements {
             }
 
             click_highlight = false;
-            if ((is_focused && Swoop.input_handler.just_pressed(Microsoft.Xna.Framework.Input.Keys.Enter)) || (mouse_over && !mouse_down)) {
+            if ((focused && Swoop.input_handler.just_pressed(Microsoft.Xna.Framework.Input.Keys.Enter)) || (mouse_over && !mouse_down)) {
                 click_highlight = true;
             }
 
         }
 
         internal override void draw() {
+            if (!visible) return;
             Drawing.fill_rect_outline(position + XYPair.One, position + size, toggled_on ? Swoop.get_color(this) : Swoop.UI_background_color, Swoop.get_color(this), 1f);
             Drawing.text(text, position + margin, toggled_on ? Swoop.UI_background_color : Swoop.get_color(this));
 

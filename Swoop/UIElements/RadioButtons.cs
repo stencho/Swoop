@@ -129,7 +129,7 @@ namespace SwoopLib.UIElements {
         public bool Checked { get; set; } = false;
         public Action<RadioButton, bool> checked_changed;
 
-        float check_circle_radius = 4f;
+        float check_circle_radius = 5f;
         XYPair text_size = XYPair.Zero;
 
         const int margin = 4;
@@ -141,10 +141,10 @@ namespace SwoopLib.UIElements {
 
             if (text_size.Y > check_circle_radius) {
                 text_taller_than_box = true;
-                size = text_size + (XYPair.UnitX * (check_circle_radius + margin));
+                size = text_size + (XYPair.UnitX * ((check_circle_radius * 2) + margin));
             } else {
                 text_taller_than_box = false;
-                size = (XYPair.One * check_circle_radius) + (XYPair.UnitX * (text_size.X + margin));
+                size = (XYPair.One * check_circle_radius * 2) + (XYPair.UnitX * (text_size.X + margin));
             }
         }
 
@@ -155,36 +155,37 @@ namespace SwoopLib.UIElements {
         internal override void added() {}
 
         internal override void draw() {
-            XYPair mid_left = position + (size.Y_only * 0.5f);
-            Drawing.fill_rect_outline(
-                mid_left - (check_circle_radius ), mid_left - (check_circle_radius) + (Vector2.One * check_circle_radius * 2),
-                Swoop.UI_background_color, Swoop.get_color(this), 1f);
+            if (!visible) return;
 
-            if (mouse_over) {
-                Drawing.rect(
-                    mid_left - (check_circle_radius) + XYPair.One,
-                    mid_left - (check_circle_radius) + (Vector2.One * check_circle_radius * 2) - XYPair.One,
-                    Swoop.get_color(this), 1f);
-            }
+            XYPair mid_left = position + (size.Y_only * 0.5f) + (XYPair.Right * check_circle_radius);
+
+            var draw_color = Swoop.get_color(this);
+
+            Drawing.circle(mid_left.ToVector2() , check_circle_radius, 1f, draw_color);
+
 
             if (Checked) {
-                Drawing.fill_rect(
-                    mid_left - (check_circle_radius) + XYPair.One,
-                    mid_left - (check_circle_radius) + (Vector2.One * check_circle_radius * 2) - (XYPair.One * 2),
-                    Swoop.get_color(this));
+                Drawing.fill_circle(mid_left.ToVector2(), check_circle_radius - 2, draw_color);
+            } else if (mouse_down && mouse_over) {
+                Drawing.fill_circle(mid_left.ToVector2(), check_circle_radius - 1,draw_color);
+            } else if (mouse_over) {
+                Drawing.fill_circle(mid_left.ToVector2(), check_circle_radius - 2, draw_color);
             }
-            
-            Drawing.text(_text, (mid_left + (XYPair.Right * check_circle_radius)) + (XYPair.UnitX * margin) - (text_size.Y_only * 0.5f),  Swoop.get_color(this));
+
+            //Drawing.rect(position, position + size, Color.Red, 1f);
+
+            Drawing.text(_text, (mid_left + (XYPair.Right * check_circle_radius)) + (XYPair.UnitX * margin) - (text_size.Y_only * 0.5f),  draw_color);
         }
 
         internal override void draw_rt() {
         }
 
         internal override void update() {
+            if (!visible) return;
             bool interacted = false;
 
             if (!clicking && was_clicking && mouse_over) interacted = true;
-            if (is_focused && Swoop.input_handler.just_pressed(Microsoft.Xna.Framework.Input.Keys.Enter))
+            if (focused && Swoop.input_handler.just_pressed(Microsoft.Xna.Framework.Input.Keys.Enter))
                 interacted = true;
 
             if (interacted) {

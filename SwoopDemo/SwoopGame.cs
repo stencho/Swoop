@@ -19,7 +19,7 @@ namespace SwoopDemo {
     public class SwoopGame : Game {
         GraphicsDeviceManager graphics;
 
-        public static double target_fps = 60;
+        public static double target_fps = 240;
         FPSCounter fps;
 
         public static XYPair resolution = new XYPair(800, 600);
@@ -128,6 +128,7 @@ namespace SwoopDemo {
                 })
             );
 
+            UI.add_element(new Label("panel_label", "panel", UI.elements["test_panel"].position + XYPair.Up * 15));
 
             var dialog_size = new XYPair(340, 160);
             ((Button)UI.elements["test_button"]).click_action = () => {
@@ -164,36 +165,83 @@ namespace SwoopDemo {
                 graphics.PreferredBackBufferWidth = resolution.X;
                 graphics.PreferredBackBufferHeight = resolution.Y;
                 graphics.ApplyChanges();
-
             };
 
+            //current input handler label
             UI.add_element(new Label("ri_info_label",
                 $"{swoop.input_handler.ri_info()}",
                 XYPair.One * 20f + (XYPair.UnitX * 300)));
 
+            //gjk test panel
             UI.add_element(new GJKTestPanel("gjk_panel", (XYPair.One * 20) + (XYPair.UnitY * 100), XYPair.One * 200));
 
-            UI.add_element(new Label("rb_label", "radio buttons", new XYPair(UI.elements["gjk_panel"].right + 10, UI.elements["gjk_panel"].Y)));
+            var gjk_panel = UI.elements["gjk_panel"];
 
-            RadioButton radio_button_a1 = new RadioButton("rba1", "a1", new XYPair(UI.elements["gjk_panel"].right + 15, UI.elements["gjk_panel"].Y + 20 ));
-            RadioButton radio_button_a2 = new RadioButton("rba2", "a2", new XYPair(UI.elements["gjk_panel"].right + 15, UI.elements["gjk_panel"].Y + 20 + 20));
-            RadioButton radio_button_a3 = new RadioButton("rba3", "a3", new XYPair(UI.elements["gjk_panel"].right + 15, UI.elements["gjk_panel"].Y + 20 + 40));
+            UI.add_element(new Label("gjk_label", "gjk", gjk_panel.position + XYPair.Up * 15));
+
+
+            //radio buttons
+            UI.add_element(new Label("rb_label", "radio buttons", new XYPair(gjk_panel.right + 10, gjk_panel.Y)));
+
+            RadioButton radio_button_a1 = new RadioButton("rba1", "a1", new XYPair(gjk_panel.right + 15, gjk_panel.Y + 20 ));
+            RadioButton radio_button_a2 = new RadioButton("rba2", "a2", new XYPair(gjk_panel.right + 15, gjk_panel.Y + 20 + 20));
+            RadioButton radio_button_a3 = new RadioButton("rba3", "a3", new XYPair(gjk_panel.right + 15, gjk_panel.Y + 20 + 40));
 
             RadioButtons.link(radio_button_a1, radio_button_a2, radio_button_a3);
 
 
-            RadioButton radio_button_b1 = new RadioButton("rbb1", "b1", new XYPair(UI.elements["gjk_panel"].right + 60, UI.elements["gjk_panel"].Y + 20 ));
-            RadioButton radio_button_b2 = new RadioButton("rbb2", "b2", new XYPair(UI.elements["gjk_panel"].right + 60, UI.elements["gjk_panel"].Y + 20 + 20));
-            RadioButton radio_button_b3 = new RadioButton("rbb3", "b3", new XYPair(UI.elements["gjk_panel"].right + 60, UI.elements["gjk_panel"].Y + 20 + 40));
+            RadioButton radio_button_b1 = new RadioButton("rbb1", "b1", new XYPair(gjk_panel.right + 60, gjk_panel.Y + 20 ));
+            RadioButton radio_button_b2 = new RadioButton("rbb2", "b2", new XYPair(gjk_panel.right + 60, gjk_panel.Y + 20 + 20));
+            RadioButton radio_button_b3 = new RadioButton("rbb3", "b3", new XYPair(gjk_panel.right + 60, gjk_panel.Y + 20 + 40));
                                                                                                                        
             RadioButtons.link(radio_button_b1, radio_button_b2, radio_button_b3);
 
             UI.add_elements(radio_button_a1, radio_button_a2, radio_button_a3);
             UI.add_elements(radio_button_b1, radio_button_b2, radio_button_b3);
+
+
+            //progress bars
+            UI.add_element(new Label("pb_label", "progress bars",                   gjk_panel.bottom_xy + (XYPair.Right * 60f) + (XYPair.Down * 3f)));
+
+            UI.add_element(new ProgressBar("progress_bar", 0.5f,                    gjk_panel.bottom_xy + (XYPair.Right * 60f) + (XYPair.Down * 37f), new XYPair(150, 10)));
+            ((ProgressBar)UI.elements["progress_bar"]).text = "normal";
+            UI.add_element(new ProgressBar("progress_bar_inverted", 0.5f,           gjk_panel.bottom_xy + (XYPair.Right * 60f) + (XYPair.Down * 59f), new XYPair(150, 10)));
+            ((ProgressBar)UI.elements["progress_bar_inverted"]).text = "inverted";
+            ((ProgressBar)UI.elements["progress_bar_inverted"]).invert = true;
+
+            UI.add_element(new ProgressBar("progress_bar_vertical", 0.5f,           gjk_panel.bottom_xy + (XYPair.Right * 5f) + (XYPair.Down * 5f), new XYPair(10, 100)));
+            ((ProgressBar)UI.elements["progress_bar_vertical"]).text = "normal";
+
+            UI.add_element(new ProgressBar("progress_bar_vertical_inverted", 0.5f,  gjk_panel.bottom_xy + (XYPair.Right * 15f) + (XYPair.Down * 5f) + (XYPair.Right * 15f), new XYPair(10, 100)));
+            ((ProgressBar)UI.elements["progress_bar_vertical_inverted"]).text = "inverted";
+
+            ((ProgressBar)UI.elements["progress_bar_vertical"]).vertical = true;
+
+            ((ProgressBar)UI.elements["progress_bar_vertical_inverted"]).invert = true;
+            ((ProgressBar)UI.elements["progress_bar_vertical_inverted"]).vertical = true;
+
+            UI.add_element(new ProgressBar("progress_bar_clickable", 0.5f,
+                ((ProgressBar)UI.elements["progress_bar_inverted"]).bottom_xy + (XYPair.Down * 25f),
+                new XYPair(150, 10)));
+
+            ((ProgressBar)UI.elements["progress_bar_clickable"]).clickable = true;
+            ((ProgressBar)UI.elements["progress_bar_clickable"]).text = "clickable";
         }
 
+        static float progress_bar_test_value = 0.5f;
 
         protected override void Update(GameTime gameTime) {
+            float clock = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            progress_bar_test_value += 0.25f * clock;
+            if (progress_bar_test_value > 1f)
+                progress_bar_test_value -= 1f;
+
+            ((ProgressBar)UI.elements["progress_bar"]).value = progress_bar_test_value;
+            ((ProgressBar)UI.elements["progress_bar_inverted"]).value = progress_bar_test_value;
+
+            ((ProgressBar)UI.elements["progress_bar_vertical"]).value = progress_bar_test_value;
+            ((ProgressBar)UI.elements["progress_bar_vertical_inverted"]).value = progress_bar_test_value;
+
             swoop.Update();
             StringBuilder sb = new StringBuilder();
 

@@ -9,11 +9,12 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using MGRawInputLib;
 using SwoopLib.UIElements;
+using System.Runtime.CompilerServices;
 
 namespace SwoopLib {
     public static class Swoop {
         public static Color get_color(UIElement element) {
-            if (element.is_focused) return UI_highlight_color;
+            if (element.focused) return UI_highlight_color;
             else return UI_color;
         }
 
@@ -21,12 +22,14 @@ namespace SwoopLib {
         public static Color UI_highlight_color = Color.FromNonPremultiplied(235, 140, 195, 255);
         public static Color UI_background_color = Color.FromNonPremultiplied(25, 25, 25, 255);
 
+        public static ContentManager content;
+
         public static UIElementManager UI;
 
         public static InputHandler input_handler;
 
-        static XYPair resolution;
-
+        static XYPair _resolution;
+        public static XYPair resolution => _resolution;
         public static RenderTarget2D render_target_output => Drawing.main_render_target;
         
         public static bool fill_background { get; set; } = false;
@@ -44,13 +47,13 @@ namespace SwoopLib {
             Input.initialize(parent);
             input_handler = new InputHandler();
 
-            Swoop.resolution = resolution;
+            Swoop._resolution = resolution;
         }
 
         public static void Load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, XYPair resolution, bool default_window_UI = true) {
             Drawing.load(gd, gdm, content, resolution);
             SDF.load(content);
-
+            Swoop.content = content;
             UI = new UIElementManager(XYPair.Zero, resolution);
             if (default_window_UI)
                 build_default_UI();
@@ -60,12 +63,12 @@ namespace SwoopLib {
             var text_length = Drawing.measure_string_profont_xy("x") ;
 
             UI.add_element(new Button("exit_button", "x",
-                resolution.X_only - text_length.X_only - (Vector2.UnitX * 10f)));
+                _resolution.X_only - text_length.X_only - (Vector2.UnitX * 10f)));
             UI.elements["exit_button"].ignore_dialog = true;
             UI.elements["exit_button"].can_be_focused = false;
 
             UI.add_element(new Button("minimize_button", "_",
-                    resolution.X_only - ((text_length.X_only + (Vector2.UnitX * 9f)) * 2),
+                    _resolution.X_only - ((text_length.X_only + (Vector2.UnitX * 9f)) * 2),
                     UI.elements["exit_button"].size));
             UI.elements["minimize_button"].ignore_dialog = true;
             UI.elements["minimize_button"].can_be_focused = false;
@@ -80,11 +83,11 @@ namespace SwoopLib {
             };
 
             UI.add_element(new TitleBar("title_bar",
-                XYPair.Zero, (int)(resolution.X - (UI.elements["exit_button"].width * 2)) + 3));
+                XYPair.Zero, (int)(_resolution.X - (UI.elements["exit_button"].width * 2)) + 3));
             UI.elements["title_bar"].ignore_dialog = true;
 
 
-            UI.add_element(new ResizeHandle("resize_handle", resolution - (XYPair.One * 15), XYPair.One * 15));
+            UI.add_element(new ResizeHandle("resize_handle", _resolution - (XYPair.One * 15), XYPair.One * 15));
 
 
             Window.resize_start = (Point size) => {
@@ -93,13 +96,13 @@ namespace SwoopLib {
             };
 
             Window.resize_end = (Point size) => {
-                Swoop.resolution = size.ToXYPair();
+                Swoop._resolution = size.ToXYPair();
 
-                change_resolution(resolution);
+                change_resolution(_resolution);
 
-                UI.elements["exit_button"].position = resolution.X_only - text_length.X_only - (XYPair.UnitX * 10f);
-                UI.elements["minimize_button"].position = resolution.X_only - ((text_length.X_only + (XYPair.UnitX * 9f)) * 2);
-                UI.elements["title_bar"].size = new XYPair((int)(resolution.X - (UI.elements["exit_button"].width * 2)) + 3, UI.elements["title_bar"].size.Y);
+                UI.elements["exit_button"].position = _resolution.X_only - text_length.X_only - (XYPair.UnitX * 10f);
+                UI.elements["minimize_button"].position = _resolution.X_only - ((text_length.X_only + (XYPair.UnitX * 9f)) * 2);
+                UI.elements["title_bar"].size = new XYPair((int)(_resolution.X - (UI.elements["exit_button"].width * 2)) + 3, UI.elements["title_bar"].size.Y);
 
                 UI.elements["resize_handle"].position = size.ToXYPair() - (XYPair.One * 15);
 
@@ -134,10 +137,10 @@ namespace SwoopLib {
         }
 
         public static void change_resolution(XYPair resolution) {
-            Swoop.resolution = resolution;
-            UI.size = Swoop.resolution;
+            Swoop._resolution = resolution;
+            UI.size = Swoop._resolution;
             Drawing.main_render_target.Dispose();
-            Drawing.main_render_target = new RenderTarget2D(Drawing.graphics_device, Swoop.resolution.X, Swoop.resolution.Y,
+            Drawing.main_render_target = new RenderTarget2D(Drawing.graphics_device, Swoop._resolution.X, Swoop._resolution.Y,
                 false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
             GC.Collect();
         }

@@ -43,22 +43,24 @@ namespace SwoopLib.UIElements {
 
 
         internal override void update() {
+            if (!visible) return;
             //successful click, released left mouse while over the button and clicking
             if (!clicking && was_clicking && mouse_over) {
                 if (click_action != null) click_action();
             } 
 
-            if (is_focused && Swoop.input_handler.just_pressed(Microsoft.Xna.Framework.Input.Keys.Enter)) {
+            if (focused && Swoop.input_handler.just_pressed(Microsoft.Xna.Framework.Input.Keys.Enter)) {
                 if (click_action != null) click_action();                
             }
             click_highlight = false;
-            if ((is_focused && Swoop.input_handler.is_pressed(Microsoft.Xna.Framework.Input.Keys.Enter)) || (mouse_over && !mouse_down)) {
+            if ((focused && Swoop.input_handler.is_pressed(Microsoft.Xna.Framework.Input.Keys.Enter)) || (mouse_over && !mouse_down)) {
                 click_highlight = true;
             }
         }
 
 
-        internal override void draw() { 
+        internal override void draw() {
+            if (!visible) return;
             Drawing.fill_rect_outline(position + XYPair.One, position + size, click_highlight ? Swoop.get_color(this) : Swoop.UI_background_color, Swoop.get_color(this), 1f);
             Drawing.text(_text, position + margin, click_highlight ? Swoop.UI_background_color : Swoop.get_color(this));
         }

@@ -88,6 +88,10 @@ namespace SwoopLib {
         public float right => position.X + size.X;
         public float bottom => position.Y + size.Y;
 
+        public XYPair bottom_xy => position + size.Y_only;
+        public XYPair right_xy => position + size.X_only;
+
+
         public bool mouse_over { get; set; } = false;
         public bool mouse_down { get; set; } = false;
         public bool mouse_was_down { get; set; } = false;
@@ -97,10 +101,12 @@ namespace SwoopLib {
         public bool clicking { get; set; } = false;
         public bool was_clicking { get; set; } = false;
 
-        public bool is_focused => UIElementManager.focused_element == this;
+        public bool focused => UIElementManager.focused_element == this;
 
         public bool ignore_dialog { get; set; } = false;
         public bool can_be_focused { get; set; } = true;
+        public bool visible { get; set; } = true;
+        public bool click_through { get; set; } = false;
 
         bool _enable_rt = false;
         public bool enable_render_target {
@@ -136,6 +142,7 @@ namespace SwoopLib {
         internal abstract void draw_rt();
 
         internal bool click_update(XYPair manager_position, XYPair manager_size, bool mouse_over_hit) {
+            if (click_through) return false;
 
             bool hit_bounds = Collision2D.point_intersects_rect(Input.cursor_pos,
                     manager_position, manager_position + manager_size);

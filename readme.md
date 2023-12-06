@@ -19,7 +19,7 @@ This project will not work as-is and requires MGRawInputLib from [MGRawInput](ht
 - [ ] Multi-choice Option Slider
 - [x] Panel
 - [ ] Progress Bar (+ combined TrackBar)
-- [ ] Radio Buttons
+- [x] Radio Buttons
 - [x] Resize Handle
 - [ ] Tab Control
 - [ ] Text Box

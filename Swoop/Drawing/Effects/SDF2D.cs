@@ -15,8 +15,8 @@ namespace SwoopLib {
 
         internal static bool effect_unloaded => sdf_effect == null;
         internal static void load(ContentManager Content) {
-            if (effect_unloaded) sdf_circle_effect = Content.Load<Effect>("sdf_circle");
-            if (effect_unloaded) sdf_effect = Content.Load<Effect>("sdf");
+            if (effect_unloaded) sdf_circle_effect = Content.Load<Effect>("effects/sdf_circle");
+            if (effect_unloaded) sdf_effect = Content.Load<Effect>("effects/sdf");
         }
 
 
