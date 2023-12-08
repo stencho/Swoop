@@ -1,8 +1,9 @@
 ## Swoop
-
-A set of UI elements, tools to use them, and systems to manage them. For building things like debug overlays, editor UIs, or even entire applications (a questionable idea, but doable if you need something in-between winforms and a full-on 2D game engine). Everything is implemented as small ProFont and extreme minimalist 1px bright-lines-on-dark-backgrounds, inspired by BlackBox/bbLean. 
+A set of UI elements, tools to use them, and systems to manage them. For building things like debug overlays, editor UIs, or even entire applications (a questionable idea, but fine if you need something in-between winforms and a full-on 2D game engine). Everything is implemented as small ProFont and extreme minimalist 1px bright-lines-on-dark-backgrounds, inspired by BlackBox/bbLean. 
 
 This project will not work as-is and requires MGRawInputLib from [MGRawInput](https://github.com/stencho/MGRawInput) (for threaded input handling, RawInput support, window movement and resizing, and other winapi stuff)
+
+Currently mostly a big ol mess, does not work straight out of the box. Looks better than it works.
 
 #### Most current SwoopDemo screenshot
 ![Most current major change screenshot](current.png)
@@ -10,12 +11,12 @@ This project will not work as-is and requires MGRawInputLib from [MGRawInput](ht
 #### Implemented UI Elements
 - [x] Button
 - [x] Check Box
-- [ ] Combo Box
+- [ ] Drop-down List (ComboBox)
 - [ ] Cursor
 - [x] Dialog Box
 - [x] Label
 - [ ] List Box
-- [ ] Menu/Menu Strip
+- [ ] Context Menu/Menu Strip
 - [ ] - Menu Bar
 - [ ] - Menu Button
 - [ ] - Submenu
@@ -33,16 +34,14 @@ This project will not work as-is and requires MGRawInputLib from [MGRawInput](ht
 - [x] Toggle Button
 
 #### Implemented useful features and effects
-- UIElements are simple to build, fully aware of mouse state, and can automatically draw all of their contents to a RenderTarget2D by setting a bool (then draw that to the screen later), to avoid things like text spilling out of boxes
-- high poll rate, multi-threaded, RawInput-based (with MonoGame as a fallback) mouse and keyboard support
+- UIElements are simple to build, fully aware of mouse state, and can automatically draw all of their contents to a RenderTarget2D by setting a bool, to avoid things like text spilling out of boxes
+- Element focus system, with element-specific keyboard handling for the currently focused element (focus a checkbox and press enter or space, it will switch state)
+- High poll rate, multi-threaded, RawInput-based mouse and keyboard support (with MonoGame as a fallback input handler, also managed in a way which supports multi-threading)
+- AutoRenderTarget, 'draw' Action automatically runs at the start of each draw, and AutoRenderTarget.Manager.(un)register_background/foreground_draw() make the renderer automatically draw the RT to the screen, above or below the rest of the UI
+- ManagedEffect class to make implementing and dealing with pixel shaders far less annoying. Also capable of drawing simple 3D models, and the DrawShaded3DPlane class uses this to draw an arbitrary pixel shader to a 3D plane
 - Easy to use drawing library for images, text, and 2D primitives
-- 2D image-based SDFs
-- Circle SDFs
-- Dithering
+- 2D image-based SDFs and Circle SDFs
 - A 2D GJK implementation
-- AutoRenderTarget system, 'draw' Action automatically runs at the start of each draw, and AutoRenderTarget.Manager.un/register_background/foreground_draw() make the renderer automatically draw the RT to the screen, above or below the rest of the UI
-
-
 
 #### Usage:
 ```csharp
