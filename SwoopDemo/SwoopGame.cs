@@ -20,7 +20,7 @@ namespace SwoopDemo {
     public class SwoopGame : Game {
         GraphicsDeviceManager graphics;
 
-        public static double target_fps = 240;
+        public static double target_fps = 60;
         FPSCounter fps;
 
         public static XYPair resolution = new XYPair(800, 600);
