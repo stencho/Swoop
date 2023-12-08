@@ -37,5 +37,6 @@ namespace SwoopLib.UIElements {
 
         }
 
+        internal override void handle_focused_input() { }
     }
 }

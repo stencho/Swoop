@@ -67,5 +67,7 @@ namespace SwoopLib.UIElements {
 
         internal override void draw_rt() { }
         internal override void added() { }
+
+        internal override void handle_focused_input() { }
     }
 }

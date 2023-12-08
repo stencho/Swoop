@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MGRawInputLib;
 using Microsoft.Xna.Framework;
 
 namespace SwoopLib.UIElements {
@@ -42,5 +43,7 @@ namespace SwoopLib.UIElements {
         }
 
         internal override void added() {}
+
+        internal override void handle_focused_input() { }
     }
 }

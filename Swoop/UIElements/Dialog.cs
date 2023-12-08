@@ -62,5 +62,7 @@ namespace SwoopLib.UIElements {
                 Drawing.text(title, tl, Swoop.get_color(this));
             }
         }
+
+        internal override void handle_focused_input() { }
     }
 }

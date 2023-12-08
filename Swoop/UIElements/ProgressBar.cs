@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MGRawInputLib;
 using Microsoft.Xna.Framework;
 
 namespace SwoopLib.UIElements {
@@ -171,5 +172,7 @@ namespace SwoopLib.UIElements {
 
             was_clicking = clicking;
         }
+
+        internal override void handle_focused_input() { }
     }
 }

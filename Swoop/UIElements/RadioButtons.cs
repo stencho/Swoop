@@ -195,5 +195,7 @@ namespace SwoopLib.UIElements {
                 if (checked_changed != null) checked_changed(this, Checked);
             }
         }
+
+        internal override void handle_focused_input() { }
     }
 }

@@ -142,6 +142,7 @@ namespace SwoopLib {
         internal abstract void update();
         internal abstract void draw();
         internal abstract void draw_rt();
+        internal abstract void handle_focused_input();
 
         internal bool click_update(XYPair manager_position, XYPair manager_size, bool mouse_over_hit) {
             if (click_through) return false;

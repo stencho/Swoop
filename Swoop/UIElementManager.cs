@@ -134,7 +134,13 @@ namespace SwoopLib {
                     elements[k].update();
                 }
             }
-            
+
+            foreach (string k in elements.Keys.Reverse()) {
+                if (elements[k].can_be_focused && elements[k].focused) {
+                    elements[k].handle_focused_input();
+                }
+            }
+
             if (mouse_down && !mouse_down_prev && !click_hit && UIExterns.in_foreground()) {
                 //focused_element = null; 
             }
