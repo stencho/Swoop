@@ -106,7 +106,8 @@ namespace SwoopLib.UIElements {
         internal override void draw_rt() {}
 
         internal override void handle_focused_input() {
-            key_down = (Swoop.input_handler.is_pressed(Keys.Enter) || Swoop.input_handler.is_pressed(Keys.Space));
+            key_down = (Swoop.input_handler.is_pressed(Keys.Enter) || Swoop.input_handler.is_pressed(Keys.Space)) 
+                     || (Swoop.input_handler.just_released(Keys.Space) || Swoop.input_handler.just_released(Keys.Enter));
 
             if (Swoop.input_handler.just_released(Keys.Space) || Swoop.input_handler.just_released(Keys.Enter)) {
                 interacted = true;
