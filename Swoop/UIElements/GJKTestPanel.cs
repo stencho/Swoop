@@ -10,13 +10,16 @@ namespace SwoopLib.UIElements {
 
         List<Shape2D> shapes = new List<Shape2D>();
         List<GJK2D.gjk_result> results = new List<GJK2D.gjk_result>();
-                
+
+        //LateDrawRenderTarget sfp;
         public GJKTestPanel(string name, XYPair position, XYPair size) 
             : base(name, position, size, null) {
 
             shapes.Add(new Circle(Vector2.One * 50f, 15f));
             shapes.Add(new Square(Vector2.One * 50f + Vector2.UnitX * 100f, Vector2.One * 25f));
             shapes.Add(new Polygon(Vector2.One * 150f, 25));
+
+            //sfp = new LateDrawRenderTarget();
         }
 
         int selected_simplex = 0;

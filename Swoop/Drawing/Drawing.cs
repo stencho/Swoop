@@ -33,6 +33,7 @@ namespace SwoopLib
         public static SpriteFont fnt_profont;
 
         public static Texture2D OnePXWhite;
+        public static Texture2D Logo;
 
         public static Texture2D sdf_circle;
         private static int sdf_circle_res = 256;
@@ -47,10 +48,12 @@ namespace SwoopLib
             graphics = gdm;
 
             main_render_target = new RenderTarget2D(graphics_device, resolution.X, resolution.Y,
-                false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+                false, SurfaceFormat.Vector4, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
             //create a 1x1 white texture
             OnePXWhite = new Texture2D(gd, 1, 1);
             OnePXWhite.SetData<Color>(new Color[1] { Color.White });
+
+            Logo = content.Load<Texture2D>("swoop_logo");
 
             //create an SDF of a circle
             Color[] sdf_data = new Color[sdf_circle_res * sdf_circle_res];

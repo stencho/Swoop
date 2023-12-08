@@ -56,6 +56,9 @@ namespace SwoopLib {
         public XYPair X_only => new XYPair(this.X, 0);
         public XYPair Y_only => new XYPair(0, this.Y);
 
+        public float aspect_ratio => (float)X/(float)Y;
+        public float aspect_ratio_inverse => (float)Y / (float)X;
+
         public int Length() {
             float y2 = this.Y;
             float x2 = this.X;

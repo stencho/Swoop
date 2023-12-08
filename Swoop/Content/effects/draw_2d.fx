@@ -7,25 +7,21 @@
 	#define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
-float2 resolution;
-float2 position, size;
+Texture2D main_texture;
+sampler2D main_texture_sampler = sampler_state
+{
+    Texture = <main_texture>;
+};
 
 struct VertexShaderOutput
 {
 	float4 Position : SV_POSITION;
-	float2 TextureCoordinates : TEXCOORD0;
+	float2 UV : TEXCOORD0;
 };
 
-float4 MainPS(VertexShaderOutput input) : COLOR {
-	float2 xy;
-
-	float2 minimum = position / resolution;
-	float2 maximum = (position + size) / resolution;
-	float2 diff = maximum - minimum;
-
-	xy.xy = minimum + (input.TextureCoordinates*diff);
-
-	return float4(xy.x, xy.y, 1, 1);
+float4 MainPS(VertexShaderOutput input) : COLOR
+{
+    return tex2D(main_texture_sampler, input.UV);
 }
 
 technique SpriteDrawing

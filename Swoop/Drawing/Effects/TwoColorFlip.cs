@@ -11,9 +11,9 @@ namespace SwoopLib.Effects {
     public class TwoColorFlip: ManagedEffect {       
 
         public void configure_shader(Vector2 top_left, Vector2 bottom_right, Color color_a, Color color_b) {
-            set_param("color_a", color_a);
-            set_param("color_b", color_b);
-            set_param("screen_texture", Drawing.main_render_target);
+            //set_param("color_a", color_a);
+            //set_param("color_b", color_b);
+            //set_param("screen_texture", Drawing.main_render_target);
         }
 
         /// <summary>

@@ -35,11 +35,13 @@ This project will not work as-is and requires MGRawInputLib from [MGRawInput](ht
 
 #### Implemented useful features and effects
 - UIElements are simple to build, fully aware of mouse state, and can automatically draw all of their contents to a RenderTarget2D by setting a bool (then draw that to the screen later), to avoid things like text spilling out of boxes
+- high poll rate, multi-threaded, RawInput-based (with MonoGame as a fallback) mouse and keyboard support
 - Easy to use drawing library for images, text, and 2D primitives
 - 2D image-based SDFs
 - Circle SDFs
 - Dithering
 - A 2D GJK implementation
+- Automated RenderTarget2D system. Create an AutoRenderTarget and assign a function to the 'draw' Action. AutoRenderTarget.Manager.register_background_draw() and Manager.register_foreground_draw() allow you to automatically draw the RT to the screen, either above/after or below/before the rest of the UI. AutoRenderTarget.render_target can be used any time, however, and is built at the start of each draw().
 
 
 #### Most current SwoopDemo screenshot

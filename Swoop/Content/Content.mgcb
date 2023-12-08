@@ -19,6 +19,18 @@
 /processorParam:DebugMode=Auto
 /build:effects/dither.fx
 
+#begin effects/draw_2d.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:effects/draw_2d.fx
+
+#begin effects/draw_3d.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:effects/draw_3d.fx
+
 #begin effects/render_target_screen_pos.fx
 /importer:EffectImporter
 /processor:EffectProcessor
@@ -36,6 +48,12 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:effects/sdf.fx
+
+#begin effects/test_tint.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:effects/test_tint.fx
 
 #begin effects/two_color_flip.fx
 /importer:EffectImporter

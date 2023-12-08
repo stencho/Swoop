@@ -159,7 +159,7 @@ namespace SwoopLib {
             }
         }
 
-        public void draw() {
+        public void draw_background() {
             Drawing.graphics_device.SetRenderTarget(Drawing.main_render_target);
 
             if (Swoop.fill_background) {
@@ -167,6 +167,9 @@ namespace SwoopLib {
             } else {
                 Drawing.graphics_device.Clear(Color.Transparent);
             }
+        }
+
+        public void draw() {
 
             foreach (string k in elements.Keys) {
                 if (in_dialog && k == dialog_element) continue;

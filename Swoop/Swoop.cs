@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework;
 using MGRawInputLib;
 using SwoopLib.UIElements;
 using System.Runtime.CompilerServices;
+using SwoopLib.Effects;
 
 namespace SwoopLib {
     public static class Swoop {
@@ -33,9 +34,10 @@ namespace SwoopLib {
         public static RenderTarget2D render_target_output => Drawing.main_render_target;
         
 
-        public static bool fill_background { get; set; } = false;
+        public static bool fill_background { get; set; } = true;
         public static bool draw_UI_border { get; set; } = true;
         public static bool enable_draw { get; set; } = true;
+        public static bool show_logo { get; set; } = true;
 
         public static Action<XYPair>? resize_start;
         public static Action<XYPair>? resize_end;
@@ -124,9 +126,25 @@ namespace SwoopLib {
             UI.update();            
         }
 
+        public static void DrawBackground() {
+            if (enable_draw) {
+                UI.draw_background();
+
+                if (fill_background && show_logo) {
+                    Drawing.end();
+                    Drawing.image(Drawing.Logo,
+                        (Swoop.resolution.ToVector2()) - (Drawing.Logo.Bounds.Size.ToVector2() * 0.5f) - (Vector2.One * 8f),
+                        Drawing.Logo.Bounds.Size.ToVector2() * 0.5f,
+                        SpriteEffects.FlipHorizontally);
+                }
+            }
+        }
+
         public static void Draw() {
             if (enable_draw) {
+                
                 UI.draw();
+
             } else {
                 Drawing.graphics_device.SetRenderTarget(Drawing.main_render_target);
                 Drawing.graphics_device.Clear(Color.Transparent);                

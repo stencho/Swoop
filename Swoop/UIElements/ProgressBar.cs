@@ -42,7 +42,6 @@ namespace SwoopLib.UIElements {
         public float value { get { return this._value; } set { this._value = value; } }
         
         internal override void added() {}
-        LateDrawRenderTarget sfp = new LateDrawRenderTarget();
         internal override void draw() {
             if (!visible) return;
 
@@ -100,7 +99,7 @@ namespace SwoopLib.UIElements {
                 }
 
                 if (clickable) {
-                    Drawing.text_inverting("test", position.ToVector2(), position.ToVector2() + Drawing.measure_string_profont("test"), Swoop.get_color(this), Swoop.UI_background_color);
+                    //Drawing.text_inverting("test", position.ToVector2(), position.ToVector2() + Drawing.measure_string_profont("test"), Swoop.get_color(this), Swoop.UI_background_color);
                 }
 
 

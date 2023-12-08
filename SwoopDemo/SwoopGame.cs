@@ -5,6 +5,7 @@ using SwoopLib;
 using SwoopLib.UIElements;
 using swoop = SwoopLib.Swoop;
 using static SwoopLib.UIExterns;
+using SwoopLib.Effects;
 
 using System;
 using System.Text;
@@ -26,7 +27,6 @@ namespace SwoopDemo {
 
         bool capture_demo_screenshot_on_exit = true;
 
-        Texture2D logo;
 
         RenderTarget2D output_rt;
 
@@ -67,8 +67,6 @@ namespace SwoopDemo {
             output_rt = new RenderTarget2D(GraphicsDevice, resolution.X, resolution.Y);
 
             swoop.Load(GraphicsDevice, graphics, Content, resolution);
-
-            logo = Content.Load<Texture2D>("swoop_logo");
              
             build_UI();
         }
@@ -76,12 +74,79 @@ namespace SwoopDemo {
         [DllImport("user32.dll", SetLastError = true)] public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
         [DllImport("user32.dll")][return: MarshalAs(UnmanagedType.Bool)] static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
-        LateDrawRenderTarget trt;
-
+        AutoRenderTarget render_target_bg;
+        AutoRenderTarget render_target_fg;
+        DrawShaded3DPlane draw_shader;
+        DrawShaded3DPlane draw_shader_passthrough;
         protected void build_UI() {
-            trt = new LateDrawRenderTarget();
-            trt.position = resolution / 4;
-            trt.size     = resolution / 2;
+            render_target_bg = new AutoRenderTarget(resolution.X_only - (resolution.X_only / 4.5f) + ((UI.elements["title_bar"].height + 30) * XYPair.UnitY), resolution / 5);
+            render_target_fg = new AutoRenderTarget(resolution.X_only - (resolution.X_only / 4.5f) + ((UI.elements["title_bar"].height + 167) * XYPair.UnitY), resolution / 5);
+
+            AutoRenderTarget.Manager.register_background_draw(render_target_bg);
+            AutoRenderTarget.Manager.register_foreground_draw(render_target_fg);
+
+            draw_shader = new DrawShaded3DPlane(Swoop.content, "draw_2d");
+            draw_shader_passthrough = new DrawShaded3DPlane(Swoop.content, "test_tint");
+
+            UI.add_element(new Label("test_3d_label", "auto render target tests\n3D plane > rt > background\n this text is in front and\n part of the above label", (resolution.X_only - (resolution.X_only / 4.5f)) + ((UI.elements["title_bar"].height + 5) * XYPair.UnitY)));
+
+            UI.add_element(new Label("test_3d_label_2", "shader > rt > foreground", (resolution.X_only - (resolution.X_only / 4.5f)) + ((UI.elements["title_bar"].height + 155) * XYPair.UnitY)));
+            UI.add_element(new Label("test_3d_label_3", "this text is behind the top\nrt layer and being passed\nthrough via a shader which is\naware of each pixel's screen\nposition, so it can pull data\nfrom the main screen render\ntarget and tint it for example\nwheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", 
+                (resolution.X_only - (resolution.X_only / 4.5f)) + ((UI.elements["title_bar"].height + 175) * XYPair.UnitY) + (XYPair.UnitX * -20f)));
+
+            //draw_shader.projection = Matrix.CreateOrthographic(2f, 2f, 0f, 5f);
+            //draw_shader.projection = Matrix.CreateOrthographic(1f,1f, 0f, 5f);
+            draw_shader.projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90f), render_target_bg.size.aspect_ratio, 0.01f, 5f);
+            draw_shader.view = Matrix.CreateLookAt(Vector3.Backward * 1f, Vector3.Forward, Vector3.Up);
+
+            draw_shader.world = Matrix.CreateFromAxisAngle(Vector3.Left, MathHelper.ToRadians(45f)) * Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(25));
+            //draw_shader.world = Matrix.CreateScale(trt.size.X, trt.size.Y, 1f);
+
+            draw_shader.set_param("main_texture", Drawing.Logo);
+
+            draw_shader.set_param("screen_pos_texture", render_target_fg.screen_pos_rt);
+            draw_shader.set_param("screen_texture", swoop.render_target_output);
+
+            render_target_bg.draw = () => {
+                Drawing.graphics_device.Clear(Color.Transparent);
+
+                Drawing.image(render_target_bg.screen_pos_rt, XYPair.Zero, render_target_bg.size);
+
+                Drawing.graphics_device.RasterizerState = RasterizerState.CullNone;
+
+                draw_shader.draw_plane();
+
+                Drawing.end();
+                Drawing.rect(XYPair.One, render_target_bg.size, Swoop.UI_color, 1f);
+
+                Drawing.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
+                Drawing.graphics_device.DepthStencilState = DepthStencilState.Default;
+            };
+
+            render_target_fg.draw = () => {
+                Drawing.graphics_device.Clear(Swoop.UI_background_color);
+
+                //Drawing.image(render_target_fg.screen_pos_rt, XYPair.Zero, render_target_fg.size);
+
+                //Drawing.graphics_device.RasterizerState = RasterizerState.CullNone;
+
+                Drawing.end();
+                Drawing.begin(draw_shader.effect);
+                draw_shader_passthrough.set_param("tint", Swoop.UI_highlight_color.ToVector3());
+                draw_shader_passthrough.set_param("screen_texture", swoop.render_target_output);
+                draw_shader_passthrough.set_param("screen_pos_texture", render_target_fg.screen_pos_rt);
+                draw_shader_passthrough.draw_plane();
+                //Drawing.fill_rect(Vector2.Zero, render_target_fg.size.ToVector2(), Color.White);
+                //draw_shader.set_param("texture", trt.screen_pos_rt);
+                //draw_shader.draw_plane();
+
+                Drawing.end();
+                Drawing.rect(XYPair.One, render_target_fg.size, Swoop.UI_color, 1f);
+
+                Drawing.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
+                Drawing.graphics_device.DepthStencilState = DepthStencilState.Default;
+            };
+
             ((Button)UI.elements["exit_button"]).click_action = () => {
                 if (capture_demo_screenshot_on_exit) {
                     output_rt.SaveAsPng(new FileStream("..\\..\\..\\current.png", FileMode.OpenOrCreate), resolution.X, resolution.Y);
@@ -170,6 +235,8 @@ namespace SwoopDemo {
                 graphics.PreferredBackBufferWidth = resolution.X;
                 graphics.PreferredBackBufferHeight = resolution.Y;
                 graphics.ApplyChanges();
+
+                AutoRenderTarget.Manager.refresh_all();
             };
 
             //current input handler label
@@ -267,40 +334,37 @@ namespace SwoopDemo {
 
 
         protected override void Draw(GameTime gameTime) {
-            LateDrawRenderTarget.Manager.draw_rts();
             if (!swoop.enable_draw) {
                 GraphicsDevice.SetRenderTarget(null);
-                if (swoop.fill_background) {
-                    Drawing.graphics_device.Clear(swoop.UI_background_color);
-                } else {
-                    Drawing.graphics_device.Clear(Color.Transparent);
-                }
-
-                Drawing.graphics_device.Clear(swoop.UI_background_color);
-
+                swoop.DrawBackground();
                 base.Draw(gameTime);
                 return;
             }
+
+
+            AutoRenderTarget.Manager.draw_rts();
+
+            swoop.DrawBackground();
+
+            Drawing.graphics_device.SetRenderTarget(swoop.render_target_output);
+
+            ManagedEffect.Manager.do_updates();
+            AutoRenderTarget.Manager.draw_rts_to_target_early();
 
             swoop.Draw();
 
             Drawing.graphics_device.SetRenderTarget(output_rt);
 
-            GraphicsDevice.Clear(swoop.UI_background_color);
-
-            Drawing.image(logo, 
-                (resolution.ToVector2()) - (logo.Bounds.Size.ToVector2() * 0.5f) - (Vector2.One * 8f), 
-                logo.Bounds.Size.ToVector2() * 0.5f,
-                SpriteEffects.FlipHorizontally);
 
             Drawing.image(swoop.render_target_output, XYPair.Zero, resolution);
+
 
             Drawing.end();
 
 
+            AutoRenderTarget.Manager.draw_rts_to_target_late();
             GraphicsDevice.SetRenderTarget(null);
             Drawing.image(output_rt, XYPair.Zero, resolution);
-            Drawing.image(trt.render_target, trt.position, trt.size);
 
 
 
