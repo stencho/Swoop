@@ -84,26 +84,6 @@ namespace SwoopLib.Effects {
             basic_effect.TextureEnabled = true;
         }
         
-        public virtual void draw_buffers(VertexBuffer vb, IndexBuffer ib, Matrix world, Matrix view, Matrix projection) {
-
-            if (shader == null) return;
-            if (selected_technique < 0 || selected_technique >= shader.Techniques.Count) return;
-            if (selected_pass < -1 || selected_pass >= shader.Techniques[selected_technique].Passes.Count) return;
-
-            Drawing.graphics_device.SetVertexBuffer(vb);
-            Drawing.graphics_device.Indices = ib;
-            
-            if (selected_pass == -1) {
-                for (int i = 0; i < shader.Techniques[selected_technique].Passes.Count; i++) {
-                    shader.Techniques[selected_technique].Passes[i].Apply();
-                }
-            } else {
-                shader.Techniques[selected_technique].Passes[selected_pass].Apply();
-            }
-
-            Drawing.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
-        }
-
         public virtual void draw_buffers_basic_effect_first_pass(VertexBuffer vb, IndexBuffer ib, Matrix world, Matrix view, Matrix projection) {
             if (shader == null) return;
             if (selected_technique < 0 || selected_technique >= shader.Techniques.Count) return;
@@ -118,16 +98,16 @@ namespace SwoopLib.Effects {
             Drawing.graphics_device.Indices = ib;
 
             basic_effect.CurrentTechnique.Passes[0].Apply();
-            /*
+            
             if (selected_pass == -1) {
                 for (int i = 0; i < shader.Techniques[selected_technique].Passes.Count; i++) {
                     shader.Techniques[selected_technique].Passes[i].Apply();
                 }
             } else {
                 shader.Techniques[selected_technique].Passes[selected_pass].Apply();
-            }*/
+            }
 
-            shader.CurrentTechnique.Passes[0].Apply();
+            //shader.CurrentTechnique.Passes[0].Apply();
             Drawing.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
         }
 

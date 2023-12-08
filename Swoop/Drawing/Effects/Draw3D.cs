@@ -109,7 +109,6 @@ namespace SwoopLib.Effects {
         }
 
         public void draw_plane() {
-
             base.draw_buffers_basic_effect_first_pass(quad_vb, quad_ib, _world, _view, _projection);
         }
     }

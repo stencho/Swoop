@@ -87,26 +87,6 @@ namespace SwoopLib
                 sb_drawing = true;
             }
         }
-        public static void begin_dither(Vector2 top_left, Vector2 bottom_right, Color col_a, Color col_b) {
-            if (dither_effect == null) dither_effect = new Dither(Swoop.content);
-
-            dither_effect.configure_shader(top_left, bottom_right, col_a, col_b);
-            dither_effect.begin_spritebatch(sb);
-        }
-
-        public static void begin_two_color_flip(Vector2 top_left, Vector2 bottom_right, Color col_a, Color col_b) {
-            if (color_flip_effect == null) color_flip_effect = new TwoColorFlip(Swoop.content);
-
-            color_flip_effect.configure_shader(top_left, bottom_right, col_a, col_b);
-            color_flip_effect.begin_spritebatch(sb);
-        }
-
-        public static void text_inverting(string text, Vector2 top_left, Vector2 bottom_right, Color col_a, Color col_b) {
-            begin_two_color_flip(top_left, bottom_right, col_a, col_b);
-
-            Drawing.text(text, top_left, Color.White);
-            end();
-        }
 
         public static void begin(Effect effect) {
             if (!sb_drawing) {
@@ -249,7 +229,10 @@ namespace SwoopLib
             sb.Draw(OnePXWhite, min.ToVector2(), null, color, 0f, Vector2.Zero, (max - min).ToVector2(), SpriteEffects.None, 0f);
         }
         public static void fill_rect_dither(XYPair min, XYPair max, Color color_a, Color color_b) {
-            begin_dither(min.ToVector2(), max.ToVector2(), color_a, color_b);
+            if (dither_effect == null) dither_effect = new Dither(Swoop.content);
+
+            dither_effect.configure_shader(min.ToVector2(), max.ToVector2(), color_a, color_b);
+            dither_effect.begin_spritebatch(sb);
             sb.Draw(OnePXWhite, min.ToVector2(), null, Color.White, 0f, Vector2.Zero, (max - min).ToVector2(), SpriteEffects.None, 0f);
             end();
         }
