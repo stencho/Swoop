@@ -1,12 +1,11 @@
 ## Swoop
 
-A set of UI elements and systems to manage them, for creating user interfaces. Allows for building things like debug overlays, editor UIs, or even entire applications (a questionable idea, but workable if you need something in between winforms and a full-on 2D/3D game engine).
-
-I intend to implement an invalidation rendering system eventually, but right now there are much bigger performance issues which need to be addressed.
-
-Everything is implemented as small ProFont and extreme minimalist 1px bright-lines-on-dark-backgrounds, inspired by BlackBox/bbLean. 
+A set of UI elements, tools to use them, and systems to manage them. For building things like debug overlays, editor UIs, or even entire applications (a questionable idea, but doable if you need something in-between winforms and a full-on 2D game engine). Everything is implemented as small ProFont and extreme minimalist 1px bright-lines-on-dark-backgrounds, inspired by BlackBox/bbLean. 
 
 This project will not work as-is and requires MGRawInputLib from [MGRawInput](https://github.com/stencho/MGRawInput) (for threaded input handling, RawInput support, window movement and resizing, and other winapi stuff)
+
+#### Most current SwoopDemo screenshot
+![Most current major change screenshot](current.png)
 
 #### Implemented UI Elements
 - [x] Button
@@ -43,9 +42,6 @@ This project will not work as-is and requires MGRawInputLib from [MGRawInput](ht
 - A 2D GJK implementation
 - AutoRenderTarget system, 'draw' Action automatically runs at the start of each draw, and AutoRenderTarget.Manager.un/register_background/foreground_draw() make the renderer automatically draw the RT to the screen, above or below the rest of the UI
 
-
-#### Most current SwoopDemo screenshot
-![Most current major change screenshot](current.png)
 
 
 #### Usage:
