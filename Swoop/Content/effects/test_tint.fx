@@ -15,8 +15,8 @@ sampler2D screen_pos_texture_sampler = sampler_state
     magfilter = POINT;
     minfilter = POINT;
     mipfilter = POINT;
-    ADDRESSU = WRAP;
-    ADDRESSV = WRAP;
+    ADDRESSU = CLAMP;
+    ADDRESSV = CLAMP;
 };
 
 Texture2D screen_texture;
@@ -26,8 +26,8 @@ sampler2D screen_texture_sampler = sampler_state
     magfilter = POINT;
     minfilter = POINT;
     mipfilter = POINT;
-    ADDRESSU = WRAP;
-    ADDRESSV = WRAP;
+    ADDRESSU = CLAMP;
+    ADDRESSV = CLAMP;
 };
 
 float3 tint = float3(1,1,1);
