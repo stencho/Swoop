@@ -46,7 +46,9 @@ namespace SwoopLib.UIElements {
             if (!visible) return;
 
             float relative_mouse_value = mouse_relative.ToVector2().X / size.ToVector2().X;
+            
             float.Clamp(relative_mouse_value, 0f, 1f);
+            if (invert) relative_mouse_value = 1f - relative_mouse_value;
 
             if (!vertical) {
 
@@ -89,10 +91,22 @@ namespace SwoopLib.UIElements {
                             position + size.Y_only + mouse_relative.X_only,
                             Swoop.get_color(this), 1f);
                     } else {
-                        Drawing.fill_rect_dither(
-                            position + (size.X_only * (1.0f - draw_value())),
-                            (position + (size.X_only * (1.0f - draw_value())) + size.Y_only) + (size.X_only * draw_value()),
-                            Swoop.get_color(this), Swoop.UI_background_color);
+                        if (relative_mouse_value > draw_value()) {
+                            Drawing.fill_rect_dither(
+                                position  + mouse_relative.X_only,
+                                (position) + size.Y_only + (size.X_only * (1f-draw_value())),
+                                Swoop.get_color(this), Swoop.UI_background_color);
+                        } else {
+                            Drawing.fill_rect_dither(
+                                position + (size.X_only * (1f - draw_value())),
+                                position + size.Y_only + mouse_relative.X_only,
+                                Swoop.get_color(this), Swoop.UI_background_color);
+                        }
+
+                        Drawing.line(
+                            position + mouse_relative.X_only,
+                            position + size.Y_only + mouse_relative.X_only,
+                            Swoop.get_color(this), 1f);
                     }
                     
                 } else {
@@ -148,7 +162,10 @@ namespace SwoopLib.UIElements {
             //mouse just released
             if (was_clicking && !clicking) {
                 if (mouse_over) {
-                    _value = relative_mouse_value;
+                    if (!invert)
+                        _value = relative_mouse_value;
+                    else
+                        _value = 1f - relative_mouse_value;
                 }
             }
 

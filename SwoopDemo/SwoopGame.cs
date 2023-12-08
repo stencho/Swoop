@@ -277,7 +277,7 @@ namespace SwoopDemo {
 
             UI.add_element(new ProgressBar("progress_bar", 0.5f,                    gjk_panel.bottom_xy + (XYPair.Right * 60f) + (XYPair.Down * 30f), new XYPair(150, 10)));
             ((ProgressBar)UI.elements["progress_bar"]).text = "normal";
-            UI.add_element(new ProgressBar("progress_bar_inverted", 0.5f,           gjk_panel.bottom_xy + (XYPair.Right * 60f) + (XYPair.Down * 50f), new XYPair(150, 10)));
+            UI.add_element(new ProgressBar("progress_bar_inverted", 0.5f,           gjk_panel.bottom_xy + (XYPair.Right * 60f) + (XYPair.Down * 53f), new XYPair(150, 10)));
             ((ProgressBar)UI.elements["progress_bar_inverted"]).text = "inverted";
             ((ProgressBar)UI.elements["progress_bar_inverted"]).invert = true;
 
@@ -293,11 +293,19 @@ namespace SwoopDemo {
             ((ProgressBar)UI.elements["progress_bar_vertical_inverted"]).vertical = true;
 
             UI.add_element(new ProgressBar("progress_bar_clickable", 0.5f,
-                ((ProgressBar)UI.elements["progress_bar_inverted"]).bottom_xy + (XYPair.Down * 25f),
+                ((ProgressBar)UI.elements["progress_bar_inverted"]).bottom_xy + (XYPair.Down * 17f),
                 new XYPair(150, 10)));
 
             ((ProgressBar)UI.elements["progress_bar_clickable"]).clickable = true;
             ((ProgressBar)UI.elements["progress_bar_clickable"]).text = "clickable";
+
+            UI.add_element(new ProgressBar("progress_bar_clickable_inverted", 0.5f,
+                ((ProgressBar)UI.elements["progress_bar_clickable"]).bottom_xy + (XYPair.Down * 12f),
+                new XYPair(150, 10)));
+
+            ((ProgressBar)UI.elements["progress_bar_clickable_inverted"]).invert = true;
+            ((ProgressBar)UI.elements["progress_bar_clickable_inverted"]).clickable = true;
+            ((ProgressBar)UI.elements["progress_bar_clickable_inverted"]).text = "clickable inverted";
         }
 
         static float progress_bar_test_value = 0.5f;
