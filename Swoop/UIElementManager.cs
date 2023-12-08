@@ -171,7 +171,7 @@ namespace SwoopLib {
             if (Swoop.fill_background) {
                 Drawing.graphics_device.Clear(Swoop.UI_background_color);
             } else {
-                Drawing.graphics_device.Clear(Color.Transparent);
+                Drawing.graphics_device.Clear(Color.HotPink);
             }
         }
 

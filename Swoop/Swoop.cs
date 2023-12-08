@@ -44,16 +44,28 @@ namespace SwoopLib {
 
         static Game parent = null;
 
-        public static void Initialize(Game parent, XYPair resolution) {
+        public static void Initialize(Game parent, GraphicsDeviceManager gdm, GameWindow window, XYPair resolution) {
             Swoop.parent = parent;
 
             Input.initialize(parent);
             input_handler = new InputHandler();
 
             Swoop._resolution = resolution;
+
+            window.IsBorderless = true;
+            window.Title = "Swoop";
+
+            gdm.PreferMultiSampling = false;
+            gdm.SynchronizeWithVerticalRetrace = true;
+
+            gdm.PreferredBackBufferWidth = resolution.X;
+            gdm.PreferredBackBufferHeight = resolution.Y;
+
+            gdm.ApplyChanges();
+            window.AllowUserResizing = true;
         }
 
-        public static void Load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, XYPair resolution, bool default_window_UI = true) {
+        public static void Load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, GameWindow window, bool default_window_UI = true) {
             Drawing.load(gd, gdm, content, resolution);
             SDF.load(content);
             Swoop.content = content;
@@ -118,19 +130,20 @@ namespace SwoopLib {
 
         public static void Update() {
             Window.is_active = parent.IsActive;
-
+            
             UIElementManager.update_UI_input();
 
             input_handler.update();
 
-            UI.update();            
+            if (enable_draw || Window.resizing_window)
+                UI.update();            
         }
 
         public static void DrawBackground() {
             if (enable_draw) {
                 UI.draw_background();
 
-                if (fill_background && show_logo) {
+                if (/*fill_background &&*/ show_logo) {
                     Drawing.end();
                     Drawing.image(Drawing.Logo,
                         (Swoop.resolution.ToVector2()) - (Drawing.Logo.Bounds.Size.ToVector2() * 0.5f) - (Vector2.One * 8f),

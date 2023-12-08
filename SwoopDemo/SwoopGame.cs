@@ -3,8 +3,6 @@ using MGRawInputLib;
 
 using SwoopLib;
 using SwoopLib.UIElements;
-using swoop = SwoopLib.Swoop;
-using static SwoopLib.UIExterns;
 using SwoopLib.Effects;
 
 using System;
@@ -27,10 +25,9 @@ namespace SwoopDemo {
 
         bool capture_demo_screenshot_on_exit = true;
 
-
         RenderTarget2D output_rt;
 
-        SwoopLib.UIElementManager UI => swoop.UI;
+        UIElementManager UI => Swoop.UI;
 
         public SwoopGame() {
             graphics = new GraphicsDeviceManager(this);
@@ -41,23 +38,11 @@ namespace SwoopDemo {
             this.InactiveSleepTime = System.TimeSpan.Zero;
             this.TargetElapsedTime = System.TimeSpan.FromMilliseconds(1000.0 / target_fps);
             
-            Window.IsBorderless = true;
-            Window.Title = "Swoop";
-
-
-            graphics.PreferMultiSampling = false;
-            graphics.SynchronizeWithVerticalRetrace = true;
-            
-            graphics.PreferredBackBufferWidth = resolution.X;
-            graphics.PreferredBackBufferHeight = resolution.Y;
-
-            graphics.ApplyChanges();
-
-            Window.AllowUserResizing = true;
         }
 
         protected override void Initialize() {
-            swoop.Initialize(this, resolution);
+            Swoop.Initialize(this, graphics, Window, resolution);
+
             fps = new FPSCounter();
             this.Disposed += SwoopGame_Disposed;
             base.Initialize();
@@ -66,13 +51,10 @@ namespace SwoopDemo {
         protected override void LoadContent() {
             output_rt = new RenderTarget2D(GraphicsDevice, resolution.X, resolution.Y);
 
-            swoop.Load(GraphicsDevice, graphics, Content, resolution);
+            Swoop.Load(GraphicsDevice, graphics, Content, Window);
              
             build_UI();
         }
-
-        [DllImport("user32.dll", SetLastError = true)] public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
-        [DllImport("user32.dll")][return: MarshalAs(UnmanagedType.Bool)] static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
         AutoRenderTarget render_target_bg;
         AutoRenderTarget render_target_fg;
@@ -105,7 +87,7 @@ namespace SwoopDemo {
             draw_shader.set_param("main_texture", Drawing.Logo);
 
             draw_shader.set_param("screen_pos_texture", render_target_fg.screen_pos_rt);
-            draw_shader.set_param("screen_texture", swoop.render_target_output);
+            draw_shader.set_param("screen_texture", Swoop.render_target_output);
 
             render_target_bg.draw = () => {
                 Drawing.graphics_device.Clear(Color.Transparent);
@@ -133,7 +115,7 @@ namespace SwoopDemo {
                 Drawing.end();
                 Drawing.begin(draw_shader.effect);
                 draw_shader_passthrough.set_param("tint", Swoop.UI_highlight_color.ToVector3());
-                draw_shader_passthrough.set_param("screen_texture", swoop.render_target_output);
+                draw_shader_passthrough.set_param("screen_texture", Swoop.render_target_output);
                 draw_shader_passthrough.set_param("screen_pos_texture", render_target_fg.screen_pos_rt);
                 draw_shader_passthrough.draw_plane();
                 //Drawing.fill_rect(Vector2.Zero, render_target_fg.size.ToVector2(), Color.White);
@@ -152,7 +134,7 @@ namespace SwoopDemo {
                     output_rt.SaveAsPng(new FileStream("..\\..\\..\\current.png", FileMode.OpenOrCreate), resolution.X, resolution.Y);
                     capture_demo_screenshot_on_exit = false;
                 }
-                swoop.End();
+                Swoop.End();
                 this.Exit();
             };
 
@@ -226,7 +208,7 @@ namespace SwoopDemo {
                 }));
             };
 
-            swoop.resize_end = (XYPair size) => {
+            Swoop.resize_end = (XYPair size) => {
                 resolution = size;
 
                 output_rt.Dispose();
@@ -241,7 +223,7 @@ namespace SwoopDemo {
 
             //current input handler label
             UI.add_element(new Label("ri_info_label",
-                $"{swoop.input_handler.ri_info()}",
+                $"{Swoop.input_handler.ri_info()}",
                 XYPair.One * 20f + (XYPair.UnitX * 300)));
 
             //gjk test panel
@@ -326,7 +308,7 @@ namespace SwoopDemo {
             ((ProgressBar)UI.elements["progress_bar_vertical"]).value = progress_bar_test_value;
             ((ProgressBar)UI.elements["progress_bar_vertical_inverted"]).value = progress_bar_test_value;
 
-            swoop.Update();
+            Swoop.Update();
             StringBuilder sb = new StringBuilder();
 
             string title_text = $"{UIExterns.get_window_title()}";
@@ -336,9 +318,9 @@ namespace SwoopDemo {
             ((TitleBar)UI.elements["title_bar"]).left_text = title_text;
             ((TitleBar)UI.elements["title_bar"]).right_text = FPS_text + " | " +  Input.poll_method;
 
-            ((Label)UI.elements["ri_info_label"]).change_text(swoop.input_handler.ri_info());
+            ((Label)UI.elements["ri_info_label"]).change_text(Swoop.input_handler.ri_info());
 
-            if (swoop.input_handler.is_pressed(Keys.Escape)) ((Button)UI.elements["exit_button"]).click_action();
+            if (Swoop.input_handler.is_pressed(Keys.Escape)) ((Button)UI.elements["exit_button"]).click_action();
 
             fps.update(gameTime);
             base.Update(gameTime);
@@ -346,46 +328,44 @@ namespace SwoopDemo {
 
 
         protected override void Draw(GameTime gameTime) {
-            if (!swoop.enable_draw) {
+            if (!Swoop.enable_draw) {
                 GraphicsDevice.SetRenderTarget(null);
-                swoop.DrawBackground();
+                GraphicsDevice.Clear(Swoop.UI_background_color);
+                //swoop.DrawBackground();
                 base.Draw(gameTime);
                 return;
             }
 
-
+            //draw each of the bg/fg AutoRenderTargets
             AutoRenderTarget.Manager.draw_rts();
 
-            swoop.DrawBackground();
+            //draws the background and logo to the main render target
+            Swoop.DrawBackground();
 
-            Drawing.graphics_device.SetRenderTarget(swoop.render_target_output);
-
+            //update any ManagedEffects which are registered for updates
             ManagedEffect.Manager.do_updates();
-            AutoRenderTarget.Manager.draw_rts_to_target_early();
+            //draw background rts to the main RT
+            AutoRenderTarget.Manager.draw_rts_to_target_background();
 
-            swoop.Draw();
+            //draw the UI
+            Swoop.Draw();
 
+            
             Drawing.graphics_device.SetRenderTarget(output_rt);
+            GraphicsDevice.Clear(Color.HotPink);
 
+            Drawing.image(Swoop.render_target_output, XYPair.Zero, resolution);
 
-            Drawing.image(swoop.render_target_output, XYPair.Zero, resolution);
+            AutoRenderTarget.Manager.draw_rts_to_target_foreground();
 
-
-            Drawing.end();
-
-
-            AutoRenderTarget.Manager.draw_rts_to_target_late();
             GraphicsDevice.SetRenderTarget(null);
             Drawing.image(output_rt, XYPair.Zero, resolution);
-
-
-
 
             base.Draw(gameTime);
         }
 
         private void SwoopGame_Disposed(object sender, System.EventArgs e) {
-            swoop.End();
+            Swoop.End();
         }
     }
 }
