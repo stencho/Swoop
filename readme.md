@@ -41,7 +41,7 @@ This project will not work as-is and requires MGRawInputLib from [MGRawInput](ht
 - Circle SDFs
 - Dithering
 - A 2D GJK implementation
-- Automated RenderTarget2D system. Create an AutoRenderTarget and assign a function to the 'draw' Action. AutoRenderTarget.Manager.register_background_draw() and Manager.register_foreground_draw() allow you to automatically draw the RT to the screen, either above/after or below/before the rest of the UI. AutoRenderTarget.render_target can be used any time, however, and is built at the start of each draw().
+- AutoRenderTarget system, 'draw' Action automatically runs at the start of each draw, and AutoRenderTarget.Manager.un/register_background/foreground_draw() make the renderer automatically draw the RT to the screen, above or below the rest of the UI
 
 
 #### Most current SwoopDemo screenshot
