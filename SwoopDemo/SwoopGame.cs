@@ -157,21 +157,21 @@ namespace SwoopDemo {
             };
 
 
-            UI.add_element(new Label("toggle_label", "a toggle button:", (XYPair.UnitY * 20) + (XYPair.UnitX * 15)));
+            UI.add_element(new Label("toggle_label", "a toggle button:", (XYPair.UnitY * 25) + (XYPair.UnitX * 15)));
 
-            UI.add_element(new ToggleButton("toggle_button", "Toggled On", "Toggled Off", (XYPair.UnitY * 26) + (XYPair.UnitX * 155)));
+            UI.add_element(new ToggleButton("toggle_button", "Toggled On", "Toggled Off", (XYPair.UnitY * 31) + (XYPair.UnitX * 155)));
             UI.elements["toggle_button"].anchor = UIElement.anchor_point.CENTER;
 
 
             UI.add_element(new Button("test_button",
-                "this button should display a test dialog window",
-                (XYPair.UnitY * 40) + (XYPair.UnitX * 15)));
+                "display a test dialog window",
+                (XYPair.UnitY * 45) + (XYPair.UnitX * 15)));
 
             UI.add_element(new Checkbox("test_checkbox", "a checkbox",
-                (XYPair.One * 20) + (XYPair.UnitY * 53)));
+                (XYPair.One * 20) + (XYPair.UnitY * 63)));
 
             UI.add_element(new Checkbox("test_checkbox_ml", "a multi-line-\ntext testing\ncheckbox",
-                (XYPair.One * 20) + (XYPair.UnitY * 40) + (XYPair.UnitX * 89)));
+                (XYPair.One * 20) + (XYPair.UnitY * 50) + (XYPair.UnitX * 89)));
 
 
             UI.add_element(new Button("behind_button",
@@ -253,18 +253,18 @@ namespace SwoopDemo {
 
 
             //radio buttons
-            UI.add_element(new Label("rb_label", "radio buttons", new XYPair(gjk_panel.right + 10, gjk_panel.Y)));
+            UI.add_element(new Label("rb_label", "radio buttons", new XYPair(gjk_panel.right - 3, gjk_panel.Y - 100)));
 
-            RadioButton radio_button_a1 = new RadioButton("rba1", "a1", new XYPair(gjk_panel.right + 15, gjk_panel.Y + 20 ));
-            RadioButton radio_button_a2 = new RadioButton("rba2", "a2", new XYPair(gjk_panel.right + 15, gjk_panel.Y + 20 + 20));
-            RadioButton radio_button_a3 = new RadioButton("rba3", "a3", new XYPair(gjk_panel.right + 15, gjk_panel.Y + 20 + 40));
+            RadioButton radio_button_a1 = new RadioButton("rba1", "a1", new XYPair(gjk_panel.right, gjk_panel.Y -80 ));
+            RadioButton radio_button_a2 = new RadioButton("rba2", "a2", new XYPair(gjk_panel.right, gjk_panel.Y -80 + 20));
+            RadioButton radio_button_a3 = new RadioButton("rba3", "a3", new XYPair(gjk_panel.right, gjk_panel.Y -80 + 40));
 
             RadioButtons.link(radio_button_a1, radio_button_a2, radio_button_a3);
 
 
-            RadioButton radio_button_b1 = new RadioButton("rbb1", "b1", new XYPair(gjk_panel.right + 60, gjk_panel.Y + 20 ));
-            RadioButton radio_button_b2 = new RadioButton("rbb2", "b2", new XYPair(gjk_panel.right + 60, gjk_panel.Y + 20 + 20));
-            RadioButton radio_button_b3 = new RadioButton("rbb3", "b3", new XYPair(gjk_panel.right + 60, gjk_panel.Y + 20 + 40));
+            RadioButton radio_button_b1 = new RadioButton("rbb1", "b1", new XYPair(gjk_panel.right + 40, gjk_panel.Y - 80 ));
+            RadioButton radio_button_b2 = new RadioButton("rbb2", "b2", new XYPair(gjk_panel.right + 40, gjk_panel.Y - 80 + 20));
+            RadioButton radio_button_b3 = new RadioButton("rbb3", "b3", new XYPair(gjk_panel.right + 40, gjk_panel.Y - 80 + 40));
                                                                                                                        
             RadioButtons.link(radio_button_b1, radio_button_b2, radio_button_b3);
 
@@ -273,18 +273,19 @@ namespace SwoopDemo {
 
 
             //progress bars
-            UI.add_element(new Label("pb_label", "progress bars",                   gjk_panel.bottom_xy + (XYPair.Right * 60f) + (XYPair.Down * 3f)));
+            UI.add_element(new Label("pb_label", "progress bars",                   gjk_panel.bottom_xy + (XYPair.Down * 3f)));
 
-            UI.add_element(new ProgressBar("progress_bar", 0.5f,                    gjk_panel.bottom_xy + (XYPair.Right * 60f) + (XYPair.Down * 30f), new XYPair(150, 10)));
+
+            UI.add_element(new ProgressBar("progress_bar", 0.5f,                    gjk_panel.bottom_xy + (XYPair.Right * 50f) + (XYPair.Down * 30f), new XYPair(100, 10)));
             ((ProgressBar)UI.elements["progress_bar"]).text = "normal";
-            UI.add_element(new ProgressBar("progress_bar_inverted", 0.5f,           gjk_panel.bottom_xy + (XYPair.Right * 60f) + (XYPair.Down * 53f), new XYPair(150, 10)));
+            UI.add_element(new ProgressBar("progress_bar_inverted", 0.5f,           gjk_panel.bottom_xy + (XYPair.Right * 50f) + (XYPair.Down * 53f), new XYPair(100, 10)));
             ((ProgressBar)UI.elements["progress_bar_inverted"]).text = "inverted";
             ((ProgressBar)UI.elements["progress_bar_inverted"]).invert = true;
 
-            UI.add_element(new ProgressBar("progress_bar_vertical", 0.5f,           gjk_panel.bottom_xy + (XYPair.Right * 5f) + (XYPair.Down * 5f), new XYPair(10, 100)));
+            UI.add_element(new ProgressBar("progress_bar_vertical", 0.5f,           gjk_panel.bottom_xy + (XYPair.Right * -5f) + (XYPair.Down * 23f), new XYPair(10, 90)));
             ((ProgressBar)UI.elements["progress_bar_vertical"]).text = "normal";
 
-            UI.add_element(new ProgressBar("progress_bar_vertical_inverted", 0.5f,  gjk_panel.bottom_xy + (XYPair.Right * 15f) + (XYPair.Down * 5f) + (XYPair.Right * 15f), new XYPair(10, 100)));
+            UI.add_element(new ProgressBar("progress_bar_vertical_inverted", 0.5f,  gjk_panel.bottom_xy + (XYPair.Right * 5f) + (XYPair.Down * 23f) + (XYPair.Right * 15f), new XYPair(10, 90)));
             ((ProgressBar)UI.elements["progress_bar_vertical_inverted"]).text = "inverted";
 
             ((ProgressBar)UI.elements["progress_bar_vertical"]).vertical = true;
@@ -292,20 +293,23 @@ namespace SwoopDemo {
             ((ProgressBar)UI.elements["progress_bar_vertical_inverted"]).invert = true;
             ((ProgressBar)UI.elements["progress_bar_vertical_inverted"]).vertical = true;
 
+
+
+
             UI.add_element(new ProgressBar("progress_bar_clickable", 0.5f,
                 ((ProgressBar)UI.elements["progress_bar_inverted"]).bottom_xy + (XYPair.Down * 17f),
-                new XYPair(150, 10)));
+                new XYPair(100, 10)));
 
             ((ProgressBar)UI.elements["progress_bar_clickable"]).clickable = true;
             ((ProgressBar)UI.elements["progress_bar_clickable"]).text = "clickable";
 
             UI.add_element(new ProgressBar("progress_bar_clickable_inverted", 0.5f,
                 ((ProgressBar)UI.elements["progress_bar_clickable"]).bottom_xy + (XYPair.Down * 12f),
-                new XYPair(150, 10)));
+                new XYPair(100, 10)));
 
             ((ProgressBar)UI.elements["progress_bar_clickable_inverted"]).invert = true;
             ((ProgressBar)UI.elements["progress_bar_clickable_inverted"]).clickable = true;
-            ((ProgressBar)UI.elements["progress_bar_clickable_inverted"]).text = "clickable inverted";
+            ((ProgressBar)UI.elements["progress_bar_clickable_inverted"]).text = "inverted";
         }
 
         static float progress_bar_test_value = 0.5f;
