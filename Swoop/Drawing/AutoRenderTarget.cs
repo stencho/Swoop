@@ -56,7 +56,7 @@ namespace SwoopLib {
                     if (target != null) target.needs_resize = true;
                 }
             }
-            public static void draw_rts_to_target_early() {
+            public static void draw_rts_to_target_background() {
                 Drawing.end();
 
                 if (targets.Count == 0) return;
@@ -67,7 +67,7 @@ namespace SwoopLib {
                     }
                 }
             }
-            public static void draw_rts_to_target_late() {
+            public static void draw_rts_to_target_foreground() {
                 Drawing.end();
 
                 if (targets.Count == 0) return;
