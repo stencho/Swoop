@@ -28,8 +28,6 @@ namespace SwoopLib
         public static GraphicsDevice graphics_device;
         public static GraphicsDeviceManager graphics;
 
-        internal static RenderTarget2D main_render_target;
-
         public static SpriteFont fnt_profont;
 
         public static Texture2D OnePXWhite;
@@ -47,8 +45,6 @@ namespace SwoopLib
             graphics_device = gd;
             graphics = gdm;
 
-            main_render_target = new RenderTarget2D(graphics_device, resolution.X, resolution.Y,
-                false, SurfaceFormat.Vector4, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
             //create a 1x1 white texture
             OnePXWhite = new Texture2D(gd, 1, 1);
             OnePXWhite.SetData<Color>(new Color[1] { Color.White });

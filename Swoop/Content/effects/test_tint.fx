@@ -30,7 +30,8 @@ sampler2D screen_texture_sampler = sampler_state
     ADDRESSV = CLAMP;
 };
 
-float3 tint = float3(1,1,1);
+float4 tint = float4(1, 1, 1, 1);
+float4 bg = float4(1, 1, 1, 1);
 
 struct VertexShaderOutput
 {
@@ -41,9 +42,14 @@ struct VertexShaderOutput
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
 	float2 screen_pos = tex2D(screen_pos_texture_sampler, input.TextureCoordinates);
-	float4 screen_tex = tex2D(screen_texture_sampler, screen_pos) ;
+	float4 screen_tex = tex2D(screen_texture_sampler, screen_pos);
 
-	return screen_tex * float4(tint, 1);
+    float4 col = bg;
+
+    if (screen_tex.a > 0)
+        col = screen_tex * tint;
+	
+    return col;
 }
 
 technique SpriteDrawing

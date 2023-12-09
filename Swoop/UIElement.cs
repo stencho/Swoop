@@ -123,7 +123,7 @@ namespace SwoopLib {
 
                     if (value) {
                         draw_target = new RenderTarget2D(Drawing.graphics_device, (int)width, (int)height, false, 
-                            SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+                            SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
                     } else {
                         draw_target = null;
                     }
@@ -178,7 +178,7 @@ namespace SwoopLib {
             if (_enable_rt) {
                 draw_target.Dispose();
                 draw_target = new RenderTarget2D(Drawing.graphics_device, (int)width, (int)height, false,
-                    SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PlatformContents);
+                    SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
                 GC.Collect();
             }
         }

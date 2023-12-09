@@ -10,6 +10,8 @@ using Microsoft.Xna.Framework.Graphics;
 namespace SwoopLib {
 
     public class UIElementManager {
+        public RenderTarget2D render_target;
+
         //STATIC
         static List<UIElementManager> managers = new List<UIElementManager>();
 
@@ -56,11 +58,29 @@ namespace SwoopLib {
         public bool in_dialog => !string.IsNullOrEmpty(dialog_element);
 
         public XYPair position;
-        public XYPair size;
+        XYPair _size;
+        public XYPair size {
+            get { return _size; }
+            set {
+                if (_size != value) {
+                    _size = value;
+                    resize_rt();
+                }
+            }
+        }
+
+        void resize_rt() {
+            if (render_target != null) render_target.Dispose();
+            render_target = new RenderTarget2D(Drawing.graphics_device, _size.X, _size.Y,
+                false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);            
+        }
 
         public UIElementManager(XYPair pos, XYPair size) {
             this.position = pos;
             this.size = size;
+
+
+            resize_rt();
 
             add_manager(this);
         }
@@ -166,7 +186,6 @@ namespace SwoopLib {
         }
 
         public void draw_background() {
-            Drawing.graphics_device.SetRenderTarget(Drawing.main_render_target);
 
             if (Swoop.fill_background) {
                 Drawing.graphics_device.Clear(Swoop.UI_background_color);
@@ -176,6 +195,8 @@ namespace SwoopLib {
         }
 
         public void draw() {
+            Drawing.graphics_device.SetRenderTarget(render_target);
+            Drawing.graphics_device.Clear(Color.Transparent);
 
             foreach (string k in elements.Keys) {
                 if (in_dialog && k == dialog_element) continue;
@@ -197,7 +218,7 @@ namespace SwoopLib {
             
             Drawing.end();
 
-            Drawing.graphics_device.SetRenderTarget(Drawing.main_render_target);
+            Drawing.graphics_device.SetRenderTarget(render_target);
             foreach (string k in elements.Keys) {
                 if (k == dialog_element) continue;
                 if (elements[k].ignore_dialog) continue;
@@ -218,13 +239,13 @@ namespace SwoopLib {
             }
 
             if (in_dialog) {
-                Drawing.graphics_device.SetRenderTarget(Drawing.main_render_target);
+                Drawing.graphics_device.SetRenderTarget(render_target);
                 Drawing.end();
                 elements[dialog_element].draw();
             }
             
             if (Swoop.draw_UI_border) {
-                Drawing.rect(Vector2.Zero, Drawing.main_render_target.Bounds.Size.ToVector2(), Swoop.UI_color, 2f);
+                Drawing.rect(Vector2.Zero, render_target.Bounds.Size.ToVector2(), Swoop.UI_color, 2f);
             }
         }
     }

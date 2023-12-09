@@ -37,7 +37,6 @@ namespace SwoopDemo {
             this.IsFixedTimeStep = true;
             this.InactiveSleepTime = System.TimeSpan.Zero;
             this.TargetElapsedTime = System.TimeSpan.FromMilliseconds(1000.0 / target_fps);
-            
         }
 
         protected override void Initialize() {
@@ -49,7 +48,7 @@ namespace SwoopDemo {
         }
 
         protected override void LoadContent() {
-            output_rt = new RenderTarget2D(GraphicsDevice, resolution.X, resolution.Y);
+            output_rt = new RenderTarget2D(GraphicsDevice, resolution.X, resolution.Y, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
 
             Swoop.Load(GraphicsDevice, graphics, Content, Window);
              
@@ -58,17 +57,20 @@ namespace SwoopDemo {
 
         AutoRenderTarget render_target_bg;
         AutoRenderTarget render_target_fg;
-        DrawShaded3DPlane draw_shader;
-        DrawShaded3DPlane draw_shader_passthrough;
+
+        ShadedQuadWVP draw_shader;
+        ShadedQuadWVP tint_effect;
+
+
         protected void build_UI() {
             render_target_bg = new AutoRenderTarget(resolution.X_only - (resolution.X_only / 4.5f) + ((UI.elements["title_bar"].height + 30) * XYPair.UnitY), resolution / 5);
-            render_target_fg = new AutoRenderTarget(resolution.X_only - (resolution.X_only / 4.5f) + ((UI.elements["title_bar"].height + 167) * XYPair.UnitY), resolution / 5);
+            render_target_fg = new AutoRenderTarget(resolution.X_only - (resolution.X_only / 4.5f) + ((UI.elements["title_bar"].height + 167) * XYPair.UnitY), resolution / 5 - (XYPair.UnitY * ((resolution / 5) / 2) ));
 
             AutoRenderTarget.Manager.register_background_draw(render_target_bg);
             AutoRenderTarget.Manager.register_foreground_draw(render_target_fg);
 
-            draw_shader = new DrawShaded3DPlane(Swoop.content, "draw_2d");
-            draw_shader_passthrough = new DrawShaded3DPlane(Swoop.content, "test_tint");
+            draw_shader = new ShadedQuadWVP(Swoop.content, "draw_2d");
+            tint_effect = new ShadedQuadWVP(Swoop.content, "test_tint");
 
             UI.add_element(new Label("test_3d_label", "auto render target tests\n3D plane > rt > background\n this text is in front and\n part of the above label", (resolution.X_only - (resolution.X_only / 4.5f)) + ((UI.elements["title_bar"].height + 5) * XYPair.UnitY)));
 
@@ -90,12 +92,11 @@ namespace SwoopDemo {
             draw_shader.set_param("screen_texture", Swoop.render_target_output);
 
             render_target_bg.draw = () => {
-                Drawing.graphics_device.Clear(Color.Transparent);
-
                 Drawing.image(render_target_bg.screen_pos_rt, XYPair.Zero, render_target_bg.size);
 
                 Drawing.graphics_device.RasterizerState = RasterizerState.CullNone;
 
+                draw_shader.set_param("main_texture", Drawing.Logo);
                 draw_shader.draw_plane();
 
                 Drawing.end();
@@ -106,23 +107,16 @@ namespace SwoopDemo {
             };
 
             render_target_fg.draw = () => {
-                Drawing.graphics_device.Clear(Swoop.UI_background_color);
-
-                //Drawing.image(render_target_fg.screen_pos_rt, XYPair.Zero, render_target_fg.size);
-
-                //Drawing.graphics_device.RasterizerState = RasterizerState.CullNone;
 
                 Drawing.end();
-                Drawing.begin(draw_shader.effect);
-                draw_shader_passthrough.set_param("tint", Swoop.UI_highlight_color.ToVector3());
-                draw_shader_passthrough.set_param("screen_texture", Swoop.render_target_output);
-                draw_shader_passthrough.set_param("screen_pos_texture", render_target_fg.screen_pos_rt);
-                draw_shader_passthrough.draw_plane();
-                //Drawing.fill_rect(Vector2.Zero, render_target_fg.size.ToVector2(), Color.White);
-                //draw_shader.set_param("texture", trt.screen_pos_rt);
-                //draw_shader.draw_plane();
 
-                Drawing.end();
+                tint_effect.set_param("tint", Swoop.UI_highlight_color.ToVector4());
+                tint_effect.set_param("bg", Swoop.UI_background_color.ToVector4());
+                tint_effect.set_param("screen_texture", Swoop.render_target_output);
+                tint_effect.set_param("screen_pos_texture", render_target_fg.screen_pos_rt);
+
+                tint_effect.draw_plane();
+
                 Drawing.rect(XYPair.One, render_target_fg.size, Swoop.UI_color, 1f);
 
                 Drawing.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
@@ -212,7 +206,7 @@ namespace SwoopDemo {
                 resolution = size;
 
                 output_rt.Dispose();
-                output_rt = new RenderTarget2D(GraphicsDevice, resolution.X, resolution.Y);
+                output_rt = new RenderTarget2D(GraphicsDevice, resolution.X, resolution.Y, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
 
                 graphics.PreferredBackBufferWidth = resolution.X;
                 graphics.PreferredBackBufferHeight = resolution.Y;
@@ -277,7 +271,6 @@ namespace SwoopDemo {
 
 
 
-
             UI.add_element(new ProgressBar("progress_bar_clickable", 0.5f,
                 ((ProgressBar)UI.elements["progress_bar_inverted"]).bottom_xy + (XYPair.Down * 17f),
                 new XYPair(100, 10)));
@@ -326,8 +319,12 @@ namespace SwoopDemo {
             base.Update(gameTime);
         }
 
+        ShadedQuad test;
 
         protected override void Draw(GameTime gameTime) {
+            if (test == null) test = new ShadedQuad(Content, "draw_2d", XYPair.One * 100, XYPair.One * 100);
+            
+
             if (!Swoop.enable_draw) {
                 GraphicsDevice.SetRenderTarget(null);
                 GraphicsDevice.Clear(Swoop.UI_background_color);
@@ -336,30 +333,29 @@ namespace SwoopDemo {
                 return;
             }
 
-            //draw each of the bg/fg AutoRenderTargets
-            AutoRenderTarget.Manager.draw_rts();
-
-            //draws the background and logo to the main render target
-            Swoop.DrawBackground();
-
             //update any ManagedEffects which are registered for updates
             ManagedEffect.Manager.do_updates();
-            //draw background rts to the main RT
-            AutoRenderTarget.Manager.draw_rts_to_target_background();
 
             //draw the UI
             Swoop.Draw();
 
-            
-            Drawing.graphics_device.SetRenderTarget(output_rt);
-            GraphicsDevice.Clear(Color.HotPink);
+            //draw each of the bg/fg AutoRenderTargets
+            AutoRenderTarget.Manager.draw_rts();
 
+            GraphicsDevice.SetRenderTarget(output_rt);
+            GraphicsDevice.Clear(Color.Transparent);
+            //Draw the UI to an output RT
+            //this is not required, but it makes screenshots easier
+            Swoop.DrawBackground();
+            AutoRenderTarget.Manager.draw_rts_to_target_background();
             Drawing.image(Swoop.render_target_output, XYPair.Zero, resolution);
-
             AutoRenderTarget.Manager.draw_rts_to_target_foreground();
 
             GraphicsDevice.SetRenderTarget(null);
             Drawing.image(output_rt, XYPair.Zero, resolution);
+
+            test.set_param("main_texture", Drawing.OnePXWhite);
+            test.draw_plane(Swoop.resolution);
 
             base.Draw(gameTime);
         }

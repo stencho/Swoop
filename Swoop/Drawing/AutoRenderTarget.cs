@@ -45,6 +45,7 @@ namespace SwoopLib {
                 foreach (AutoRenderTarget target in targets) {
                     Drawing.end();
                     Drawing.graphics_device.SetRenderTarget(target.render_target);
+                    Drawing.graphics_device.Clear(Color.Transparent);
                     if (target.draw != null) {
                         target.draw();
                     }
@@ -154,7 +155,6 @@ namespace SwoopLib {
             Drawing.end();
 
             Drawing.graphics_device.SetRenderTarget(screen_pos_rt);
-            Drawing.graphics_device.Clear(Color.Black);
 
             Drawing.begin(screen_pos_effect);
 

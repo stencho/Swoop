@@ -38,7 +38,7 @@ Currently mostly a big ol mess, does not work straight out of the box. Looks bet
 - Element focus system, with element-specific keyboard handling for the currently focused element (focus a checkbox and press enter or space, it will switch state)
 - High poll rate, multi-threaded, RawInput-based mouse and keyboard support (with MonoGame as a fallback input handler, also managed in a way which supports multi-threading)
 - AutoRenderTarget, 'draw' Action automatically runs at the start of each draw, and AutoRenderTarget.Manager.(un)register_background/foreground_draw() make the renderer automatically draw the RT to the screen, above or below the rest of the UI
-- ManagedEffect class to make implementing and dealing with pixel shaders far less annoying. Also capable of drawing simple 3D models, and the DrawShaded3DPlane class uses this to draw an arbitrary pixel shader to a 3D plane
+- ManagedEffect class to make implementing and dealing with pixel shaders far less annoying. Also capable of drawing simple 3D models, and the ShadedQuad/ShadedQuadWVP classes uses this to draw an arbitrary pixel shader to a 3D plane
 - Easy to use drawing library for images, text, and 2D primitives
 - 2D image-based SDFs and Circle SDFs
 - A 2D GJK implementation

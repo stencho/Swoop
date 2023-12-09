@@ -65,6 +65,7 @@ namespace SwoopLib.Effects {
             } else if (t == typeof(Texture2D)) shader.Parameters[param].SetValue((Texture2D)obj);
             else if (t == typeof(TextureCube)) shader.Parameters[param].SetValue((TextureCube)obj);
             else if (t == typeof(RenderTarget2D)) shader.Parameters[param].SetValue((RenderTarget2D)obj);
+            else { throw new Exception("Bad shader object type"); }
         }
 
         public virtual void begin_spritebatch(SpriteBatch sb) {
@@ -73,7 +74,17 @@ namespace SwoopLib.Effects {
             Drawing.sb_drawing = true;
         }
 
-        
+        public virtual void draw(XYPair position, XYPair size) {
+            begin_spritebatch(Drawing.sb);
+            Drawing.sb.Draw(Drawing.OnePXWhite, new Rectangle(position.ToPoint(), size.ToPoint()), Color.Transparent);
+            Drawing.end();
+        }
+        public virtual void draw_texture(Texture2D texture, XYPair position, XYPair size) {
+            begin_spritebatch(Drawing.sb);
+            Drawing.sb.Draw(texture, new Rectangle(position.ToPoint(), size.ToPoint()), Color.White);
+            Drawing.end();
+        }
+
         public ManagedEffect() {
             basic_effect = new BasicEffect(Drawing.graphics_device);
             
@@ -92,7 +103,7 @@ namespace SwoopLib.Effects {
             basic_effect.World = world;
             basic_effect.View = view;
             basic_effect.Projection = projection;
-            
+            basic_effect.Texture = Drawing.OnePXWhite;
 
             Drawing.graphics_device.SetVertexBuffer(vb);
             Drawing.graphics_device.Indices = ib;

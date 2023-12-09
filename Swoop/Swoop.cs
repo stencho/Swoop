@@ -31,7 +31,7 @@ namespace SwoopLib {
 
         static XYPair _resolution;
         public static XYPair resolution => _resolution;
-        public static RenderTarget2D render_target_output => Drawing.main_render_target;
+        public static RenderTarget2D render_target_output => UI.render_target;
         
 
         public static bool fill_background { get; set; } = true;
@@ -62,16 +62,20 @@ namespace SwoopLib {
             gdm.PreferredBackBufferHeight = resolution.Y;
 
             gdm.ApplyChanges();
+
             window.AllowUserResizing = true;
+
         }
 
         public static void Load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, GameWindow window, bool default_window_UI = true) {
             Drawing.load(gd, gdm, content, resolution);
             SDF.load(content);
+            GraphicsDevice.DiscardColor = Color.Transparent;
             Swoop.content = content;
             UI = new UIElementManager(XYPair.Zero, resolution);
             if (default_window_UI)
                 build_default_UI();
+            
         }
 
         public static void build_default_UI() {
@@ -159,7 +163,7 @@ namespace SwoopLib {
                 UI.draw();
 
             } else {
-                Drawing.graphics_device.SetRenderTarget(Drawing.main_render_target);
+                Drawing.graphics_device.SetRenderTarget(UI.render_target);
                 Drawing.graphics_device.Clear(Color.Transparent);                
             }
         }
@@ -171,9 +175,6 @@ namespace SwoopLib {
         public static void change_resolution(XYPair resolution) {
             Swoop._resolution = resolution;
             UI.size = Swoop._resolution;
-            Drawing.main_render_target.Dispose();
-            Drawing.main_render_target = new RenderTarget2D(Drawing.graphics_device, Swoop._resolution.X, Swoop._resolution.Y,
-                false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
             GC.Collect();
         }
     }
