@@ -125,17 +125,19 @@ namespace SwoopLib {
             needs_resize = false;
         }
 
-        public AutoRenderTarget(XYPair position, XYPair size) {
-            _position = position; _size = size;            
+        public AutoRenderTarget(XYPair position, XYPair size, bool screen_aware = true) {
+            _position = position; _size = size;
+            this.screen_aware = screen_aware;
             init();
         }
 
         public AutoRenderTarget() {
+            screen_aware = false;
             init();
         }
-        public AutoRenderTarget(XYPair size) {
+        public AutoRenderTarget(XYPair size, bool screen_aware = false) {
             _position = XYPair.Zero; _size = size;
-            screen_aware = false;
+            this.screen_aware = screen_aware;
             init();
         }
 

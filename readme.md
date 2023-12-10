@@ -35,16 +35,16 @@ Currently mostly a big ol mess, does not work straight out of the box. Looks bet
 - UIElements are simple to build, fully aware of mouse state, and can automatically draw all of their contents to a RenderTarget2D by setting a bool, to avoid things like text spilling out of boxes
 - Element focus system, with element-specific keyboard handling for the currently focused element (focus a checkbox and press enter or space, it will switch state)
 - High poll rate, multi-threaded, RawInput-based mouse and keyboard support (with MonoGame as a fallback input handler, also managed in a way which supports multi-threading)
-- AutoRenderTarget, 'draw' Action automatically runs at the start of each draw, and AutoRenderTarget.Manager.(un)register_background/foreground_draw() make the renderer automatically draw the RT to the screen, above or below the rest of the UI
+- AutoRenderTarget, 'draw' Action automatically runs at the start of each draw, and AutoRenderTarget.Manager.(un)register_background/foreground_draw() make the renderer automatically draw the RT to the screen, above or below the rest of the UI. Also allows any shaders drawn to ARTs which are being drawn in the foreground to access the screen's pixels (via a screen position UV map)
 - Easy to use drawing library for images, text, and 2D primitives
 - ManagedEffect class to make implementing and dealing with pixel shaders far less annoying. Also capable of drawing simple 3D models, and the ShadedQuad/ShadedQuadWVP classes uses this to draw an arbitrary pixel shader to a 3D plane
-- 2D image-based SDFs, as well as a pixel-perfect SDF-based circle shader
+- 2D image-based SDFs, as well as a pixel-perfect SDF-based circle drawing shader
 - A 2D GJK implementation (might eventually finish adding EPA, might even add move/slide collision resolution in the future)
 
 ##### MGRawInputLib
-This is probably actually useful on its own.
+This is actually useful on its own.
 
-MGRawInputLib provides the Input and InputHandler classes, as well as a handful of implementations of WinAPI externs to handle window moving and resizing. 
+MGRawInputLib provides the Input and InputHandler classes, as well as implementations of WinAPI externs to handle window moving and resizing. 
 
 The Input class runs a thread which regularly polls the RawInput or MonoGame APIs. It captures all changes in mouse/keyboard input in whichever API it's currently watching, and lets all InputHandlers know what those changes are. The InputHandler's parent class can then, for example, check mouse movement/scroll deltas, with any amount of time in between checks, and get an accurate delta since that class's last check.
 

@@ -35,7 +35,7 @@ namespace SwoopLib.Effects {
         /// <param name="color_a"></param>
         /// <param name="color_b"></param>
         public InvertingText(ContentManager content, string text) {
-            render_target = new AutoRenderTarget();
+            //render_target = new AutoRenderTarget();
             this.text = text;
 
             load_shader_file(content, "effects/two_color_flip");
