@@ -18,6 +18,10 @@ namespace SwoopLib {
             if (element.focused) return UI_highlight_color;
             else return UI_color;
         }
+        public static Color get_color_inverse(UIElement element) {
+            if (!element.focused) return UI_highlight_color;
+            else return UI_color;
+        }
 
         public static Color UI_color = Color.White;
         public static Color UI_highlight_color = Color.FromNonPremultiplied(235, 140, 195, 255);

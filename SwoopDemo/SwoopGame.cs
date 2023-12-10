@@ -74,7 +74,7 @@ namespace SwoopDemo {
             draw_shader = new ShadedQuadWVP(Swoop.content, "draw_2d");
             tint_effect = new ShadedQuadWVP(Swoop.content, "test_tint");
 
-            UI.add_element(new Label("test_3d_label", "auto render target tests\n3D plane > rt > background\n this text is in front and\n part of the above label", (resolution.X_only - (resolution.X_only / 4.5f)) + ((UI.elements["title_bar"].height + 5) * XYPair.UnitY)));
+            UI.add_element(new Label("test_3d_label", "AutoRenderTarget tests\n3D plane > rt > background\n this text is in front and\n part of the above label", (resolution.X_only - (resolution.X_only / 4.5f)) + ((UI.elements["title_bar"].height + 5) * XYPair.UnitY)));
 
             UI.add_element(new Label("test_3d_label_2", "shader > rt > foreground", (resolution.X_only - (resolution.X_only / 4.5f)) + ((UI.elements["title_bar"].height + 155) * XYPair.UnitY)));
             UI.add_element(new Label("test_3d_label_3", "this text is behind the top\nrt layer and being passed\nthrough via a shader which is\naware of each pixel's screen\nposition, so it can pull data\nfrom the main screen render\ntarget and tint it for example\nwheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", 
@@ -318,7 +318,8 @@ namespace SwoopDemo {
             test_listbox.add_item(new ListBoxItem("a third test\nthis time it's multiline\nlol"));
             test_listbox.add_item(new ListBoxItem(50, (XYPair position, XYPair size) => {
                 Drawing.fill_rect_dither(XYPair.Zero, size, Swoop.UI_background_color, Swoop.UI_color);
-                Drawing.text_shadow("BIG HEFTY CUSTOM DRAW", Vector2.One * 20, Color.Red);
+                Drawing.fill_rect(Vector2.One * 18, Vector2.One * 22 + Drawing.measure_string_profont_xy("BIG HEFTY CUSTOM DRAW"), Swoop.UI_background_color);
+                Drawing.text("BIG HEFTY CUSTOM DRAW", Vector2.One * 20, Color.Red);
             }));
             test_listbox.add_item(new ListBoxItem("here comes some random spam!"));
 
