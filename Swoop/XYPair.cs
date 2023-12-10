@@ -89,6 +89,17 @@ namespace SwoopLib {
             return (int)Math.Sqrt(x2 + y2);
         }
 
+        public static XYPair clamp(XYPair input, XYPair min, XYPair max) {
+            XYPair output = input;
+
+            if (output.X < min.X) output.X = min.X;
+            if (output.X > max.X) output.X = max.X;
+            if (output.Y < min.Y) output.Y = min.Y;
+            if (output.Y > max.Y) output.Y = max.Y;
+
+            return output;
+        }
+
         public static explicit operator XYPair(Vector2 v) {
             return new XYPair((int)v.X, (int)v.Y);
         }

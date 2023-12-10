@@ -109,7 +109,7 @@ namespace SwoopLib {
         public bool click_through { get; set; } = false;
 
         public XYPair mouse_relative => Swoop.input_handler.mouse_position.ToXYPair() - this.position;
-        
+
         bool _enable_rt = false;
         public bool enable_render_target {
             get {
