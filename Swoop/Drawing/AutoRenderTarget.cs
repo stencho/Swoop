@@ -39,6 +39,7 @@ namespace SwoopLib {
                     if (target.needs_resize) target.resize_render_targets();
                 }
                 foreach (AutoRenderTarget target in targets) {
+                    if (!target.screen_aware) continue;
                     if (target.needs_new_pos_map) target.draw_screen_pos_map();
                 }
 
@@ -46,8 +47,8 @@ namespace SwoopLib {
                     Drawing.end();
                     Drawing.graphics_device.SetRenderTarget(target.render_target);
                     Drawing.graphics_device.Clear(Color.Transparent);
-                    if (target.draw != null) {
-                        target.draw();
+                    if (target.draw != null && target.render_target != null) {
+                        target.draw(target.position, target.size);
                     }
                 }
             }
@@ -84,6 +85,8 @@ namespace SwoopLib {
 
         static Effect screen_pos_effect;
 
+        public Action<XYPair, XYPair> draw;
+
         public RenderTarget2D render_target;
         public RenderTarget2D screen_pos_rt;
 
@@ -104,8 +107,10 @@ namespace SwoopLib {
             } set { _size = value; request_rt_resize(); } 
         }
         
-        internal bool draw_to_screen_early = true;
+        internal bool draw_to_screen_early = false;
         internal bool draw_to_screen_late = false;
+
+        internal bool screen_aware = true;
 
         bool needs_resize = true;
         void request_rt_resize() {
@@ -116,7 +121,7 @@ namespace SwoopLib {
             render_target = new RenderTarget2D(Drawing.graphics_device, size.X, size.Y, false, SurfaceFormat.Vector4, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
             screen_pos_rt = new RenderTarget2D(Drawing.graphics_device, size.X, size.Y, false, SurfaceFormat.Vector2, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
 
-            draw_screen_pos_map();
+            if (screen_aware) draw_screen_pos_map();
             needs_resize = false;
         }
 
@@ -128,6 +133,11 @@ namespace SwoopLib {
         public AutoRenderTarget() {
             init();
         }
+        public AutoRenderTarget(XYPair size) {
+            _position = XYPair.Zero; _size = size;
+            screen_aware = false;
+            init();
+        }
 
 
         void init() {
@@ -136,8 +146,6 @@ namespace SwoopLib {
             if (screen_pos_effect == null) screen_pos_effect = Swoop.content.Load<Effect>("effects/render_target_screen_pos");
 
             draw_screen_pos_map();
-
-
         }
 
         ~AutoRenderTarget() {
@@ -168,6 +176,5 @@ namespace SwoopLib {
             needs_new_pos_map = false;
         }
 
-        public Action draw;
     }
 }

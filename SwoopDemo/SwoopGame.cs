@@ -13,6 +13,7 @@ using Microsoft.Xna.Framework.Input;
 
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace SwoopDemo {
     public class SwoopGame : Game {
@@ -29,6 +30,11 @@ namespace SwoopDemo {
 
         UIElementManager UI => Swoop.UI;
 
+        AutoRenderTarget render_target_bg;
+        AutoRenderTarget render_target_fg;
+
+        ShadedQuadWVP draw_shader;
+        ShadedQuadWVP tint_effect;
         public SwoopGame() {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
@@ -55,11 +61,6 @@ namespace SwoopDemo {
             build_UI();
         }
 
-        AutoRenderTarget render_target_bg;
-        AutoRenderTarget render_target_fg;
-
-        ShadedQuadWVP draw_shader;
-        ShadedQuadWVP tint_effect;
 
 
 
@@ -92,7 +93,7 @@ namespace SwoopDemo {
             draw_shader.set_param("screen_pos_texture", render_target_fg.screen_pos_rt);
             draw_shader.set_param("screen_texture", Swoop.render_target_output);
 
-            render_target_bg.draw = () => {
+            render_target_bg.draw = (XYPair position, XYPair size) => {
                 Drawing.image(render_target_bg.screen_pos_rt, XYPair.Zero, render_target_bg.size);
 
                 Drawing.graphics_device.RasterizerState = RasterizerState.CullNone;
@@ -107,7 +108,7 @@ namespace SwoopDemo {
                 Drawing.graphics_device.DepthStencilState = DepthStencilState.Default;
             };
 
-            render_target_fg.draw = () => {
+            render_target_fg.draw = (XYPair position, XYPair size) => {
 
                 Drawing.end();
 
@@ -227,11 +228,11 @@ namespace SwoopDemo {
 
             var gjk_panel = UI.elements["gjk_panel"];
 
-            UI.add_element(new Label("gjk_label", "gjk", gjk_panel.position + XYPair.Up * 15));
+            UI.add_element(new Label("gjk_label", "GJK", gjk_panel.position + XYPair.Up * 15));
 
 
             //radio buttons
-            UI.add_element(new Label("rb_label", "radio buttons", new XYPair(gjk_panel.right - 3, gjk_panel.Y - 100)));
+            UI.add_element(new Label("rb_label", "Radio Buttons", new XYPair(gjk_panel.right - 3, gjk_panel.Y - 100)));
 
             RadioButton radio_button_a1 = new RadioButton("rba1", "a1", new XYPair(gjk_panel.right, gjk_panel.Y -80 ));
             RadioButton radio_button_a2 = new RadioButton("rba2", "a2", new XYPair(gjk_panel.right, gjk_panel.Y -80 + 20));
@@ -251,7 +252,7 @@ namespace SwoopDemo {
 
 
             //progress bars
-            UI.add_element(new Label("pb_label", "progress bars",                   gjk_panel.bottom_xy + (XYPair.Down * 3f)));
+            UI.add_element(new Label("pb_label", "Progress Bars",                   gjk_panel.bottom_xy + (XYPair.Down * 3f)));
 
 
             UI.add_element(new ProgressBar("progress_bar", 0.5f,                    gjk_panel.bottom_xy + (XYPair.Right * 100f) + (XYPair.Down * 30f), new XYPair(100, 10)));
@@ -308,6 +309,35 @@ namespace SwoopDemo {
             ((ProgressBar)UI.elements["progress_bar_clickable_vertical_inverted"]).invert = true;
             ((ProgressBar)UI.elements["progress_bar_clickable_vertical_inverted"]).clickable = true;
             ((ProgressBar)UI.elements["progress_bar_clickable_vertical_inverted"]).text = "clickable inv";
+
+            UI.add_element(new Label("listbox_label", "ListBox", gjk_panel.right_xy + (XYPair.UnitX * 10) - (XYPair.UnitY * 15)));
+
+            ListBox test_listbox = new ListBox("test_listbox", gjk_panel.right_xy + (XYPair.UnitX * 10) + (XYPair.UnitY * 1), new XYPair(200, 320));
+            test_listbox.add_item(new ListBoxItem("test"));
+            test_listbox.add_item(new ListBoxItem("a second test"));
+            test_listbox.add_item(new ListBoxItem("a third test\nthis time it's multiline\nlol"));
+            test_listbox.add_item(new ListBoxItem(50, (XYPair position, XYPair size) => {
+                Drawing.fill_rect_dither(XYPair.Zero, size, Swoop.UI_background_color, Swoop.UI_color);
+                Drawing.text_shadow("BIG HEFTY CUSTOM DRAW", Vector2.One * 20, Color.Red);
+            }));
+            test_listbox.add_item(new ListBoxItem("here comes some random spam!"));
+
+            for (int i = 0; i < 25; i++) {
+                var lbi = new ListBoxItem(RandomNumberGenerator.GetHexString(RandomNumberGenerator.GetInt32(10, 55)));
+                string t = lbi.text;
+
+                int nl = RandomNumberGenerator.GetInt32(0, 3);
+                
+                for (int n = 0; n < nl; n++) {
+                    int nl_pos = RandomNumberGenerator.GetInt32(t.Length-2);
+                    t=t.Insert(nl_pos, "\n");
+                }
+                lbi.text = t;
+                test_listbox.add_item(lbi); 
+            }
+            //ListBox
+            UI.add_element(test_listbox);
+
         }
 
         static float progress_bar_test_value = 0.5f;
