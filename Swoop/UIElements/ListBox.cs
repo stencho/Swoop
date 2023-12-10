@@ -206,9 +206,8 @@ namespace SwoopLib.UIElements {
         internal override void update() {
             handler.update();
             if (mouse_over) {
-                var delta = handler.rawinput_mouse_state.ScrollDelta;
+                var delta = handler.scroll_delta;
                 scroll_position -= delta / 6f;
-
                 if (top_position_fract < 0f) {
                     scroll_position = 0f;
 

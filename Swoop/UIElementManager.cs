@@ -111,7 +111,7 @@ namespace SwoopLib {
         public void update() {
             bool click_hit = false;
             bool mouse_over_hit = false;
-            bool mouse_down = Input.is_pressed(InputStructs.MouseButtons.Left);
+            bool mouse_down = Input.is_pressed(MouseButtons.Left);
 
             if (in_dialog) {
                 if (elements[dialog_element].click_update(position, size, mouse_over_hit)) {

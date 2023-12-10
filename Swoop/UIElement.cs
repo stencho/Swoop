@@ -156,10 +156,10 @@ namespace SwoopLib {
                     manager_position + position + (size - XYPair.One));
 
             mouse_was_down = mouse_down;
-            mouse_down = Input.is_pressed(InputStructs.MouseButtons.Left);
+            mouse_down = Input.is_pressed(MouseButtons.Left);
 
             right_mouse_was_down = right_mouse_down;
-            right_mouse_down = Input.is_pressed(InputStructs.MouseButtons.Right);
+            right_mouse_down = Input.is_pressed(MouseButtons.Right);
             
             was_clicking = clicking;
 

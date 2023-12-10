@@ -87,11 +87,11 @@ namespace SwoopLib.UIElements {
             if (mouse_over) {
                 var sd = Swoop.input_handler.rawinput_mouse_state.ScrollDelta;
 
-                if (Swoop.input_handler.is_pressed(InputStructs.MouseButtons.ScrollUp)) {
+                if (Swoop.input_handler.is_pressed(MouseButtons.ScrollUp)) {
                     if (cursor.radius < 30)
                         cursor.radius += sd / 120;
                     else cursor.radius = 30;
-                } else if (Swoop.input_handler.is_pressed(InputStructs.MouseButtons.ScrollDown)) {
+                } else if (Swoop.input_handler.is_pressed(MouseButtons.ScrollDown)) {
                     if (cursor.radius > 5)
                         cursor.radius += sd / 120;
                     else cursor.radius = 5;

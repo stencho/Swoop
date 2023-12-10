@@ -18,9 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="MGRawInputLib">
-      <HintPath>..\..\MGRawInput\MGRawInputLib\bin\Debug\net7.0\MGRawInputLib.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\MGRawInputLib\MGRawInputLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="MonoGame.Framework">
       <HintPath>..\..\MonoGame\MonoGame\Artifacts\MonoGame.Framework\DesktopGL\Debug\MonoGame.Framework.dll</HintPath>
     </Reference>

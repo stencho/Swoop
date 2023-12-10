@@ -21,7 +21,7 @@
     <EmbeddedResource Include="Icon.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\MGRawInput\MGRawInputLib\MGRawInputLib.csproj" />
+    <ProjectReference Include="..\MGRawInputLib\MGRawInputLib.csproj" />
     <ProjectReference Include="..\Swoop\SwoopLib.csproj" />
   </ItemGroup>
   <ItemGroup>

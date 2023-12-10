@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SwoopDemo", "SwoopDemo\Swoo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SwoopLib", "Swoop\SwoopLib.csproj", "{929F7A82-4567-4191-BB4E-2949C716C211}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MGRawInputLib", "..\MGRawInput\MGRawInputLib\MGRawInputLib.csproj", "{AD91C91F-E2DE-42E9-A52C-D1BFC92A8211}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MGRawInputLib", "MGRawInputLib\MGRawInputLib.csproj", "{795B2BE7-4B5B-45A2-9E23-0DC6F6AA0357}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{929F7A82-4567-4191-BB4E-2949C716C211}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{929F7A82-4567-4191-BB4E-2949C716C211}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{929F7A82-4567-4191-BB4E-2949C716C211}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AD91C91F-E2DE-42E9-A52C-D1BFC92A8211}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AD91C91F-E2DE-42E9-A52C-D1BFC92A8211}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AD91C91F-E2DE-42E9-A52C-D1BFC92A8211}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AD91C91F-E2DE-42E9-A52C-D1BFC92A8211}.Release|Any CPU.Build.0 = Release|Any CPU
+		{795B2BE7-4B5B-45A2-9E23-0DC6F6AA0357}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{795B2BE7-4B5B-45A2-9E23-0DC6F6AA0357}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{795B2BE7-4B5B-45A2-9E23-0DC6F6AA0357}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{795B2BE7-4B5B-45A2-9E23-0DC6F6AA0357}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
