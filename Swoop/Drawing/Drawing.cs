@@ -37,7 +37,7 @@ namespace SwoopLib
         private static int sdf_circle_res = 256;
 
         static Effects.Dither dither_effect;
-        static Effects.TwoColorFlip color_flip_effect;
+        static Effects.InvertingText color_flip_effect;
 
         public static void load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, XYPair resolution) {
             sb = new SpriteBatch(gd);
