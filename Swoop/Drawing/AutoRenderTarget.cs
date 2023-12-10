@@ -25,10 +25,10 @@ namespace SwoopLib {
                 target.draw_to_screen_late = true;
             }
 
-            public static void unregister_early_screen_draw(AutoRenderTarget target) {
+            public static void unregister_background_draw(AutoRenderTarget target) {
                 target.draw_to_screen_early = false;
             }
-            public static void unregister_late_screen_draw(AutoRenderTarget target) {
+            public static void unregister_foreground_draw(AutoRenderTarget target) {
                 target.draw_to_screen_late = false;
             }
 
