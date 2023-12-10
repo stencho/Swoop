@@ -1,7 +1,9 @@
 ## Swoop
 A set of UI elements, tools to use them, and systems to manage them. Designed to be used for projects which need a WinForms-like UI, highly managed 2D drawing, and even some 3D drawing. Everything is implemented as small ProFont and extreme minimalist 1px bright-lines-on-dark-backgrounds, inspired by BlackBox/bbLean. 
 
-Currently mostly a big ol mess, does not work straight out of the box. Looks better than it works.
+Currently mostly a big ol mess, does not work straight out of the box and requires an up-to-date-from-github version of MonoGame in the same folder as the Swoop folder, with mgcb.exe in the PATH. 
+
+Looks better than it works.
 
 ### Most current SwoopDemo screenshot
 ![Most current major change screenshot](current.png)
@@ -42,13 +44,11 @@ Currently mostly a big ol mess, does not work straight out of the box. Looks bet
 - A 2D GJK implementation (might eventually finish adding EPA, might even add move/slide collision resolution in the future)
 
 ##### MGRawInputLib
-This is actually useful on its own.
-
-MGRawInputLib provides the Input and InputHandler classes, as well as implementations of WinAPI externs to handle window moving and resizing. 
+This is actually useful on its own. MGRawInputLib provides the Input and InputHandler classes, as well as implementations of WinAPI externs to handle window moving and resizing. 
 
 The Input class runs a thread which regularly polls the RawInput or MonoGame APIs. It captures all changes in mouse/keyboard input in whichever API it's currently watching, and lets all InputHandlers know what those changes are. The InputHandler's parent class can then, for example, check mouse movement/scroll deltas, with any amount of time in between checks, and get an accurate delta since that class's last check.
 
-This effectively allows for multi-threaded input to work in MonoGame without several things breaking due to complete lack of frame sync. 
+This effectively allows for multi-threaded input to work in MonoGame without several things breaking due to complete lack of frame sync. Any amount of threads can pull accurate input info as long as they stick to their own InputHandlers.
 
 
 ### Usage:

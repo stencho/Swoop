@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <Reference Include="MonoGame.Framework">
-      <HintPath>..\..\MonoGame\MonoGame\Artifacts\MonoGame.Framework\DesktopGL\Debug\MonoGame.Framework.dll</HintPath>
+      <HintPath>..\..\MonoGame\Artifacts\MonoGame.Framework\DesktopGL\Debug\MonoGame.Framework.dll</HintPath>
     </Reference>
   </ItemGroup>
 

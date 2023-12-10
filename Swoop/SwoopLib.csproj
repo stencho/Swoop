@@ -23,12 +23,12 @@
 
   <ItemGroup>
     <Reference Include="MonoGame.Framework">
-      <HintPath>..\..\MonoGame\MonoGame\Artifacts\MonoGame.Framework\DesktopGL\Debug\MonoGame.Framework.dll</HintPath>
+      <HintPath>..\..\MonoGame\Artifacts\MonoGame.Framework\DesktopGL\Debug\MonoGame.Framework.dll</HintPath>
     </Reference>
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="rmdir /S /Q Content\bin\&#xD;&#xA;mgcb /o:Content\effects\bin Content\Content.mgcb&#xD;&#xA;robocopy /S Content\effects\bin\ bin\Debug\&#xD;&#xA;robocopy /S Content\effects\bin\ bin\Release\&#xD;&#xA;SET ERRORLEVEL = 0" />
+    <Exec Command="rmdir /S /Q Content\bin\&#xD;&#xA;mkdir Content\bin\&#xD;&#xA;mgcb /o:Content\effects\bin Content\Content.mgcb&#xD;&#xA;robocopy /S Content\effects\bin\ bin\Debug\&#xD;&#xA;robocopy /S Content\effects\bin\ bin\Release\&#xD;&#xA;SET ERRORLEVEL = 0" />
   </Target>
 
 </Project>

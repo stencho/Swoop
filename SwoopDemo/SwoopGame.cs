@@ -27,7 +27,7 @@ namespace SwoopDemo {
         bool capture_demo_screenshot_on_exit = true;
 
         RenderTarget2D output_rt;
-
+        
         UIElementManager UI => Swoop.UI;
 
         AutoRenderTarget render_target_bg;
@@ -60,9 +60,6 @@ namespace SwoopDemo {
              
             build_UI();
         }
-
-
-
 
         protected void build_UI() {
             render_target_bg = new AutoRenderTarget(resolution.X_only - (resolution.X_only / 4.5f) + ((UI.elements["title_bar"].height + 30) * XYPair.UnitY), resolution / 5, true);
