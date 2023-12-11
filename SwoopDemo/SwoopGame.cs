@@ -318,23 +318,29 @@ namespace SwoopDemo {
                 Drawing.fill_rect(Vector2.One * 18, Vector2.One * 22 + Drawing.measure_string_profont_xy("BIG HEFTY CUSTOM DRAW"), Swoop.UI_background_color);
                 Drawing.text("BIG HEFTY CUSTOM DRAW", Vector2.One * 20, Color.Red);
             }));
-            test_listbox.add_item(new ListBoxItem("here comes some random spam!"));
 
-            for (int i = 0; i < 25; i++) {
+            Button test_listbox_add_button = new Button("rng_add_button", "Add Item", test_listbox.position + (XYPair.Up * 17) + (XYPair.Right * 75));
+            test_listbox_add_button.click_action = () => {
                 var lbi = new ListBoxItem(RandomNumberGenerator.GetHexString(RandomNumberGenerator.GetInt32(10, 55)));
+
                 string t = lbi.text;
 
                 int nl = RandomNumberGenerator.GetInt32(0, 3);
-                
+
                 for (int n = 0; n < nl; n++) {
-                    int nl_pos = RandomNumberGenerator.GetInt32(t.Length-2);
-                    t=t.Insert(nl_pos, "\n");
+                    int nl_pos = RandomNumberGenerator.GetInt32(t.Length - 2);
+                    t = t.Insert(nl_pos, "\n");
                 }
                 lbi.text = t;
-                test_listbox.add_item(lbi); 
-            }
+                
+                test_listbox.add_item(lbi);
+            };
+
+            test_listbox.add_item(new ListBoxItem("here comes some random spam!"));
+
             //ListBox
             UI.add_element(test_listbox);
+            UI.add_element(test_listbox_add_button);
 
         }
 

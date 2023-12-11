@@ -16,7 +16,11 @@ namespace SwoopLib.UIElements {
         internal RenderTarget2D render_target => rt.render_target;
 
         int left_margin = 4;
-        
+
+        bool is_selected => parent.find_index(this) == parent.selected_index;
+        bool is_stored_click => parent.find_index(this) == parent.stored_index;
+
+
         bool _custom_draw = false;
         public bool custom_draw => _custom_draw;
 
@@ -54,7 +58,7 @@ namespace SwoopLib.UIElements {
 
         void draw_text(XYPair position, XYPair size) {
             Drawing.text(text, XYPair.Zero + (XYPair.UnitX * left_margin), 
-                parent.find_index(this) == parent.selected_index || parent.find_index(this) == parent.stored_index
+                is_selected || is_stored_click
                 ? Swoop.UI_highlight_color : Swoop.UI_color);
         }
 
@@ -100,6 +104,19 @@ namespace SwoopLib.UIElements {
         int top_margin = 5;
         int bottom_margin = 4;
 
+        bool _force_selected_item = false;
+        public bool force_selected_item {
+            get { return _force_selected_item; }
+            set {
+                if (_force_selected_item != value) {
+                    if (_force_selected_item == false && value == true && selected_index == -1 && items.Count > 0) 
+                        selected_index = 0;
+
+                    _force_selected_item = value;
+                }            
+            }
+        }
+
         internal int selected_index = -1;
         internal int mouse_over_index = -1;
         internal int stored_index = -1;
@@ -112,43 +129,60 @@ namespace SwoopLib.UIElements {
         float top_position_fract => scroll_position / (float)total_height;
         float bottom_position_fract => (scroll_position + lb_height) / (float)total_height;
 
-        int _scroll_width = 7;
-        int scroll_bar_width { get => _scroll_width;
-            set {
-                if (_scroll_width != value) {
-                    _scroll_width = value;
+        public int scroll_bar_width { get; set; } = 7;
 
-                    foreach(ListBoxItem item in items) {
-                        item.size_changed();
-                    }
+        int _current_scroll_width = 7;
+        int current_scroll_bar_width { get => _current_scroll_width;
+            set {
+                if (_current_scroll_width != value) {
+                    _current_scroll_width = value;
+                    refresh_all();
                 }
 
             }
         }
+
         float scroll_position = 0f;
 
-        internal XYPair size_minus_scroll_bar => size - (XYPair.UnitX * scroll_bar_width);
+        internal XYPair size_minus_scroll_bar => size - (XYPair.UnitX * current_scroll_bar_width);
 
         public void add_item(ListBoxItem item) { 
             item.set_parent(this);
-            items.Add(item); 
+            items.Add(item);
+
+            if (force_selected_item && items.Count == 1)
+                selected_index = 0;
 
             if (item.custom_draw) total_height += item.height;
             else total_height += item.height + top_margin + bottom_margin + 1;
-            
+
+            resize_scroll_bar_width_based_on_height();
         }
+
         public void remove(ListBoxItem item) {
             if (item.custom_draw) total_height -= item.height;
             else total_height -= item.height + top_margin + bottom_margin + 1;
-            
+
+            var ii = find_index(item);            
+            if (force_selected_item && selected_index == ii)
+                selected_index--;
+
             items.Remove(item);
-            
+
+            resize_scroll_bar_width_based_on_height();
         }
         public void remove_at(int index) {
+            if (!(index >= 0 && index < items.Count)) return;
+
             if (items[index].custom_draw) total_height -= items[index].height;
             else total_height -= items[index].height + top_margin + bottom_margin + 1;
 
-            items.RemoveAt(index); 
+            if (force_selected_item && selected_index == index)
+                selected_index--;
+
+            items.RemoveAt(index);
+
+            resize_scroll_bar_width_based_on_height();
         }
 
         internal int find_index(float y_position) {
@@ -156,7 +190,7 @@ namespace SwoopLib.UIElements {
             int index = 0;
 
             foreach (ListBoxItem item in items) {
-                if (y_position >= running_height && y_position <= running_height + (item.custom_draw ? item.height : item.height + top_margin + bottom_margin + 1)) { //check custom draw and add extra height for margins etc
+                if (mouse_relative.X <= size_minus_scroll_bar.X && y_position >= running_height && y_position <= running_height + (item.custom_draw ? item.height : item.height + top_margin + bottom_margin + 1)) { 
                     return index;
                 }
 
@@ -179,6 +213,22 @@ namespace SwoopLib.UIElements {
                 else index++;
             }
             return -1;
+        }
+
+        internal void refresh_all() {
+            foreach(ListBoxItem item in items) {
+                item.size_changed();
+            }
+        }
+
+        void resize_scroll_bar_width_based_on_height() {
+            if (visible_area_fract_of_height < 1f && old_visible_area != visible_area_fract_of_height) {
+                _current_scroll_width = scroll_bar_width;
+                refresh_all();
+            } else {
+                _current_scroll_width = 0;
+                refresh_all();
+            }
         }
 
         public ListBoxItem last_item => items[items.Count - 1];
@@ -207,7 +257,6 @@ namespace SwoopLib.UIElements {
 
                         if (item.render_target != null)
                             Drawing.image(item.render_target, (XYPair.UnitY * (running_height - scroll_position)), item.size);
-
                     }
 
                     running_height += item.height;
@@ -250,32 +299,44 @@ namespace SwoopLib.UIElements {
             Drawing.line(size_minus_scroll_bar.X_only, size_minus_scroll_bar, Swoop.get_color(this), 1f);
         }
 
-        internal override void handle_focused_input() {}       
-
+        internal override void handle_focused_input() {}
+        float old_visible_area = 0f;
         internal override void update() {
             handler.update();
+
+            old_visible_area = visible_area_fract_of_height;
+
+            if (force_selected_item && selected_index < 0 && items.Count > 0) selected_index = 0;
 
             if (mouse_over) {
                 var delta = handler.scroll_delta;
                 scroll_position -= delta / 6f;
-                if (top_position_fract < 0f) {
-                    scroll_position = 0f;
 
-                }
-                if (bottom_position_fract > 1f) {
-                    scroll_position = total_height - lb_height;
+                if (visible_area_fract_of_height < 1f) {
+                    if (top_position_fract < 0f) {
+                        scroll_position = 0f;
+
+                    }
+                    if (bottom_position_fract > 1f) {
+                        scroll_position = total_height - lb_height;
+                    }
+                }  else {
+                    scroll_position = 0;
                 }
 
                 var mouse_pos = scroll_position + mouse_relative.Y;
                 mouse_over_index = find_index(mouse_pos);
 
-                if (clicking && !was_clicking) {
-                    stored_index = mouse_over_index;
-                } else if (!clicking && was_clicking) {
-                    if (stored_index == mouse_over_index)
-                        selected_index = stored_index;
+                if ((force_selected_item && mouse_over_index >= 0) || !force_selected_item) {
+                    if (clicking && !was_clicking) {
+                        stored_index = mouse_over_index;
 
-                    stored_index = -1;
+                    } else if (!clicking && was_clicking) {
+                        if (stored_index == mouse_over_index)
+                            selected_index = stored_index;
+
+                        stored_index = -1;
+                    }
                 }
             } else {
                 if (!clicking && was_clicking) {
