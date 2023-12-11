@@ -53,7 +53,9 @@ namespace SwoopLib.UIElements {
             text_size.Y_only + parent.size_minus_scroll_bar.X_only;
 
         void draw_text(XYPair position, XYPair size) {
-            Drawing.text(text, XYPair.Zero + (XYPair.UnitX * left_margin), Swoop.UI_color);            
+            Drawing.text(text, XYPair.Zero + (XYPair.UnitX * left_margin), 
+                parent.find_index(this) == parent.selected_index || parent.find_index(this) == parent.stored_index
+                ? Swoop.UI_highlight_color : Swoop.UI_color);
         }
 
         public ListBoxItem(string text) {
@@ -98,8 +100,9 @@ namespace SwoopLib.UIElements {
         int top_margin = 5;
         int bottom_margin = 4;
 
-        int selected_index = -1;
-        int mouse_over_index = -1;
+        internal int selected_index = -1;
+        internal int mouse_over_index = -1;
+        internal int stored_index = -1;
 
         float lb_height => (float)size.Y;
         int total_height = 0;
@@ -146,6 +149,36 @@ namespace SwoopLib.UIElements {
             else total_height -= items[index].height + top_margin + bottom_margin + 1;
 
             items.RemoveAt(index); 
+        }
+
+        internal int find_index(float y_position) {
+            int running_height = 0;
+            int index = 0;
+
+            foreach (ListBoxItem item in items) {
+                if (y_position >= running_height && y_position <= running_height + (item.custom_draw ? item.height : item.height + top_margin + bottom_margin + 1)) { //check custom draw and add extra height for margins etc
+                    return index;
+                }
+
+                if (item.custom_draw) {
+                    running_height += item.height;
+                } else {
+                    running_height += item.height + top_margin + bottom_margin + 1;
+                }
+
+                index++;
+            }
+
+            return -1;
+        }
+
+        internal int find_index(ListBoxItem find_item) {
+            int index = 0;
+            foreach(var item in items) {
+                if (item == find_item) return index;
+                else index++;
+            }
+            return -1;
         }
 
         public ListBoxItem last_item => items[items.Count - 1];
@@ -217,32 +250,7 @@ namespace SwoopLib.UIElements {
             Drawing.line(size_minus_scroll_bar.X_only, size_minus_scroll_bar, Swoop.get_color(this), 1f);
         }
 
-        internal override void handle_focused_input() {
-
-        }
-
-        int find_index(float y_position) {
-            int running_height = 0;
-            int index = 0;
-
-            foreach (ListBoxItem item in items) {
-                if (y_position >= running_height && y_position <= running_height + (item.custom_draw ? item.height : item.height + top_margin + bottom_margin + 1)) { //check custom draw and add extra height for margins etc
-                    return index;
-                }
-
-                if (item.custom_draw) {
-                    running_height += item.height;
-                } else {
-                    running_height += item.height + top_margin + bottom_margin + 1;
-                }
-
-                index++;
-            }
-
-            return -1;
-        }
-
-        int stored_index = -1;
+        internal override void handle_focused_input() {}       
 
         internal override void update() {
             handler.update();
