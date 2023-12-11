@@ -9,29 +9,32 @@ Looks better than it works.
 ![Most current major change screenshot](current.png)
 
 ### Implemented UI Elements
+- [ ] Resize Anchor system (to automatically move/resize elements when a UIElementManager changes size)
 - [x] Button
 - [x] Check Box
-- [ ] Drop-down List (ComboBox)
+- [ ] Context menu + registration system
 - [ ] Cursor
 - [x] Dialog Box
+- [ ] Drop-down List (ComboBox)
 - [x] Label
 - [ ] List Box
-- [ ] Context Menu/Menu Strip
+- [ ] Menu Strip
 - [ ] - Menu Bar
 - [ ] - Menu Button
 - [ ] - Submenu
 - [ ] - Menu Toggle
 - [ ] - Menu Slider?
 - [ ] Numeric Up/Down
-- [ ] Multi-choice Option Slider
+- [ ] Option Slider (Multi-choice)
 - [x] Panel
 - [x] Progress Bar (+ combined TrackBar)
 - [x] Radio Buttons
 - [x] Resize Handle
-- [ ] Tab Control
+- [ ] Tab Control (a bunch of panels stuck together)
 - [ ] Text Box
 - [x] Title Bar (with window dragging)
 - [x] Toggle Button
+- [ ] Tooltip + registration system
 
 ### Implemented useful features and effects
 - UIElements are simple to build, fully aware of mouse state, and can automatically draw all of their contents to a RenderTarget2D by setting a bool, to avoid things like text spilling out of boxes
