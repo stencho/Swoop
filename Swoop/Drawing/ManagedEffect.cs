@@ -95,6 +95,15 @@ namespace SwoopLib.Effects {
             basic_effect.TextureEnabled = true;
         }
         
+        /// <summary>
+        /// Useful for drawing a mesh with an appearance entirely determined by this effect
+        /// No base texture, just white, and no requirement for the shader to even take a texture as input
+        /// </summary>
+        /// <param name="vb"></param>
+        /// <param name="ib"></param>
+        /// <param name="world"></param>
+        /// <param name="view"></param>
+        /// <param name="projection"></param>
         public virtual void draw_buffers_basic_effect_first_pass(VertexBuffer vb, IndexBuffer ib, Matrix world, Matrix view, Matrix projection) {
             if (shader == null) return;
             if (selected_technique < 0 || selected_technique >= shader.Techniques.Count) return;

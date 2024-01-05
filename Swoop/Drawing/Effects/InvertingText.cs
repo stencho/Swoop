@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace SwoopLib.Effects {
-    public class InvertingText: ManagedEffect {
+    public class InvertingText : ManagedEffect {
         XYPair position;
         
         string _text = "text";

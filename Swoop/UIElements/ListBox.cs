@@ -121,10 +121,13 @@ namespace SwoopLib.UIElements {
         internal int mouse_over_index = -1;
         internal int stored_index = -1;
 
+        float scroll_position = 0f;
+
         float lb_height => (float)size.Y;
         int total_height = 0;
 
         float visible_area_fract_of_height => (float)size.Y / (float)total_height;
+        float old_visible_area = 0f;
 
         float top_position_fract => scroll_position / (float)total_height;
         float bottom_position_fract => (scroll_position + lb_height) / (float)total_height;
@@ -142,7 +145,6 @@ namespace SwoopLib.UIElements {
             }
         }
 
-        float scroll_position = 0f;
 
         internal XYPair size_minus_scroll_bar => size - (XYPair.UnitX * current_scroll_bar_width);
 
@@ -300,7 +302,7 @@ namespace SwoopLib.UIElements {
         }
 
         internal override void handle_focused_input() {}
-        float old_visible_area = 0f;
+
         internal override void update() {
             handler.update();
 
