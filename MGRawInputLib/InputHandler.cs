@@ -1,5 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System.ComponentModel.Design;
+using System.Text;
+using static MGRawInputLib.Input;
 
 namespace MGRawInputLib {
     //This entire class exists to "decouple" the input handling from the polling thread
@@ -30,6 +33,12 @@ namespace MGRawInputLib {
 
         public RawInputMouseState rawinput_mouse_state;
         public RawInputMouseState rawinput_mouse_state_previous;
+
+        public HashSet<KeyTime> pressed_keys => Input.pressed_keys;
+        HashSet<KeyTime> previous_pressed_keys;
+
+        public HashSet<KeyTime> just_pressed_keys = new HashSet<KeyTime>();
+        public HashSet<KeyTime> held_keys = new HashSet<KeyTime>();
 
         Point _mouse_delta_acc = Point.Zero;
         Point mouse_delta_accumulated { 
@@ -75,16 +84,48 @@ namespace MGRawInputLib {
         ~InputHandler() { Input.handlers.Remove(this); }
 
         public string ri_info() {
-            return $"[keyboard] -> {rawinput_key_state.list_keys()}\n[mouse] -> {rawinput_mouse_state.info()}";
+            return $"[keyboard] -> {list_keys()}\n[held keys] -> {list_held_keys()}\n[mouse] -> {rawinput_mouse_state.info()}";
+        }
+
+        public string list_keys() {
+            if (pressed_keys == null) return "";
+            StringBuilder sb = new StringBuilder();
+            foreach (KeyTime key in pressed_keys) { sb.Append(key.key.ToString()); sb.Append(", "); }
+            if (sb.Length > 0)
+                sb.Remove(sb.Length - 2, 2);
+            return sb.ToString();
+        }
+
+        public string list_held_keys() {
+            if (held_keys == null) return "";
+            StringBuilder sb = new StringBuilder();
+            foreach (KeyTime key in held_keys) { sb.Append(key.key.ToString()); sb.Append(", "); }
+            if (sb.Length > 0)
+                sb.Remove(sb.Length - 2, 2);
+            return sb.ToString();
         }
 
         public void update() {
+            previous_pressed_keys = pressed_keys;
+
+            just_pressed_keys.Clear();
+            held_keys.Clear();
+
+            foreach(var k in pressed_keys) {
+                if (!previous_pressed_keys.Contains(k)) {
+                    just_pressed_keys.Add(k);
+                }
+
+                if (k.held) 
+                    held_keys.Add(k);
+            }
+
             if (Input.poll_method == Input.input_method.MonoGame) {
                 key_state_previous = key_state;
                 key_state = Input.keyboard_state;
 
                 mouse_state_previous = mouse_state;
-                mouse_state = Input.mouse_state;
+                mouse_state = Input.mouse_state;                
 
             } else {
                 rawinput_key_state_previous = rawinput_key_state;
@@ -92,7 +133,6 @@ namespace MGRawInputLib {
                 
                 rawinput_mouse_state_previous = rawinput_mouse_state;
                 rawinput_mouse_state = Input.ri_mouse_state;
-
             }
 
             mouse_position = Input.cursor_pos.ToVector2();
@@ -101,6 +141,7 @@ namespace MGRawInputLib {
 
             rawinput_mouse_state.Delta = mouse_delta;
             rawinput_mouse_state.ScrollDelta = scroll_delta_accumulated;
+
         }
 
         public bool is_pressed(Keys key) {
@@ -201,6 +242,15 @@ namespace MGRawInputLib {
 
         public bool just_pressed(MouseButtons mouse_button) => is_pressed(mouse_button) && !was_pressed(mouse_button);
         public bool just_released(MouseButtons mouse_button) => !is_pressed(mouse_button) && was_pressed(mouse_button);
+
+        public bool held(Keys key) {
+            KeyTime kt;
+            if (Input.key_in_pressed_list(key, out kt)) {
+                return kt.held;
+            } else {
+                return false;
+            }
+        } 
     }
 }
 

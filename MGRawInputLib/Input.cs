@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System.Text;
 
 namespace MGRawInputLib {
     public static class Input {
@@ -7,6 +8,44 @@ namespace MGRawInputLib {
 
         public static List<InputHandler> handlers = new List<InputHandler>();
         static Game parent;
+
+        static readonly double key_hold_time = 300;
+
+        public static HashSet<KeyTime> pressed_keys = new HashSet<KeyTime>();
+
+        public struct KeyTime {
+            Keys _key;
+            public Keys key => _key;
+
+            DateTime _pressed_time;
+            public DateTime pressed_time => _pressed_time;
+
+            public TimeSpan time_since_press => DateTime.Now - _pressed_time;            
+            public bool held => time_since_press.TotalMilliseconds >= key_hold_time;
+
+            public KeyTime(Keys key, DateTime time) {
+                this._key = key;                
+                _pressed_time = time;
+            }
+        }
+
+        public static string list_keys() {
+            if (pressed_keys == null) return "";
+            StringBuilder sb = new StringBuilder();
+            foreach (KeyTime key in pressed_keys) { sb.Append(key.key.ToString()); sb.Append(", "); }
+            if (sb.Length > 0)
+                sb.Remove(sb.Length - 2, 2);
+            return sb.ToString();
+        }
+
+
+        public static bool key_in_pressed_list(Keys k, out KeyTime key_time) {
+            foreach (var key in pressed_keys) {
+                if (k == key.key) { key_time = key; return true; }
+            }
+            key_time = new KeyTime();
+            return false;
+        }
 
         public static void end() { run_thread = false; }
 
@@ -29,7 +68,7 @@ namespace MGRawInputLib {
         static long _frame_count = 0;
 
         public static int fps_update_frequency_ms { get; set; } = 1000;
-        public static int poll_hz { get; private set; } = 300;
+        public static int poll_hz { get; private set; } = 120;
         static bool limit_thread_rate = true;
         static bool use_sleep = true;
         static double thread_ms => (1000.0 / (double)poll_hz);
@@ -38,7 +77,7 @@ namespace MGRawInputLib {
         static DateTime current_dt = DateTime.Now;
         static TimeSpan ts;
 
-        static volatile bool run_thread = true;        
+        static volatile bool run_thread = true;
 
         static bool _lock_mouse = false;
         public static bool lock_mouse {
@@ -53,6 +92,7 @@ namespace MGRawInputLib {
         public enum input_method { MonoGame, RawInput }
         static input_method _input_method = input_method.RawInput;
         public static input_method poll_method => _input_method;
+
         public static void change_polling_method(input_method method) {
             if (_input_method != input_method.RawInput && method == input_method.RawInput) {
                 Externs.RawInput.enable = true;
@@ -93,6 +133,11 @@ namespace MGRawInputLib {
             while (run_thread) {
                 start_dt = DateTime.Now;
 
+                gamepad_one_state = GamePad.GetState(PlayerIndex.One);
+                gamepad_two_state = GamePad.GetState(PlayerIndex.Two);
+                gamepad_three_state = GamePad.GetState(PlayerIndex.Three);
+                gamepad_four_state = GamePad.GetState(PlayerIndex.Four);
+
                 if (_input_method == input_method.RawInput) {
 
                     cursor_pos = Externs.get_cursor_pos_relative_to_window();
@@ -102,18 +147,28 @@ namespace MGRawInputLib {
 
                     ri_mouse_state = RawInputMouse.GetState();
 
-
                     mouse_delta = ri_mouse_state.Delta;
-
-                    bool hit_data = false;
 
                     for (int i = 0; i < handlers.Count; i++) {
                         handlers[i].accumulate_mouse_delta(ri_mouse_state.Delta);
                         handlers[i].accumulate_scroll_delta(ri_mouse_state.ScrollDelta);
                     }
 
-                    RawInputMouse.reset_scroll_delta();
 
+
+                    var current_keys = ri_keyboard_state.pressed_keys;
+
+                    foreach (var kt in pressed_keys) {
+                        if (!current_keys.Contains(kt.key)) pressed_keys.Remove(kt);
+                    }
+
+                    foreach (var k in current_keys) {
+                        if (!key_in_pressed_list(k, out _)) {
+                            pressed_keys.Add(new KeyTime(k, DateTime.Now));
+                        }
+                    }
+
+                    RawInputMouse.reset_scroll_delta();
                 }
 
                 if (_input_method == input_method.MonoGame) {
@@ -129,10 +184,19 @@ namespace MGRawInputLib {
 
                     foreach (InputHandler handler in handlers) handler.accumulate_mouse_delta(mouse_delta);
 
-                    gamepad_one_state = GamePad.GetState(PlayerIndex.One);
-                    gamepad_two_state = GamePad.GetState(PlayerIndex.Two);
-                    gamepad_three_state = GamePad.GetState(PlayerIndex.Three);
-                    gamepad_four_state = GamePad.GetState(PlayerIndex.Four);
+
+
+                    var current_keys = keyboard_state.GetPressedKeys();
+
+                    foreach (var kt in pressed_keys) {
+                        if (!current_keys.Contains(kt.key)) pressed_keys.Remove(kt);
+                    }
+
+                    foreach (var k in current_keys) {
+                        if (!key_in_pressed_list(k, out _)) {
+                            pressed_keys.Add(new KeyTime(k, DateTime.Now));
+                        }
+                    }
                 } 
                 
                 //mouse lock 
