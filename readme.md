@@ -1,9 +1,9 @@
 ## Swoop
-A set of UI elements, tools to use them, and systems to manage them. Designed to be used for projects which need a WinForms-like UI, highly managed 2D drawing, and even some 3D drawing. Everything is implemented as small ProFont and extreme minimalist 1px bright-lines-on-dark-backgrounds, inspired by BlackBox/bbLean. 
+A set of UI elements, tools to use them, and systems to manage them. Designed to be used for projects which need a WinForms-like UI, highly managed 2D drawing, and even some 3D drawing. Everything is implemented as small ProFont and extreme minimalist 1px bright lines on dark backgrounds, inspired by BlackBox/bbLean. 
 
-Currently mostly a big ol mess, does not work straight out of the box and requires an up-to-date-from-github version of MonoGame in the same folder as the Swoop folder, with mgcb.exe in the PATH. 
+Currently mostly a mess, and requires an up-to-date github version of MonoGame in the same folder as this one, with mgcb.exe in the PATH. 
 
-Looks better than it works.
+Looks better than it works. Uses SUBSTANTIALLY more 
 
 ### Most current SwoopDemo screenshot
 ![Most current major change screenshot](current.png)
@@ -17,7 +17,7 @@ Looks better than it works.
 - [x] Dialog Box
 - [ ] Drop-down List (ComboBox)
 - [x] Label
-- [ ] List Box
+- [x] List Box
 - [ ] Menu Strip
 - [ ] - Menu Bar
 - [ ] - Menu Button
@@ -37,22 +37,25 @@ Looks better than it works.
 - [ ] Tooltip + registration system
 
 ### Implemented useful features and effects
-- UIElements are simple to build, fully aware of mouse state, and can automatically draw all of their contents to a RenderTarget2D by setting a bool, to avoid things like text spilling out of boxes
-- Element focus system, with element-specific keyboard handling for the currently focused element (focus a checkbox and press enter or space, it will switch state)
+- UIElements are simple to build, fully aware of mouse state, and can automatically draw all of their contents to a RenderTarget2D by setting a bool, to avoid drawing outside their bounds
+- Element focus system, with element-specific keyboard handling for the currently focused element (focus a checkbox and press enter or space to toggle state)
 - High poll rate, multi-threaded, RawInput-based mouse and keyboard support (with MonoGame as a fallback input handler, also managed in a way which supports multi-threading)
-- AutoRenderTarget, 'draw' Action automatically runs at the start of each draw, and AutoRenderTarget.Manager.(un)register_background/foreground_draw() make the renderer automatically draw the RT to the screen, above or below the rest of the UI. Also allows any shaders drawn to ARTs which are being drawn in the foreground to access the screen's pixels (via a screen position UV map)
+- AutoRenderTarget, 'draw' Action automatically runs at the start of each draw, and AutoRenderTarget.Manager.(un)register_background/foreground_draw() make the renderer automatically draw the RT to the screen, above or below the rest of the UI. Also allows any shaders drawn to ARTs and drawn in the foreground to access the screen's pixels (via a screen position UV map)
 - Easy to use drawing library for images, text, and 2D primitives
-- ManagedEffect class to make implementing and dealing with pixel shaders far less annoying. Also capable of drawing simple 3D models, and the ShadedQuad/ShadedQuadWVP classes uses this to draw an arbitrary pixel shader to a 3D plane
+- ManagedEffect class to make implementing and dealing with pixel shaders faster and less annoying
 - 2D image-based SDFs, as well as a pixel-perfect SDF-based circle drawing shader
 - A 2D GJK implementation (might eventually finish adding EPA, might even add move/slide collision resolution in the future)
 
 ##### MGRawInputLib
-This is actually useful on its own. MGRawInputLib provides the Input and InputHandler classes, as well as implementations of WinAPI externs to handle window moving and resizing. 
+This is actually useful on its own. It provides the Input, InputHandler, and Window classes.
 
-The Input class runs a thread which regularly polls the RawInput or MonoGame APIs. It captures all changes in mouse/keyboard input in whichever API it's currently watching, and lets all InputHandlers know what those changes are. The InputHandler's parent class can then, for example, check mouse movement/scroll deltas, with any amount of time in between checks, and get an accurate delta since that class's last check.
+The Input class runs a thread which regularly polls the RawInput or MonoGame APIs. It captures all changes in mouse/keyboard input in whichever API it's currently watching, and lets all existing InputHandlers know what those changes are. It easily runs at tens of thousands of ticks/sec (and should *always* be run at a higher tickrate than any other thread).
 
-This effectively allows for multi-threaded input to work in MonoGame without several things breaking due to complete lack of frame sync. Any amount of threads can pull accurate input info as long as they stick to their own InputHandlers.
+Any InputHandler can then, for example, check mouse movement/scroll deltas, with any amount of time in between checks, and get an accurate delta since that specific InputHandler's last check. Also allows for just_pressed/just_released checks for buttons/keys.
 
+This allows for multi-threaded input to work properly in MonoGame. Any amount of threads can pull accurate input info as long as they stick to their own InputHandlers.
+
+The Window class contains the bools 'moving_window' and 'resizing_window' which will use WinAPI calls to automatically move/resize the window.
 
 ### Usage:
 ```csharp
