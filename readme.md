@@ -3,7 +3,7 @@ A set of UI elements, tools to use them, and systems to manage them. Designed to
 
 Currently mostly a mess, and requires an up-to-date github version of MonoGame in the same folder as this one, with mgcb.exe in the PATH. 
 
-Looks better than it works. Uses SUBSTANTIALLY more 
+Looks better than it works.
 
 ### Most current SwoopDemo screenshot
 ![Most current major change screenshot](current.png)
