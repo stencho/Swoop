@@ -14,6 +14,8 @@ namespace SwoopLib.UIElements {
 
         bool click_highlight = false;
 
+        Action custom_draw;
+
         public Action click_action = null;
 
         bool _auto_size = false;
@@ -21,6 +23,14 @@ namespace SwoopLib.UIElements {
             get => _auto_size; set {
 
             }
+        }
+
+        public Button(string name, Action custom_draw, XYPair position, XYPair size) : base(name, position, size) {
+            _text = text;
+            _auto_size = false;
+            
+            this.custom_draw = custom_draw;
+            this.enable_render_target = true;
         }
 
         public Button(string name, string text, XYPair position, XYPair size) : base(name, position, size) {
@@ -61,11 +71,22 @@ namespace SwoopLib.UIElements {
 
         internal override void draw() {
             if (!visible) return;
-            Drawing.fill_rect_outline(position + XYPair.One, position + size, click_highlight ? Swoop.get_color(this) : Swoop.UI_background_color, Swoop.get_color(this), 1f);
-            Drawing.text(_text, position + margin, click_highlight ? Swoop.UI_background_color : Swoop.get_color(this));
+
+            if (custom_draw != null) {
+                //Drawing.fill_rect(position + XYPair.One, position + size, click_highlight ? Swoop.get_color(this) : Swoop.UI_background_color);
+                Drawing.image(draw_target, position.ToVector2(), size.ToVector2(), Color.White);
+                //Drawing.rect(position + XYPair.One, position + size, Swoop.get_color(this), 1f);
+
+            } else {
+                Drawing.fill_rect_outline(position + XYPair.One, position + size, click_highlight ? Swoop.get_color(this) : Swoop.UI_background_color, Swoop.get_color(this), 1f);
+                Drawing.text(_text, position + margin, click_highlight ? Swoop.UI_background_color : Swoop.get_color(this));
+            }
+
         }
 
-        internal override void draw_rt() { }
+        internal override void draw_rt() {
+            if (custom_draw != null) custom_draw();
+        }
         internal override void added() { }
 
         internal override void handle_focused_input() { }
