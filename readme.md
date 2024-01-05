@@ -38,7 +38,6 @@ Looks better than it works.
 
 ### Implemented useful features and effects
 - UIElements are simple to build, fully aware of mouse state, and can automatically draw all of their contents to a RenderTarget2D by setting a bool, to avoid drawing outside their bounds
-- Element focus system, with element-specific keyboard handling for the currently focused element (focus a checkbox and press enter or space to toggle state)
 - High poll rate, multi-threaded, RawInput-based mouse and keyboard support (with MonoGame as a fallback input handler, also managed in a way which supports multi-threading)
 - AutoRenderTarget, 'draw' Action automatically runs at the start of each draw, and AutoRenderTarget.Manager.(un)register_background/foreground_draw() make the renderer automatically draw the RT to the screen, above or below the rest of the UI. Also allows any shaders drawn to ARTs and drawn in the foreground to access the screen's pixels (via a screen position UV map)
 - Easy to use drawing library for images, text, and 2D primitives
