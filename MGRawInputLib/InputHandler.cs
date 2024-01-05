@@ -106,18 +106,20 @@ namespace MGRawInputLib {
         }
 
         public void update() {
-            previous_pressed_keys = pressed_keys;
+            previous_pressed_keys = Input.pressed_keys;
 
             just_pressed_keys.Clear();
             held_keys.Clear();
 
-            foreach(var k in pressed_keys) {
-                if (!previous_pressed_keys.Contains(k)) {
-                    just_pressed_keys.Add(k);
-                }
+            lock (pressed_keys) {
+                foreach (var k in pressed_keys) {
+                    if (!previous_pressed_keys.Contains(k)) {
+                        just_pressed_keys.Add(k);
+                    }
 
-                if (k.held) 
-                    held_keys.Add(k);
+                    if (k.held)
+                        held_keys.Add(k);
+                }
             }
 
             if (Input.poll_method == Input.input_method.MonoGame) {

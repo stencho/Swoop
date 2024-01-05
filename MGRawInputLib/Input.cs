@@ -154,20 +154,19 @@ namespace MGRawInputLib {
                         handlers[i].accumulate_scroll_delta(ri_mouse_state.ScrollDelta);
                     }
 
+                    lock (pressed_keys) {
+                        var current_keys = ri_keyboard_state.pressed_keys;
 
+                        foreach (var kt in pressed_keys) {
+                            if (!current_keys.Contains(kt.key)) pressed_keys.Remove(kt);
+                        }
 
-                    var current_keys = ri_keyboard_state.pressed_keys;
-
-                    foreach (var kt in pressed_keys) {
-                        if (!current_keys.Contains(kt.key)) pressed_keys.Remove(kt);
-                    }
-
-                    foreach (var k in current_keys) {
-                        if (!key_in_pressed_list(k, out _)) {
-                            pressed_keys.Add(new KeyTime(k, DateTime.Now));
+                        foreach (var k in current_keys) {
+                            if (!key_in_pressed_list(k, out _)) {
+                                pressed_keys.Add(new KeyTime(k, DateTime.Now));
+                            }
                         }
                     }
-
                     RawInputMouse.reset_scroll_delta();
                 }
 
@@ -185,16 +184,17 @@ namespace MGRawInputLib {
                     foreach (InputHandler handler in handlers) handler.accumulate_mouse_delta(mouse_delta);
 
 
+                    lock (pressed_keys) {
+                        var current_keys = keyboard_state.GetPressedKeys();
 
-                    var current_keys = keyboard_state.GetPressedKeys();
+                        foreach (var kt in pressed_keys) {
+                            if (!current_keys.Contains(kt.key)) pressed_keys.Remove(kt);
+                        }
 
-                    foreach (var kt in pressed_keys) {
-                        if (!current_keys.Contains(kt.key)) pressed_keys.Remove(kt);
-                    }
-
-                    foreach (var k in current_keys) {
-                        if (!key_in_pressed_list(k, out _)) {
-                            pressed_keys.Add(new KeyTime(k, DateTime.Now));
+                        foreach (var k in current_keys) {
+                            if (!key_in_pressed_list(k, out _)) {
+                                pressed_keys.Add(new KeyTime(k, DateTime.Now));
+                            }
                         }
                     }
                 } 
