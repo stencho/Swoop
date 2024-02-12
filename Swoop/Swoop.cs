@@ -11,6 +11,7 @@ using MGRawInputLib;
 using SwoopLib.UIElements;
 using System.Runtime.CompilerServices;
 using SwoopLib.Effects;
+using System.Net.WebSockets;
 
 namespace SwoopLib {
     public static class Swoop {
@@ -26,6 +27,7 @@ namespace SwoopLib {
         public static Color UI_color = Color.White;
         public static Color UI_highlight_color = Color.FromNonPremultiplied(235, 140, 195, 255);
         public static Color UI_background_color = Color.FromNonPremultiplied(25, 25, 25, 255);
+        public static Color UI_disabled_color = Color.FromNonPremultiplied(60, 60, 60, 255);
 
         public static ContentManager content;
 
@@ -47,16 +49,18 @@ namespace SwoopLib {
         public static Action<XYPair>? resize_end;
 
         static Game parent = null;
+        static GameWindow game_window;
+        public static GameTime game_time;
 
-        public static void Initialize(Game parent, GraphicsDeviceManager gdm, GameWindow window, XYPair resolution) {
+        public static void Initialize(Game parent, GraphicsDeviceManager gdm, GameWindow window, XYPair resolution, bool borderless = true) {
             Swoop.parent = parent;
 
             Input.initialize(parent);
             input_handler = new InputHandler();
 
             Swoop._resolution = resolution;
-
-            window.IsBorderless = true;
+            game_window = window;
+            window.IsBorderless = borderless;
             window.Title = "Swoop";
 
             gdm.PreferMultiSampling = false;
@@ -68,8 +72,8 @@ namespace SwoopLib {
             gdm.ApplyChanges();
 
             window.AllowUserResizing = true;
-
-        }
+            window.ClientSizeChanged += Window_ClientSizeChanged;
+        }        
 
         public static void Load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, GameWindow window, bool default_window_UI = true) {
             Drawing.load(gd, gdm, content, resolution);
@@ -77,10 +81,12 @@ namespace SwoopLib {
             GraphicsDevice.DiscardColor = Color.Transparent;
             Swoop.content = content;
             UI = new UIElementManager(XYPair.Zero, resolution);
+
             if (default_window_UI)
-                build_default_UI();
-            
+                build_default_UI();            
         }
+        
+
 
         public static void build_default_UI() {
             var text_length = Drawing.measure_string_profont_xy("x") ;
@@ -135,8 +141,18 @@ namespace SwoopLib {
             };
 
         }
+        private static void Window_ClientSizeChanged(object? sender, EventArgs e) {
+            var s = game_window.ClientBounds.sizeToXYPair();
+            if (resize_end != null) resize_end(s);
 
-        public static void Update() {
+            _resolution = s;
+
+            change_resolution(_resolution);
+        }
+
+        public static void Update(GameTime gt) {
+            game_time = gt;
+
             Window.is_active = parent.IsActive;
             
             UIElementManager.update_UI_input();
@@ -153,6 +169,7 @@ namespace SwoopLib {
 
                 if (/*fill_background &&*/ show_logo) {
                     Drawing.end();
+                    
                     Drawing.image(Drawing.Logo,
                         (Swoop.resolution.ToVector2()) - (Drawing.Logo.Bounds.Size.ToVector2() * 0.5f) - (Vector2.One * 8f),
                         Drawing.Logo.Bounds.Size.ToVector2() * 0.5f,

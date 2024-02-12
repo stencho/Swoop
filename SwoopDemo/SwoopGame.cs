@@ -73,8 +73,10 @@ namespace SwoopDemo {
 
             UI.add_element(new Label("test_3d_label", "AutoRenderTarget tests\n3D plane > rt > background\nthis text is in front and\npart of the above label", (resolution.X_only - (resolution.X_only / 4.5f)) + ((UI.elements["title_bar"].height + 5) * XYPair.UnitY)));
 
-            UI.add_element(new Button("test_custom_draw_button", () => {
+            UI.add_element(new Button("test_custom_draw_button", (UIElement parent) => {
+                Drawing.fill_rect(XYPair.Zero, parent.size, parent.mouse_over && parent.mouse_down ? Swoop.get_color(parent) : Swoop.UI_background_color);
                 Drawing.image(Drawing.Logo, Vector2.Zero, Vector2.One * 28, SpriteEffects.None);
+                Drawing.rect(XYPair.One, parent.size, Swoop.get_color(parent), 1f);
             }, UI.elements["test_3d_label"].position - (XYPair.UnitX * 30), XYPair.One * 28));
             UI.elements["test_custom_draw_button"].can_be_focused = false;
 
@@ -363,7 +365,7 @@ namespace SwoopDemo {
             ((ProgressBar)UI.elements["progress_bar_vertical"]).value = progress_bar_test_value;
             ((ProgressBar)UI.elements["progress_bar_vertical_inverted"]).value = progress_bar_test_value;
 
-            Swoop.Update();
+            Swoop.Update(gameTime);
             StringBuilder sb = new StringBuilder();
 
             string title_text = $"{UIExterns.get_window_title()}";

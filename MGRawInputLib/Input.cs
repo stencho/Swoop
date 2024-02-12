@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System.Diagnostics;
 using System.Text;
 
 namespace MGRawInputLib {
@@ -9,11 +10,13 @@ namespace MGRawInputLib {
         public static List<InputHandler> handlers = new List<InputHandler>();
         static Game parent;
 
-        static readonly double key_hold_time = 300;
+        public static double key_hold_time = 500;
+        public static double repeat_rate = 50;
 
         public static HashSet<KeyTime> pressed_keys = new HashSet<KeyTime>();
 
-        public struct KeyTime {
+
+        public class KeyTime {
             Keys _key;
             public Keys key => _key;
 
@@ -23,11 +26,37 @@ namespace MGRawInputLib {
             public TimeSpan time_since_press => DateTime.Now - _pressed_time;            
             public bool held => time_since_press.TotalMilliseconds >= key_hold_time;
 
+            public TimeSpan repeat_timer;
+
+            DateTime last_time;
+
+            public bool handled = false;
+            public void handle() { handled = true; }
+            public void unhandle() { handled = false; }
+
+            public bool repeat() {
+                if (handled) { last_time = DateTime.Now; return false; }
+
+                var time = DateTime.Now;
+                repeat_timer = time - last_time;
+
+                if (repeat_timer.TotalMilliseconds >= repeat_rate) {
+                    last_time = time;
+                    return true;
+                }
+
+                return false;
+            }
+
+            public KeyTime() {}
+
             public KeyTime(Keys key, DateTime time) {
                 this._key = key;                
                 _pressed_time = time;
+                last_time = pressed_time;
             }
         }
+
 
         public static string list_keys() {
             if (pressed_keys == null) return "";
@@ -68,7 +97,7 @@ namespace MGRawInputLib {
         static long _frame_count = 0;
 
         public static int fps_update_frequency_ms { get; set; } = 1000;
-        public static int poll_hz { get; private set; } = 120;
+        public static int poll_hz { get; private set; } = 200;
         static bool limit_thread_rate = true;
         static bool use_sleep = true;
         static double thread_ms => (1000.0 / (double)poll_hz);
@@ -158,6 +187,8 @@ namespace MGRawInputLib {
                         var current_keys = ri_keyboard_state.pressed_keys;
 
                         foreach (var kt in pressed_keys) {
+                            //kt.unhandle();
+
                             if (!current_keys.Contains(kt.key)) pressed_keys.Remove(kt);
                         }
 
@@ -221,13 +252,15 @@ namespace MGRawInputLib {
                         Mouse.SetPosition(parent.Window.ClientBounds.Size.X / 2, parent.Window.ClientBounds.Size.Y / 2);
                     }
                 }
-                if ((parent != null && !parent.IsActive && was_active && lock_mouse) || (!lock_mouse && _was_locked)) {
-                    parent.IsMouseVisible = true;
+                if (run_thread) {
+                    if ((parent != null && !parent.IsActive && was_active && lock_mouse) || (!lock_mouse && _was_locked)) {
+                        parent.IsMouseVisible = true;
 
-                    if (_input_method == input_method.RawInput) {
-                        Externs.set_cursor_pos(pre_lock_mouse_pos);
-                    } else {
-                        Mouse.SetPosition(pre_lock_mouse_pos.X, pre_lock_mouse_pos.Y);
+                        if (_input_method == input_method.RawInput) {
+                            Externs.set_cursor_pos(pre_lock_mouse_pos);
+                        } else {
+                            Mouse.SetPosition(pre_lock_mouse_pos.X, pre_lock_mouse_pos.Y);
+                        }
                     }
                 }
 

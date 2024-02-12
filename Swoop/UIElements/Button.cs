@@ -14,7 +14,7 @@ namespace SwoopLib.UIElements {
 
         bool click_highlight = false;
 
-        Action custom_draw;
+        Action<UIElement> custom_draw;
 
         public Action click_action = null;
 
@@ -25,7 +25,7 @@ namespace SwoopLib.UIElements {
             }
         }
 
-        public Button(string name, Action custom_draw, XYPair position, XYPair size) : base(name, position, size) {
+        public Button(string name, Action<UIElement> custom_draw, XYPair position, XYPair size) : base(name, position, size) {
             _text = text;
             _auto_size = false;
             
@@ -73,9 +73,7 @@ namespace SwoopLib.UIElements {
             if (!visible) return;
 
             if (custom_draw != null) {
-                //Drawing.fill_rect(position + XYPair.One, position + size, click_highlight ? Swoop.get_color(this) : Swoop.UI_background_color);
                 Drawing.image(draw_target, position.ToVector2(), size.ToVector2(), Color.White);
-                //Drawing.rect(position + XYPair.One, position + size, Swoop.get_color(this), 1f);
 
             } else {
                 Drawing.fill_rect_outline(position + XYPair.One, position + size, click_highlight ? Swoop.get_color(this) : Swoop.UI_background_color, Swoop.get_color(this), 1f);
@@ -85,7 +83,7 @@ namespace SwoopLib.UIElements {
         }
 
         internal override void draw_rt() {
-            if (custom_draw != null) custom_draw();
+            if (custom_draw != null) custom_draw(this);
         }
         internal override void added() { }
 

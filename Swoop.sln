@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SwoopLib", "Swoop\SwoopLib.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MGRawInputLib", "MGRawInputLib\MGRawInputLib.csproj", "{795B2BE7-4B5B-45A2-9E23-0DC6F6AA0357}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NestEdit", "NestEdit\NestEdit.csproj", "{580C1EDA-3971-4D51-A049-EF07F51C42E6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{795B2BE7-4B5B-45A2-9E23-0DC6F6AA0357}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{795B2BE7-4B5B-45A2-9E23-0DC6F6AA0357}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{795B2BE7-4B5B-45A2-9E23-0DC6F6AA0357}.Release|Any CPU.Build.0 = Release|Any CPU
+		{580C1EDA-3971-4D51-A049-EF07F51C42E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{580C1EDA-3971-4D51-A049-EF07F51C42E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{580C1EDA-3971-4D51-A049-EF07F51C42E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{580C1EDA-3971-4D51-A049-EF07F51C42E6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

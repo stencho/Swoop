@@ -10,6 +10,9 @@ namespace SwoopLib {
     public static class BaseExt {
         public static XYPair ToXYPair(this Point p) => new XYPair(p.X, p.Y);
         public static XYPair ToXYPair(this Vector2 p) => new XYPair(p.X, p.Y);
+
+        public static XYPair positionToXYPair(this Rectangle r) => r.Location.ToXYPair();
+        public static XYPair sizeToXYPair(this Rectangle r) => r.Size.ToXYPair();
     }
 
     //disable warnings for equals/hashcode overrides - works fine without
@@ -190,6 +193,7 @@ namespace SwoopLib {
 
         private static XYPair _one = new XYPair { X = 1, Y = 1 };
         private static XYPair _zero = new XYPair { X = 0, Y = 0 };
+        private static XYPair _minus_one = new XYPair { X = -1, Y = -1 };
 
         private static XYPair _unitX = new XYPair { X = 1, Y = 0 };
         private static XYPair _unitY = new XYPair { X = 0, Y = 1 };
@@ -202,12 +206,13 @@ namespace SwoopLib {
 
         public static XYPair One => _one;
         public static XYPair Zero => _zero;
+        public static XYPair MinusOne => _minus_one;
 
         public static XYPair Up => -_unitY;
         public static XYPair Down => _unitY;
 
         public static XYPair Right => _unitX;
-        public static XYPair Left => -_unitX;        
+        public static XYPair Left => -_unitX;      
     }
 
 #pragma warning restore CS0661 // Type defines operator == or operator != but does not override Object.GetHashCode()

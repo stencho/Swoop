@@ -32,11 +32,11 @@ namespace SwoopLib.UIElements
             Drawing.fill_rect_outline(position + XYPair.One, position + size, Swoop.UI_background_color, Swoop.get_color(this), 1f);
 
             if (!string.IsNullOrEmpty(left_text))
-                Drawing.text(left_text, position + XYPair.One * 3, Swoop.get_color(this));
+                Drawing.text(left_text, position + (XYPair.Down * 2) + (XYPair.Right * 3), Swoop.get_color(this));
             if (!string.IsNullOrEmpty(right_text)) {
                 float right_text_width = Drawing.measure_string_profont(right_text).X;
                 Drawing.text(right_text,
-                    position + (XYPair.UnitY * 3) + (XYPair.UnitX * size.X) - (XYPair.UnitX * (right_text_width + 3f))
+                    position + (XYPair.UnitY * 2) + (XYPair.UnitX * size.X) - (XYPair.UnitX * (right_text_width + 3f))
                     , Swoop.get_color(this));
             }
         }

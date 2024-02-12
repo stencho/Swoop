@@ -17,8 +17,8 @@ namespace SwoopLib.UIElements {
 
         int left_margin = 4;
 
-        bool is_selected => parent.find_index(this) == parent.selected_index;
-        bool is_stored_click => parent.find_index(this) == parent.stored_index;
+        public bool is_selected => parent.find_index(this) == parent.selected_index;
+        public bool is_stored_click => parent.find_index(this) == parent.stored_index;
 
 
         bool _custom_draw = false;
@@ -59,7 +59,7 @@ namespace SwoopLib.UIElements {
         void draw_text(XYPair position, XYPair size) {
             Drawing.text(text, XYPair.Zero + (XYPair.UnitX * left_margin), 
                 is_selected || is_stored_click
-                ? Swoop.UI_highlight_color : Swoop.UI_color);
+                ? Swoop.UI_background_color : Swoop.UI_color);
         }
 
         public ListBoxItem(string text) {
@@ -268,27 +268,37 @@ namespace SwoopLib.UIElements {
                     if ((item_bottom > scroll_position && item_bottom < scroll_position + lb_height) ||
                         (running_height > scroll_position && running_height < scroll_position + lb_height)) {
 
+
+                        if (item.is_selected || item.is_stored_click)
+                            Drawing.fill_rect(
+                                (XYPair.UnitY * (running_height - scroll_position)),
+                                (XYPair.UnitY * (running_height - scroll_position)) + item.size + (XYPair.UnitY * (top_margin + bottom_margin + 2)),
+                                Swoop.get_color(this));
+
                         if (item.render_target != null)
                             Drawing.image(item.render_target, (XYPair.UnitY * (running_height - scroll_position)) + (Vector2.UnitY * top_margin), item.size);
                     }
 
                     running_height += item.height + top_margin + bottom_margin + 1;
                 }
+
                 bool stored = (stored_index == index || stored_index == index + 1);
                 bool mouse_on_index = (mouse_over_index == index || mouse_over_index == index + 1);
                 bool selected = (selected_index == index || selected_index == index + 1);
 
-                if (stored || mouse_on_index)
-                    Drawing.fill_rect_dither(
-                        (XYPair.UnitY * (running_height - scroll_position)), 
-                        (XYPair.UnitY * (running_height - scroll_position)) + (Vector2.UnitX * size_minus_scroll_bar.X) + (Vector2.UnitY), 
-                        selected || stored ? Swoop.UI_highlight_color : Swoop.UI_color, Swoop.UI_background_color);
-                else 
-                    Drawing.line(
-                        (Vector2.UnitY * (running_height - scroll_position)), 
-                        (Vector2.UnitY * (running_height - scroll_position)) + (Vector2.UnitX * size_minus_scroll_bar.X),
-                        selected_index == index || selected_index == index + 1? Swoop.UI_highlight_color : Swoop.UI_color, 1f);
-                
+                //jesus christ
+                if ((item.custom_draw && (item.is_selected || item.is_stored_click)) || (!(item.is_selected || item.is_stored_click))) {
+                    if (stored || mouse_on_index)
+                        Drawing.fill_rect_dither(
+                            (XYPair.UnitY * (running_height - scroll_position)),
+                            (XYPair.UnitY * (running_height - scroll_position)) + (Vector2.UnitX * size_minus_scroll_bar.X) + (Vector2.UnitY),
+                            selected || stored ? Swoop.UI_highlight_color : Swoop.UI_color, Swoop.UI_background_color);
+                    else
+                        Drawing.line(
+                            (Vector2.UnitY * (running_height - scroll_position)),
+                            (Vector2.UnitY * (running_height - scroll_position)) + (Vector2.UnitX * size_minus_scroll_bar.X),
+                            selected_index == index || selected_index == index + 1 ? Swoop.get_color(this) : Swoop.UI_color, 1f);
+                }
                 index++;
             }
 

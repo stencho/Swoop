@@ -35,10 +35,16 @@ namespace MGRawInputLib {
         public RawInputMouseState rawinput_mouse_state_previous;
 
         public HashSet<KeyTime> pressed_keys => Input.pressed_keys;
-        HashSet<KeyTime> previous_pressed_keys;
+        HashSet<KeyTime> previous_pressed_keys = new HashSet<KeyTime>();
 
         public HashSet<KeyTime> just_pressed_keys = new HashSet<KeyTime>();
         public HashSet<KeyTime> held_keys = new HashSet<KeyTime>();
+
+        bool _ctrl, _shift, _alt;
+
+        public bool ctrl => _ctrl;
+        public bool shift => _shift;
+        public bool alt => _alt;
 
         Point _mouse_delta_acc = Point.Zero;
         Point mouse_delta_accumulated { 
@@ -73,6 +79,16 @@ namespace MGRawInputLib {
             _mouse_delta_acc += p;
         }
 
+        public void handle_key(Keys key) {
+            foreach (KeyTime k in pressed_keys) {
+                if (k.key == key) k.handle();
+            }
+        }
+        public void unhandle_key(Keys key) {
+            foreach (KeyTime k in pressed_keys) {
+                if (k.key == key) k.unhandle();
+            }
+        }
 
         public InputHandler() {
             Input.handlers.Add(this);
@@ -106,10 +122,8 @@ namespace MGRawInputLib {
         }
 
         public void update() {
-            previous_pressed_keys = Input.pressed_keys;
-
             just_pressed_keys.Clear();
-            held_keys.Clear();
+            //held_keys.Clear();
 
             lock (pressed_keys) {
                 foreach (var k in pressed_keys) {
@@ -119,6 +133,14 @@ namespace MGRawInputLib {
 
                     if (k.held)
                         held_keys.Add(k);
+                }
+            }
+
+            lock (held_keys) {
+                foreach (var k in held_keys) {
+                    if (!pressed_keys.Contains(k)) {
+                        held_keys.Remove(k);
+                    }
                 }
             }
 
@@ -144,6 +166,16 @@ namespace MGRawInputLib {
             rawinput_mouse_state.Delta = mouse_delta;
             rawinput_mouse_state.ScrollDelta = scroll_delta_accumulated;
 
+            //ctrl/shift
+            _ctrl = is_pressed(Keys.LeftControl) || is_pressed(Keys.RightControl);
+            _shift = is_pressed(Keys.LeftShift) || is_pressed(Keys.RightShift);
+            _alt = is_pressed(Keys.LeftAlt) || is_pressed(Keys.RightAlt);
+
+            lock (pressed_keys) {
+                previous_pressed_keys.Clear();
+                foreach (var v in pressed_keys)
+                    previous_pressed_keys.Add(v);
+            }
         }
 
         public bool is_pressed(Keys key) {
@@ -153,6 +185,7 @@ namespace MGRawInputLib {
                 return rawinput_key_state.IsKeyDown(key);
             }
         }
+
         public bool was_pressed(Keys key) {
             if (Input.poll_method == Input.input_method.MonoGame) {
                 return key_state_previous.IsKeyDown(key);
