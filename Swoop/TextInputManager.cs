@@ -280,7 +280,7 @@ namespace SwoopLib {
                 var sel = get_actual_selection_min_max();
 
                 cursor_pos.X = sel.min.X;
-                delete_text(sel.min.Y, sel.min.X, sel.max.X - sel.min.X);
+                delete_text(sel.min.Y, sel.min.X, (sel.max.X - sel.min.X));
 
                 clear_selection();
             } else {
@@ -325,7 +325,7 @@ namespace SwoopLib {
 
             } else {
                 for (int i = 0; i < count; i++) {
-                    if (start + i == lines[line].length+1 || start == lines[line].length) {
+                    if (start + i == lines[line].length || start == lines[line].length) {
                         Debug.Write($" L");
                         if (line+1 >= line_count) break;
                         lines[line].text += lines[line+1].text;
