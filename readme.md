@@ -9,10 +9,13 @@ Looks better than it works.
 ![Most current major change screenshot](current.png)
 
 ### Implemented UI Elements and Systems
-- [ ] Drop-down List (ComboBox) **(IMPORTANT)**
-- [ ] Numeric Up/Down **(IMPORTANT)**
-- [ ] OptionSlider (Progress-bar-esque multi-choice selection bar) **(IMPORTANT)**
-- [ ] Tooltip + full-screen top-layer AutoRT + registration system **(IMPORTANT)**
+**(PRIORITY)**
+- [ ] Drop-down List (ComboBox) 
+- [ ] Numeric Up/Down
+- [ ] OptionSlider (Progress-bar-esque multi-choice selection bar)
+- [ ] Tooltip + full-screen top-layer AutoRT + registration system
+
+**(THE LIST)**
 - [x] Button
 - [x] CheckBox
 - [ ] Context menu + registration system
@@ -34,6 +37,7 @@ Looks better than it works.
 - [x] TextBox and a multi-line TextEditor *(both still need mouse support, editor still needs scrolling and word wrap at minimum)*
 - [x] Title Bar (with window dragging)
 - [x] Toggle Button
+
 ### Implemented useful features and effects
 - UIElements are simple to build, fully aware of mouse state, and can automatically draw all of their contents to a RenderTarget2D by setting a bool, to avoid drawing outside their bounds
 - High poll rate, multi-threaded, RawInput-based mouse and keyboard support (with MonoGame as a fallback input handler, also managed in a way which supports multi-threading)
