@@ -60,7 +60,7 @@ namespace SwoopLib {
     public class TextInputManager {
         public bool input_enabled = true;
 
-        bool multiline = true;
+        public bool multiline = true;
         bool insert_mode = false;
 
         XYPair previous_cursor_pos = XYPair.Zero;

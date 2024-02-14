@@ -62,8 +62,9 @@ namespace NestEdit {
         }
 
         protected void build_UI() {
-            UI.add_element(new TextEditor("main_text_box", XYPair.Zero, resolution));
-
+            UI.add_element(new TextEditor("main_text_box", "test", XYPair.Zero, resolution));
+            UI.elements["main_text_box"].can_be_focused = false;
+            
             Swoop.resize_end = (XYPair size) => {
                 resolution = size;
 

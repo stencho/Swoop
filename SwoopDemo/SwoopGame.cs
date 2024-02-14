@@ -314,6 +314,7 @@ namespace SwoopDemo {
             ((ProgressBar)UI.elements["progress_bar_clickable_vertical_inverted"]).clickable = true;
             ((ProgressBar)UI.elements["progress_bar_clickable_vertical_inverted"]).text = "clickable inv";
 
+            //ListBox
             UI.add_element(new Label("listbox_label", "ListBox", gjk_panel.right_xy + (XYPair.UnitX * 10) - (XYPair.UnitY * 15)));
 
             ListBox test_listbox = new ListBox("test_listbox", gjk_panel.right_xy + (XYPair.UnitX * 10) + (XYPair.UnitY * 1), new XYPair(200, 320));
@@ -344,10 +345,33 @@ namespace SwoopDemo {
             };
 
             test_listbox.add_item(new ListBoxItem("here comes some random spam!"));
-
-            //ListBox
             UI.add_element(test_listbox);
             UI.add_element(test_listbox_add_button);
+
+
+            UI.add_element(new TextBox("text_box", "this is a test textbox",
+                UI.elements["test_listbox"].position + UI.elements["test_listbox"].size.X_only + (XYPair.Right * 8),
+                ((UI.elements["test_listbox"].size * 0.75f) * (XYPair.UnitX * 2)) + (XYPair.UnitY * 19)
+                ));
+
+            //text editor
+            UI.add_element(new TextEditor("text_editor", 
+                "this is a literal actual text editor" +
+                "\n" +
+                "\nI don't really know why I thought that this" +
+                "\nwas a good idea but it did let me implement" +
+                "\na fairly robust system for editing text" +                
+                "\n" +
+                "\nit is still missing a ton of features though, " +
+                "\nword wrap and scrolling still need to be implemented" +
+                "\nthere is a line counter but no scrolling" +
+                "\nvery good priorities" +
+                "\n" +
+                "\n- CTRL + L to toggle line count",
+
+                UI.elements["test_listbox"].position + UI.elements["test_listbox"].size.X_only + (XYPair.Right * 8) + (XYPair.Down * 25),
+                UI.elements["test_listbox"].size * 0.75f * (XYPair.One + XYPair.Right)));
+
 
         }
 

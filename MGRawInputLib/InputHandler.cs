@@ -106,10 +106,13 @@ namespace MGRawInputLib {
         public string list_keys() {
             if (pressed_keys == null) return "";
             StringBuilder sb = new StringBuilder();
-            foreach (KeyTime key in pressed_keys) { sb.Append(key.key.ToString()); sb.Append(", "); }
+            lock (pressed_keys) {
+                foreach (KeyTime key in pressed_keys) { sb.Append(key.key.ToString()); sb.Append(", "); }
+            }
             if (sb.Length > 0)
                 sb.Remove(sb.Length - 2, 2);
             return sb.ToString();
+
         }
 
         public string list_held_keys() {
