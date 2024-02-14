@@ -11,7 +11,6 @@ namespace SwoopLib.UIElements {
         List<Shape2D> shapes = new List<Shape2D>();
         List<GJK2D.gjk_result> results = new List<GJK2D.gjk_result>();
 
-        //LateDrawRenderTarget sfp;
         public GJKTestPanel(string name, XYPair position, XYPair size) 
             : base(name, position, size, null) {
 
@@ -19,7 +18,7 @@ namespace SwoopLib.UIElements {
             shapes.Add(new Square(Vector2.One * 50f + Vector2.UnitX * 100f, Vector2.One * 25f));
             shapes.Add(new Polygon(Vector2.One * 150f, 25));
 
-            //sfp = new LateDrawRenderTarget();
+            can_be_focused = true;
         }
 
         int selected_simplex = 0;
@@ -52,6 +51,7 @@ namespace SwoopLib.UIElements {
             foreach (GJK2D.gjk_result result in results) {
                 result.draw();
             }
+            Drawing.rect(XYPair.One, size, Swoop.get_color(this), 1f);
         }
 
         internal override void draw() {
@@ -61,8 +61,8 @@ namespace SwoopLib.UIElements {
 
         internal override void update() {
             if (!visible) return;
-
-            if (GJK2D.SAVE_SIMPLICES) {
+            
+            if (GJK2D.SAVE_SIMPLICES && focused) {
                 if (Swoop.input_handler.just_pressed(Microsoft.Xna.Framework.Input.Keys.A)) {
                     selected_shape--;
                     if (selected_shape < 0) selected_shape = 0;
@@ -100,17 +100,19 @@ namespace SwoopLib.UIElements {
             }
 
             var p = Vector2.Zero;
-            if (Swoop.input_handler.is_pressed(Keys.Up)) {
-                p += -Vector2.UnitY;
-            }
-            if (Swoop.input_handler.is_pressed(Keys.Down)) {
-                p += Vector2.UnitY;
-            }
-            if (Swoop.input_handler.is_pressed(Keys.Left)) {
-                p += -Vector2.UnitX;
-            }
-            if (Swoop.input_handler.is_pressed(Keys.Right)) {
-                p += Vector2.UnitX;
+            if (focused) {
+                if (Swoop.input_handler.is_pressed(Keys.Up)) {
+                    p += -Vector2.UnitY;
+                }
+                if (Swoop.input_handler.is_pressed(Keys.Down)) {
+                    p += Vector2.UnitY;
+                }
+                if (Swoop.input_handler.is_pressed(Keys.Left)) {
+                    p += -Vector2.UnitX;
+                }
+                if (Swoop.input_handler.is_pressed(Keys.Right)) {
+                    p += Vector2.UnitX;
+                }
             }
 
             cursor.position += p;
