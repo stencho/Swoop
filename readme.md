@@ -9,31 +9,31 @@ Looks better than it works.
 ![Most current major change screenshot](current.png)
 
 ### Implemented UI Elements and Systems
+- [ ] Drop-down List (ComboBox) **(IMPORTANT)**
+- [ ] Numeric Up/Down **(IMPORTANT)**
+- [ ] OptionSlider (Progress-bar-esque multi-choice selection bar) **(IMPORTANT)**
+- [ ] Tooltip + full-screen top-layer AutoRT + registration system **(IMPORTANT)**
 - [x] Button
 - [x] CheckBox
 - [ ] Context menu + registration system
 - [ ] Cursor replacement + switching system
 - [x] DialogBox
-- [ ] Drop-down List (ComboBox) **(IMPORTANT)**
 - [x] Label
-- [x] ListBox (still needs mouse support for scrolling + actions for events)
+- [x] ListBox *(still needs mouse support for scrolling + actions for events)*
 - [ ] MenuStrip (file, edit, view, etc. the strip of buttons itself)
-- [ ] - MenuList (spawned by the buttons, contains a list of UI elements)
+- [ ] - MenuList (spawned by the buttons, draws a list of UI elements)
 - [ ] - SubMenu button (to spawn submenus more easily from the MenuLists)
 - [ ] - GameMenu (MenuStrip but vertical, modal, and nesting)
-- [ ] Numeric Up/Down **(IMPORTANT)**
-- [ ] OptionSlider (Progress-bar-esque multi-choice selection bar) **(IMPORTANT)**
 - [x] Panel
-- [x] Progress Bar (+ combined TrackBar)
+- [x] ProgressBar + TrackBar *(would like to add CooldownBar and TickBar)*
 - [x] Radio Buttons
 - [ ] Resize Anchor system (to automatically move/resize elements when a UIElementManager changes size)
 - [x] Resize Handle
-- [ ] Tab Control (a bunch of panels stuck together)
-- [x] TextBox (and text editor, both need mouse support still)
+- [x] SubWindows (Panels with handles)
+- [ ] Tab Control (A bunch of panels stuck together)
+- [x] TextBox and a multi-line TextEditor *(both still need mouse support, editor still needs scrolling and word wrap at minimum)*
 - [x] Title Bar (with window dragging)
 - [x] Toggle Button
-- [ ] Tooltip + registration system **(IMPORTANT)**
-
 ### Implemented useful features and effects
 - UIElements are simple to build, fully aware of mouse state, and can automatically draw all of their contents to a RenderTarget2D by setting a bool, to avoid drawing outside their bounds
 - High poll rate, multi-threaded, RawInput-based mouse and keyboard support (with MonoGame as a fallback input handler, also managed in a way which supports multi-threading)
