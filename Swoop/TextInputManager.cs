@@ -74,8 +74,8 @@ namespace SwoopLib {
         public XYPair selection_start => _selection_start;
         public XYPair selection_end => _selection_end;
 
-        enum selection_shape { LINEAR, BLOCK };
-        selection_shape select_shape = selection_shape.LINEAR;
+        public enum selection_shape { LINEAR, BLOCK };
+        public selection_shape select_shape = selection_shape.LINEAR;
 
         public bool has_selection() {
             if (_selection_start == XYPair.MinusOne) return false;
@@ -190,7 +190,8 @@ namespace SwoopLib {
             if (has_selection()) {
                 delete_selected_text();
             }
-
+            
+            validate_cursor();
             lines[cursor_pos.Y].insert_text(cursor, text);
 
             cursor_pos.X += text.Length;
@@ -286,10 +287,49 @@ namespace SwoopLib {
         void delete_selected_text() {
             var sel = get_actual_selection_min_max();
 
-            cursor_pos.X = sel.min.X;
-            delete_text(sel.min.Y, sel.min.X, (sel.max.X - sel.min.X));
+            var top_line = sel.min.Y;
+            var bottom_line = sel.max.Y;
+            var selected_lines = bottom_line - top_line;
+
+            var top_line_x = (selection_start.Y < selection_end.Y) ? selection_start.X : selection_end.X;
+            var bottom_line_x = (selection_start.Y > selection_end.Y) ? selection_start.X : selection_end.X;
+
+            var single_line_select = top_line == bottom_line;
+
+            if (single_line_select) {
+                delete_text(sel.min.Y, sel.min.X, (sel.max.X - sel.min.X));
+
+            } else {                
+                //cursor isn't at the start of the top line, so delete from cursor until the end
+                if (top_line_x > 0)
+                    delete_text(top_line, top_line_x, lines[top_line].text.Length - top_line_x);
+                //cursor is at the start of the top line, so remove the whole line
+                else {
+                    top_line--;
+                    selected_lines++;
+                }
+
+                //similar but in reverse for the bottom line, if the selection X is at the end of the line, remove the whole line
+                if (bottom_line_x < lines[bottom_line].text.Length)
+                    delete_text(bottom_line, 0, bottom_line_x);
+                else 
+                    selected_lines++;
+
+                //go ahead and actually do the line removal
+                lock (lines) {
+                    if (selected_lines >= 2) {
+                        for (int i = 1; i <= selected_lines - 1; i++) {
+                            Debug.WriteLine($"line {i}");
+                            lines.RemoveAt(top_line + 1);
+                        }
+                    }
+                }
+            }
 
             clear_selection();
+
+            cursor_pos = sel.min;
+            validate_cursor();
         }
 
         void delete_text_at_cursor(int count) {
@@ -303,59 +343,59 @@ namespace SwoopLib {
         }
 
         public void delete_text(int line, int start, int count) {
-            //stupid loop to handle deleting text within the TextLine system
-            if (count < 0) {
-                var c = Math.Abs(count);
-                for (int i = 0; i < c; i++) {
-                    //at the start of a line so instead of removing a character
-                    //we need to move the current line's text to the above line
-                    //and delete the current one
-                    if (start - i <= 0) {
-                        if (line <= 0) break;
-                        var t = lines[line].text;
+            lock (lines) {
+                //stupid loop to handle deleting text within the TextLine system
+                if (count < 0) {
+                    var c = Math.Abs(count);
+                    for (int i = 0; i < c; i++) {
+                        //at the start of a line so instead of removing a character
+                        //we need to move the current line's text to the above line
+                        //and delete the current one
+                        if (start - i <= 0) {
+                            if (line <= 0) break;
+                            var t = lines[line].text;
 
-                        cursor_pos.Y--;
-                        lines.RemoveAt(line);
+                            cursor_pos.Y--;
+                            lines.RemoveAt(line);
 
-                        line--;
+                            line--;
 
-                        cursor_pos.X = lines[line].length;
-                        start = cursor_pos.X + 1;
+                            cursor_pos.X = lines[line].length;
+                            start = cursor_pos.X + 1;
 
-                        lines[line].text += t;
+                            lines[line].text += t;
 
-                    } else {
-                        lines[line].delete_text_no_update(start - 1 - i, 1);
-                        cursor_pos.X--;
+                        } else {
+                            lines[line].delete_text_no_update(start - 1 - i, 1);
+                            cursor_pos.X--;
+                        }
+
+                        lines[line].update_size_length();
+                        validate_cursor();
+                    }
+
+                } else {                    
+                    for (int i = 0; i < count; i++) {
+                        if (start + i >= lines[line].length) {
+                            Debug.Write($"L");
+                            if (line + 1 >= line_count) break;
+                            lines[line].text += lines[line + 1].text;
+                            lines[line].update_size_length();
+
+                            lines.RemoveAt(line + 1);
+                            Debug.Write($"E");
+
+                        } else {
+                            lines[line].delete_text_no_update(start, 1);
+                            Debug.Write($" C{start + i}");
+                        }
                     }
 
                     lines[line].update_size_length();
-                    validate_cursor();
-                }
-                
-                //cursor_pos.X += count;
-
-            } else {
-                for (int i = 0; i < count; i++) {
-                    if (start + i == lines[line].length || start == lines[line].length) {
-                        Debug.Write($" L");
-                        if (line+1 >= line_count) break;
-                        lines[line].text += lines[line+1].text;
-                        
-                        lines.RemoveAt(line + 1);
-                        Debug.Write($"E");
-
-                    } else {
-                        lines[line].delete_text_no_update(start, 1);
-                        Debug.Write($" C");
-                    }
                     Debug.Write($"\n");
-
-                    lines[line].update_size_length();
-                    validate_cursor();
                 }
-            }
 
+            }
             store_cursor_X();
         }
 
@@ -406,7 +446,7 @@ namespace SwoopLib {
             cursor_pos.Y--;           
 
             validate_cursor();
-
+            //return;
             if (current_line_text_length > cursor_pos_stored_X)
                 cursor_pos.X = cursor_pos_stored_X;
             else {
@@ -419,7 +459,7 @@ namespace SwoopLib {
             cursor_pos.Y++;
 
             validate_cursor();
-
+           //return;
             if (current_line_text_length > cursor_pos_stored_X)
                 cursor_pos.X = cursor_pos_stored_X;
             else {
@@ -455,19 +495,23 @@ namespace SwoopLib {
         void cursor_home_line() { 
             cursor_pos.X = 0;
             validate_cursor();
+            store_cursor_X();
         }
         void cursor_home_file() {
             cursor_pos = XYPair.Zero;
             validate_cursor();
+            store_cursor_X();
         }
 
         void cursor_end_line() { 
             cursor_pos.X = current_line_text_length;
             validate_cursor();
+            store_cursor_X();
         }
         void cursor_end_file() {
             cursor_pos.Y = line_count - 1;
             validate_cursor();
+            store_cursor_X();
         }
 
         // haha, oh boy
@@ -491,11 +535,24 @@ namespace SwoopLib {
 
                 case Keys.Up:
                     if (!input_handler.shift) clear_selection();
+                    if (input_handler.shift && !has_selection())
+                        start_selection();
+
                     cursor_up();
+
+                    if (input_handler.shift)
+                        end_selection();
+
                     return;
                 case Keys.Down:
                     if (!input_handler.shift) clear_selection();
+                    if (input_handler.shift && !has_selection())
+                        start_selection();
+
                     cursor_down();
+
+                    if (input_handler.shift)
+                        end_selection();
                     return;
 
                 case Keys.Left:
