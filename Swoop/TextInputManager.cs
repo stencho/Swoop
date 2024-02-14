@@ -299,12 +299,16 @@ namespace SwoopLib {
             if (single_line_select) {
                 delete_text(sel.min.Y, sel.min.X, (sel.max.X - sel.min.X));
 
+                clear_selection();
+                cursor_pos = sel.min;
+
             } else {                
                 //cursor isn't at the start of the top line, so delete from cursor until the end
                 if (top_line_x > 0)
                     delete_text(top_line, top_line_x, lines[top_line].text.Length - top_line_x);
                 //cursor is at the start of the top line, so remove the whole line
-                else {
+                //line also actually has text on it
+                else if (lines[top_line].text.Length > 0) {
                     top_line--;
                     selected_lines++;
                 }
@@ -312,23 +316,29 @@ namespace SwoopLib {
                 //similar but in reverse for the bottom line, if the selection X is at the end of the line, remove the whole line
                 if (bottom_line_x < lines[bottom_line].text.Length)
                     delete_text(bottom_line, 0, bottom_line_x);
-                else 
+                else if (lines[bottom_line].text.Length > 0) {
                     selected_lines++;
+                }
 
                 //go ahead and actually do the line removal
                 lock (lines) {
                     if (selected_lines >= 2) {
                         for (int i = 1; i <= selected_lines - 1; i++) {
-                            Debug.WriteLine($"line {i}");
+                            //Debug.WriteLine($"line {i}");
                             lines.RemoveAt(top_line + 1);
                         }
                     }
-                }
+
+                    if (lines.Count > 1) {
+                        lines[top_line].text += lines[top_line + 1].text;
+                        lines.RemoveAt(top_line + 1);
+                    }
+                }                
+
+                clear_selection();
+                cursor_pos = new XYPair(top_line_x, sel.min.Y);
             }
 
-            clear_selection();
-
-            cursor_pos = sel.min;
             validate_cursor();
         }
 
@@ -377,22 +387,22 @@ namespace SwoopLib {
                 } else {                    
                     for (int i = 0; i < count; i++) {
                         if (start + i >= lines[line].length) {
-                            Debug.Write($"L");
+                            //Debug.Write($"L");
                             if (line + 1 >= line_count) break;
                             lines[line].text += lines[line + 1].text;
                             lines[line].update_size_length();
 
                             lines.RemoveAt(line + 1);
-                            Debug.Write($"E");
+                            //Debug.Write($"E");
 
                         } else {
                             lines[line].delete_text_no_update(start, 1);
-                            Debug.Write($" C{start + i}");
+                            //Debug.Write($" C{start + i}");
                         }
                     }
 
                     lines[line].update_size_length();
-                    Debug.Write($"\n");
+                    //Debug.Write($"\n");
                 }
 
             }
@@ -492,24 +502,56 @@ namespace SwoopLib {
             validate_cursor();
         }
 
-        void cursor_home_line() { 
+        void cursor_home_line() {
+            if (!input_handler.shift) clear_selection();
+            if (input_handler.shift && !has_selection())
+                start_selection();
+
             cursor_pos.X = 0;
+
+            if (input_handler.shift)
+                end_selection();
+
             validate_cursor();
             store_cursor_X();
         }
         void cursor_home_file() {
+            if (!input_handler.shift) clear_selection();
+            if (input_handler.shift && !has_selection())
+                start_selection();
+
             cursor_pos = XYPair.Zero;
+
+            if (input_handler.shift)
+                end_selection();
+
             validate_cursor();
             store_cursor_X();
         }
 
-        void cursor_end_line() { 
+        void cursor_end_line() {
+            if (!input_handler.shift) clear_selection();
+            if (input_handler.shift && !has_selection())
+                start_selection();
+
             cursor_pos.X = current_line_text_length;
+
+            if (input_handler.shift)
+                end_selection();
+
             validate_cursor();
             store_cursor_X();
         }
         void cursor_end_file() {
+            if (!input_handler.shift) clear_selection();
+            if (input_handler.shift && !has_selection())
+                start_selection();
+
             cursor_pos.Y = line_count - 1;
+
+            if (input_handler.shift)
+                end_selection();
+
             validate_cursor();
             store_cursor_X();
         }

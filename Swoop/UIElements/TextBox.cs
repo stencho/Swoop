@@ -94,26 +94,39 @@ namespace SwoopLib.UIElements {
             for (int i = 0; i < text_manager.lines.Count; i++) {
                 TextLine tl = text_manager.lines[i];
                 bool cursor_on_line = i == text_manager.cursor_pos.Y;
-                bool empty_line = text_manager.lines[i].length == 0;
-                
+                bool empty_line = (text_manager.lines[i].length == 0);
+
                 if ((text_manager.has_selection() && text_manager.select_shape == TextInputManager.selection_shape.LINEAR) && !single_line_select) {
                     if (i == top_line) {
+                        empty_line = text_manager.lines[i].length == top_line_x;
                         Drawing.fill_rect_dither(
-                            (single_character_size * ((XYPair.UnitX * top_line_x))) + line_count_width + XYPair.Down,
-                            (single_character_size * ((XYPair.UnitX * (top_line_x + (text_manager.lines[top_line].text.Length - top_line_x) + (empty_line ? 1 : 0))))) 
-                            + line_count_width + XYPair.Down + single_character_size.Y_only,
+                            (single_character_size * ((XYPair.UnitY * top_line) + (XYPair.UnitX * top_line_x))) 
+                            + line_count_width + (XYPair.Down * 2),
+
+                            (single_character_size * ((XYPair.UnitY * top_line) + (XYPair.UnitX * (top_line_x + (text_manager.lines[top_line].text.Length - top_line_x))))) 
+                            + ((single_character_size / 2) * (XYPair.UnitX * (empty_line ? 1:0)))
+                            + (XYPair.Down * 3) + line_count_width + single_character_size.Y_only,
+
                             Swoop.UI_background_color, Swoop.UI_disabled_color);
                     } else if (i > top_line && i < bottom_line) {
                         Drawing.fill_rect_dither(
-                            (single_character_size * (XYPair.UnitY * i)) + line_count_width + XYPair.Down,
-                            (single_character_size * ((XYPair.UnitX * (text_manager.lines[i].text.Length + (empty_line ? 1 : 0))) + (XYPair.UnitY * i))) 
-                            + line_count_width + XYPair.Down + single_character_size.Y_only,
+                            (single_character_size * (XYPair.UnitY * i)) 
+                            + line_count_width + (XYPair.Down * 2),
+
+                            (single_character_size * ((XYPair.UnitX * text_manager.lines[i].text.Length) + (XYPair.UnitY * i)))
+                            + ((single_character_size / 2) * (XYPair.UnitX * (empty_line ? 1 : 0)))
+                            + (XYPair.Down * 3) + line_count_width + single_character_size.Y_only,
+
                             Swoop.UI_background_color, Swoop.UI_disabled_color);
                     } else if (i == bottom_line) {
                         Drawing.fill_rect_dither(
-                            (single_character_size * (XYPair.UnitY * bottom_line)) + line_count_width + XYPair.Down,
-                            (single_character_size * ((XYPair.UnitY * bottom_line) + (XYPair.UnitX * (bottom_line_x + (empty_line ? 1 : 0))))) 
-                            + line_count_width + XYPair.Down + single_character_size.Y_only,
+                            (single_character_size * (XYPair.UnitY * bottom_line)) 
+                            + line_count_width + (XYPair.Down * 2),
+
+                            (single_character_size * ((XYPair.UnitY * bottom_line) + (XYPair.UnitX * bottom_line_x)))
+                            + ((single_character_size / 2) * (XYPair.UnitX * (empty_line ? 1 : 0)))
+                            + (XYPair.Down * 3) + line_count_width + single_character_size.Y_only,
+
                             Swoop.UI_background_color, Swoop.UI_disabled_color);
                     }
                 }
