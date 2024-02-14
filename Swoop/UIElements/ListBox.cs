@@ -1,12 +1,14 @@
 ﻿using MGRawInputLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static MGRawInputLib.Input;
 
 namespace SwoopLib.UIElements {
     public class ListBoxItem {
@@ -110,25 +112,39 @@ namespace SwoopLib.UIElements {
     public class ListBox : UIElement {
         List<ListBoxItem> items = new List<ListBoxItem>();
 
-        InputHandler handler = new InputHandler();
+        InputHandler handler = new InputHandler();        
 
         int top_margin = 5;
         int bottom_margin = 4;
 
-        bool _force_selected_item = false;
+        bool _force_selected_item = true;
         public bool force_selected_item {
             get { return _force_selected_item; }
             set {
                 if (_force_selected_item != value) {
-                    if (_force_selected_item == false && value == true && selected_index == -1 && items.Count > 0) 
-                        selected_index = 0;
-
                     _force_selected_item = value;
+                    verify_select();
                 }            
             }
         }
 
+        void verify_select() {
+            if (!force_selected_item) return;
+            if (selected_index < 0) selected_index = 0;
+            if (selected_index >= items.Count) selected_index = items.Count - 1;
+        }
+
         internal int selected_index = -1;
+        public void select_index(int index) { selected_index = index; }
+        public void select_item_above() {
+            selected_index--;
+            verify_select();
+        }
+        public void select_item_below() {
+            selected_index++;
+            verify_select();
+        }
+
         internal int mouse_over_index = -1;
         internal int stored_index = -1;
 
@@ -248,6 +264,9 @@ namespace SwoopLib.UIElements {
 
         public ListBox(string name, XYPair position, XYPair size) : base(name, position, size) {
             enable_render_target = true;
+
+            handler.set_hold_tick_action(check_keys);
+            handler.set_just_pressed_action(check_keys);
         }
 
         internal override void added() {}
@@ -332,8 +351,28 @@ namespace SwoopLib.UIElements {
 
         internal override void handle_focused_input() {}
 
+        internal void check_keys(KeyTime key_time) {
+            if (key_time.held == false) {
+                //JUST PRESSED ONLY
+                switch (key_time.key) {}
+            }
+
+            switch (key_time.key) {
+                case Keys.Up:
+                    select_item_above();
+                    break;
+                case Keys.Down:
+                    select_item_below();
+                    break;
+            }
+        }
+
         internal override void update() {
             handler.update();
+
+            if (focused) {
+                handler.do_action_loops();
+            }
 
             old_visible_area = visible_area_fract_of_height;
 

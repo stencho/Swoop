@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Microsoft.VisualBasic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System.ComponentModel.Design;
 using System.Text;
@@ -288,7 +289,50 @@ namespace MGRawInputLib {
             } else {
                 return false;
             }
-        } 
+        }
+
+
+        public void do_action_loops() {
+            just_pressed_action_loop();
+            hold_repeat_action_loop();
+        }
+
+        Action<KeyTime> just_pressed_action;
+        bool just_pressed_action_set = false;
+        
+        public void set_just_pressed_action(Action<KeyTime> just_pressed_action) {
+            this.just_pressed_action = just_pressed_action;
+            just_pressed_action_set = true;
+        }
+
+        public void just_pressed_action_loop() {
+            if (!just_pressed_action_set) return;
+
+            foreach (Input.KeyTime key_time in just_pressed_keys) {
+                if (!key_time.handled) { 
+                    just_pressed_action(key_time);
+                }
+            }
+        }
+
+
+        Action<KeyTime> hold_tick_action;
+        bool hold_tick_action_set = false;
+
+        public void set_hold_tick_action(Action<KeyTime> tick_action) {
+            this.hold_tick_action = tick_action;
+            hold_tick_action_set = true;
+        }
+
+        public void hold_repeat_action_loop() {
+            if (!hold_tick_action_set) return;
+
+            foreach (Input.KeyTime key_time in pressed_keys) {
+                if ((key_time.held && !key_time.handled) && (key_time.repeat())) {
+                    hold_tick_action(key_time);
+                }
+            }
+        }
     }
 }
 
