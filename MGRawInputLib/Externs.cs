@@ -1797,10 +1797,6 @@ namespace MGRawInputLib {
             RECT rect; GetWindowRect(actual_window_handle, out rect);
             return new Microsoft.Xna.Framework.Point(rect.Location.X, rect.Location.Y);
         }
-        public static void get_window_pos(ref Microsoft.Xna.Framework.Point point) {
-            RECT rect; GetWindowRect(actual_window_handle, out rect);
-            point.X = rect.Location.X; point.Y = rect.Location.Y;
-        }
         public static Microsoft.Xna.Framework.Point get_window_size() {
             RECT rect; GetWindowRect(actual_window_handle, out rect);
             return new Microsoft.Xna.Framework.Point(rect.Size.Width, rect.Size.Height);
@@ -1816,23 +1812,17 @@ namespace MGRawInputLib {
             pxn.Y = pms.Y; 
             return pxn;
         }
-        public static void get_cursor_pos(ref Microsoft.Xna.Framework.Point point) {
-            point.X = pms.X;
-            point.Y = pms.Y;            
-        }
         public static void set_cursor_pos(int x, int y) {
             SetCursorPos(x,y);
         }
         public static void set_cursor_pos(Microsoft.Xna.Framework.Point pos) {
             SetCursorPos(pos.X, pos.Y);
         }
-
-        public static void get_cursor_pos_relative_to_window(ref Microsoft.Xna.Framework.Point point) {
-            get_cursor_pos(ref point);
-
+        public static Microsoft.Xna.Framework.Point get_cursor_pos_relative_to_window() {
+            Microsoft.Xna.Framework.Point p = get_cursor_pos();
             Microsoft.Xna.Framework.Point w = get_window_pos();
 
-            point.X -= w.X; point.Y -= w.Y;
+            return new Microsoft.Xna.Framework.Point(p.X - w.X, p.Y - w.Y);
         }
 
         static IntPtr current_process_monogame_window_handle() {
