@@ -8,33 +8,31 @@ Looks better than it works.
 ### Most current SwoopDemo screenshot
 ![Most current major change screenshot](current.png)
 
-### Implemented UI Elements
-- [ ] Resize Anchor system (to automatically move/resize elements when a UIElementManager changes size)
+### Implemented UI Elements and Systems
 - [x] Button
 - [x] CheckBox
 - [ ] Context menu + registration system
 - [ ] Cursor replacement + switching system
 - [x] DialogBox
-- [ ] Drop-down List (ComboBox) **(NEXT)**
+- [ ] Drop-down List (ComboBox) **(IMPORTANT)**
 - [x] Label
 - [x] ListBox (still needs mouse support for scrolling + actions for events)
-- [ ] Menu Strip
-- [ ] - Menu Bar
-- [ ] - Menu Button
-- [ ] - Submenu
-- [ ] - Menu Toggle
-- [ ] - Menu Slider?
-- [ ] Numeric Up/Down
-- [ ] Option Slider (Multi-choice)
+- [ ] MenuStrip (file, edit, view, etc. the strip of buttons itself)
+- [ ] - MenuList (spawned by the buttons, contains a list of UI elements)
+- [ ] - SubMenu button (to spawn submenus more easily from the MenuLists)
+- [ ] - GameMenu (MenuStrip but vertical, modal, and nesting)
+- [ ] Numeric Up/Down **(IMPORTANT)**
+- [ ] OptionSlider (Progress-bar-esque multi-choice selection bar) **(IMPORTANT)**
 - [x] Panel
 - [x] Progress Bar (+ combined TrackBar)
 - [x] Radio Buttons
+- [ ] Resize Anchor system (to automatically move/resize elements when a UIElementManager changes size)
 - [x] Resize Handle
 - [ ] Tab Control (a bunch of panels stuck together)
 - [x] TextBox (and text editor, both need mouse support still)
 - [x] Title Bar (with window dragging)
 - [x] Toggle Button
-- [ ] Tooltip + registration system
+- [ ] Tooltip + registration system **(IMPORTANT)**
 
 ### Implemented useful features and effects
 - UIElements are simple to build, fully aware of mouse state, and can automatically draw all of their contents to a RenderTarget2D by setting a bool, to avoid drawing outside their bounds
