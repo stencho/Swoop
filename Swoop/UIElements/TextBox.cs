@@ -56,8 +56,8 @@ namespace SwoopLib.UIElements {
                 var minmax = text_manager.get_actual_selection_min_max();
 
                 Drawing.fill_rect_dither(
-                    (XYPair.UnitX) + (single_character_size.X_only * minmax.min.X) + (XYPair.UnitY * 2),
-                    (single_character_size.X_only * minmax.max.X) + size.Y_only - (XYPair.UnitY * 3),
+                    (XYPair.UnitX) + (single_character_size.X_only * minmax.min.X) + (XYPair.UnitY * 2) - (XYPair.UnitX * view_offset),
+                    (single_character_size.X_only * minmax.max.X) + size.Y_only - (XYPair.UnitY * 3) - (XYPair.UnitX * view_offset),
                     Swoop.UI_disabled_color,
                     Swoop.UI_background_color);
             }
@@ -65,10 +65,10 @@ namespace SwoopLib.UIElements {
             Drawing.text(text_manager.lines[0].text, (XYPair.One * 2) - (XYPair.UnitX * view_offset), Swoop.get_color(this));
 
             Drawing.line(
-                    (XYPair.UnitX) + (text_manager.cursor * single_character_size.X_only) - (XYPair.UnitX * view_offset) + (XYPair.UnitY * 2),
-                    (XYPair.UnitX) + (text_manager.cursor * single_character_size.X_only) - (XYPair.UnitX * view_offset) + size.Y_only - (XYPair.UnitY * 3),
+                    (XYPair.UnitX*2) + (text_manager.cursor * single_character_size.X_only) - (XYPair.UnitX * view_offset) + (XYPair.UnitY * 2),
+                    (XYPair.UnitX*2) + (text_manager.cursor * single_character_size.X_only) - (XYPair.UnitX * view_offset) + size.Y_only - (XYPair.UnitY * 3),
 
-                    Swoop.get_color(this), 2f
+                    Swoop.get_color(this), 1f
                     );
         }
 
