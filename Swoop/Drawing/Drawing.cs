@@ -351,10 +351,21 @@ namespace SwoopLib
             sb.DrawString(fnt_profont, text, position, color, MathHelper.ToRadians(90f), Vector2.Zero, 1f, SpriteEffects.None, 1f);
         }
 
-        public static void text_shadow(string text, Vector2 position, Color color) {
-            Drawing.text(text, position + (Vector2.One), Swoop.UI_background_color);
-            Drawing.text(text, position, color);
+        public static void text_shadow(string text, XYPair position, Color color_fg, Color color_bg) {
+            Drawing.text(text, position + XYPair.One, color_bg);
+            Drawing.text(text, position, color_fg);
         }
+        public static void text_shadow(string text, XYPair position, Color color_fg, Color color_bg, XYPair shadow_offset) {
+            Drawing.text(text, position + shadow_offset, color_bg);
+            Drawing.text(text, position, color_fg);
+        }
+        public static void text_shadow(string text, XYPair position, Color color_fg, Color color_bg, params XYPair[] shadow_offsets) {
+            foreach (var offset in shadow_offsets) 
+                Drawing.text(text, position + offset, color_bg);
+
+            Drawing.text(text, position, color_fg);
+        }
+
         public static Vector2 measure_string_profont(string text) {
             return fnt_profont.MeasureString(text);
         }

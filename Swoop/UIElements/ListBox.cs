@@ -57,9 +57,20 @@ namespace SwoopLib.UIElements {
             text_size.Y_only + parent.size_minus_scroll_bar.X_only;
 
         void draw_text(XYPair position, XYPair size) {
-            Drawing.text(text, XYPair.Zero + (XYPair.UnitX * left_margin), 
-                is_selected || is_stored_click
-                ? Swoop.UI_background_color : Swoop.UI_color);
+            if (is_stored_click) {
+                Drawing.text_shadow(text, XYPair.Zero + (XYPair.UnitX * left_margin),
+                    Swoop.UI_background_color,
+                    Swoop.get_color(parent),
+                    XYPair.One, -XYPair.One,
+                    XYPair.Left, XYPair.Right, 
+                    //XYPair.Left * 2, XYPair.Right * 2,
+                    XYPair.Up, XYPair.Down//,
+                    //XYPair.Up * 2, XYPair.Down * 2
+                    );
+            } else {
+                Drawing.text(text, XYPair.Zero + (XYPair.UnitX * left_margin),
+                 is_selected ? Swoop.UI_background_color : Swoop.get_color(parent));
+            }
         }
 
         public ListBoxItem(string text) {
@@ -269,11 +280,17 @@ namespace SwoopLib.UIElements {
                         (running_height > scroll_position && running_height < scroll_position + lb_height)) {
 
 
-                        if (item.is_selected || item.is_stored_click)
+                        if (item.is_selected) {
                             Drawing.fill_rect(
                                 (XYPair.UnitY * (running_height - scroll_position)),
                                 (XYPair.UnitY * (running_height - scroll_position)) + item.size + (XYPair.UnitY * (top_margin + bottom_margin + 2)),
                                 Swoop.get_color(this));
+                        } else if (item.is_stored_click) { 
+                            Drawing.fill_rect_dither(
+                                (XYPair.UnitY * (running_height - scroll_position)),
+                                (XYPair.UnitY * (running_height - scroll_position)) + item.size + (XYPair.UnitY * (top_margin + bottom_margin + 2)),
+                                Swoop.get_color(this), Swoop.UI_background_color);
+                        }
 
                         if (item.render_target != null)
                             Drawing.image(item.render_target, (XYPair.UnitY * (running_height - scroll_position)) + (Vector2.UnitY * top_margin), item.size);
@@ -297,7 +314,7 @@ namespace SwoopLib.UIElements {
                         Drawing.line(
                             (Vector2.UnitY * (running_height - scroll_position)),
                             (Vector2.UnitY * (running_height - scroll_position)) + (Vector2.UnitX * size_minus_scroll_bar.X),
-                            selected_index == index || selected_index == index + 1 ? Swoop.get_color(this) : Swoop.UI_color, 1f);
+                            /*selected_index == index || selected_index == index + 1 ? */Swoop.get_color(this)/* : Swoop.UI_color*/, 1f);
                 }
                 index++;
             }
