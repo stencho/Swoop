@@ -11,13 +11,13 @@ Looks better than it works.
 ### Implemented UI Elements
 - [ ] Resize Anchor system (to automatically move/resize elements when a UIElementManager changes size)
 - [x] Button
-- [x] Check Box
+- [x] CheckBox
 - [ ] Context menu + registration system
-- [ ] Cursor
-- [x] Dialog Box
-- [ ] Drop-down List (ComboBox)
+- [ ] Cursor replacement + switching system
+- [x] DialogBox
+- [ ] Drop-down List (ComboBox) **(NEXT)**
 - [x] Label
-- [x] List Box
+- [x] ListBox (still needs mouse support for scrolling + actions for events)
 - [ ] Menu Strip
 - [ ] - Menu Bar
 - [ ] - Menu Button
@@ -31,7 +31,7 @@ Looks better than it works.
 - [x] Radio Buttons
 - [x] Resize Handle
 - [ ] Tab Control (a bunch of panels stuck together)
-- [x] Text Box (and text editor, both need mouse support still)
+- [x] TextBox (and text editor, both need mouse support still)
 - [x] Title Bar (with window dragging)
 - [x] Toggle Button
 - [ ] Tooltip + registration system
