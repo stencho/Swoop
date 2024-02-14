@@ -186,6 +186,10 @@ namespace SwoopLib {
         }
 
         void insert_text_at_cursor(string text) {
+            if (has_selection()) {
+                delete_selected_text();
+            }
+
             lines[cursor_pos.Y].insert_text(cursor, text);
 
             cursor_pos.X += text.Length;
@@ -275,14 +279,18 @@ namespace SwoopLib {
             delete_text_at_cursor(ws);
         }
 
+        void delete_selected_text() {
+            var sel = get_actual_selection_min_max();
+
+            cursor_pos.X = sel.min.X;
+            delete_text(sel.min.Y, sel.min.X, (sel.max.X - sel.min.X));
+
+            clear_selection();
+        }
+
         void delete_text_at_cursor(int count) {
             if (has_selection()) {
-                var sel = get_actual_selection_min_max();
-
-                cursor_pos.X = sel.min.X;
-                delete_text(sel.min.Y, sel.min.X, (sel.max.X - sel.min.X));
-
-                clear_selection();
+                delete_selected_text();
             } else {
                 delete_text(cursor_pos.Y, cursor_pos.X, count);
             }
