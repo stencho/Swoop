@@ -162,10 +162,10 @@ namespace MGRawInputLib {
             while (run_thread) {
                 start_dt = DateTime.Now;
 
-                gamepad_one_state = GamePad.GetState(PlayerIndex.One);
-                gamepad_two_state = GamePad.GetState(PlayerIndex.Two);
-                gamepad_three_state = GamePad.GetState(PlayerIndex.Three);
-                gamepad_four_state = GamePad.GetState(PlayerIndex.Four);
+                //gamepad_one_state = GamePad.GetState(PlayerIndex.One);
+                //gamepad_two_state = GamePad.GetState(PlayerIndex.Two);
+                //gamepad_three_state = GamePad.GetState(PlayerIndex.Three);
+                //gamepad_four_state = GamePad.GetState(PlayerIndex.Four);
 
                 if (_input_method == input_method.RawInput) {
 
