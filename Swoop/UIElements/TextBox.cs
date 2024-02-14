@@ -11,7 +11,9 @@ namespace SwoopLib.UIElements {
         TextInputManager text_manager;
     }
 
-    public class TextEditor : UIElement{
+    public class TextEditor : UIElement {
+        string status_text = string.Empty;
+
         public bool line_count = true;
 
         bool show_menu = false;
@@ -27,14 +29,12 @@ namespace SwoopLib.UIElements {
 
         public TextEditor(string name, XYPair position, XYPair size) : base(name, position, size) {
             enable_render_target = true;
-            text_manager = new TextInputManager("maximum fart dose");
+            text_manager = new TextInputManager("maximum fart dose\n\n\nand a big one in the back");
             single_character_size = Drawing.measure_string_profont_xy("a");
             can_be_focused = false;
 
             text_manager.external_input_handler = handle_input;
         }
-
-        string status_text = string.Empty;
 
         internal override void update() {
             text_manager.update_input();
@@ -59,7 +59,7 @@ namespace SwoopLib.UIElements {
             Drawing.fill_rect(XYPair.Zero, size, Swoop.UI_background_color);
             Drawing.fill_rect_dither(XYPair.Zero, (size.Y_only + (XYPair.UnitY * 25)) + (XYPair.UnitX * line_count_width - 3), Swoop.UI_background_color, Swoop.UI_disabled_color);
 
-            if (text_manager.has_selection()) {
+            if (text_manager.has_selection() && text_manager.select_shape == TextInputManager.selection_shape.BLOCK) {
                 var select_min_max = text_manager.get_actual_selection_min_max();
 
                 Drawing.fill_rect_dither(
@@ -68,13 +68,55 @@ namespace SwoopLib.UIElements {
                     Swoop.UI_background_color, Swoop.UI_disabled_color);
             }
 
-
-
             int ctop = 0;
+
+            //uh oh
+            var sel = text_manager.get_actual_selection_min_max();
+
+            var top_line = sel.min.Y;
+            var bottom_line = sel.max.Y;
+
+            var selected_lines = bottom_line - top_line;
+
+            var top_line_x = (text_manager.selection_start.Y < text_manager.selection_end.Y) ? text_manager.selection_start.X : text_manager.selection_end.X;
+            var bottom_line_x = (text_manager.selection_start.Y > text_manager.selection_end.Y) ? text_manager.selection_start.X : text_manager.selection_end.X;
+
+            var single_line_select = top_line == bottom_line;
+
+            if ((text_manager.has_selection() && text_manager.select_shape == TextInputManager.selection_shape.LINEAR) && single_line_select) {
+                Drawing.fill_rect_dither(
+                    (single_character_size * sel.min) + line_count_width + XYPair.Down,
+                    (single_character_size * (sel.max + XYPair.Down)) + line_count_width + (XYPair.One * 3),
+                    Swoop.UI_background_color, Swoop.UI_disabled_color);
+            }
+
             //draw each TextLine
             for (int i = 0; i < text_manager.lines.Count; i++) {
                 TextLine tl = text_manager.lines[i];
                 bool cursor_on_line = i == text_manager.cursor_pos.Y;
+                bool empty_line = text_manager.lines[i].length == 0;
+                
+                if ((text_manager.has_selection() && text_manager.select_shape == TextInputManager.selection_shape.LINEAR) && !single_line_select) {
+                    if (i == top_line) {
+                        Drawing.fill_rect_dither(
+                            (single_character_size * ((XYPair.UnitX * top_line_x))) + line_count_width + XYPair.Down,
+                            (single_character_size * ((XYPair.UnitX * (top_line_x + (text_manager.lines[top_line].text.Length - top_line_x) + (empty_line ? 1 : 0))))) 
+                            + line_count_width + XYPair.Down + single_character_size.Y_only,
+                            Swoop.UI_background_color, Swoop.UI_disabled_color);
+                    } else if (i > top_line && i < bottom_line) {
+                        Drawing.fill_rect_dither(
+                            (single_character_size * (XYPair.UnitY * i)) + line_count_width + XYPair.Down,
+                            (single_character_size * ((XYPair.UnitX * (text_manager.lines[i].text.Length + (empty_line ? 1 : 0))) + (XYPair.UnitY * i))) 
+                            + line_count_width + XYPair.Down + single_character_size.Y_only,
+                            Swoop.UI_background_color, Swoop.UI_disabled_color);
+                    } else if (i == bottom_line) {
+                        Drawing.fill_rect_dither(
+                            (single_character_size * (XYPair.UnitY * bottom_line)) + line_count_width + XYPair.Down,
+                            (single_character_size * ((XYPair.UnitY * bottom_line) + (XYPair.UnitX * (bottom_line_x + (empty_line ? 1 : 0))))) 
+                            + line_count_width + XYPair.Down + single_character_size.Y_only,
+                            Swoop.UI_background_color, Swoop.UI_disabled_color);
+                    }
+                }
 
                 if (cursor_mode == cursor_display_mode.BOX) {
                     Drawing.rect(
