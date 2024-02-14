@@ -158,22 +158,29 @@ namespace MGRawInputLib {
 
         static TimeSpan one_tick = new TimeSpan((long)250);
         static TimeSpan sleep_ts;
+        static Microsoft.Xna.Framework.Point p;
+        static Microsoft.Xna.Framework.Point w;
         static void update() {
             while (run_thread) {
                 start_dt = DateTime.Now;
 
-                gamepad_one_state = GamePad.GetState(PlayerIndex.One);
-                gamepad_two_state = GamePad.GetState(PlayerIndex.Two);
-                gamepad_three_state = GamePad.GetState(PlayerIndex.Three);
-                gamepad_four_state = GamePad.GetState(PlayerIndex.Four);
+                //gamepad_one_state = GamePad.GetState(PlayerIndex.One);
+                //gamepad_two_state = GamePad.GetState(PlayerIndex.Two);
+                //gamepad_three_state = GamePad.GetState(PlayerIndex.Three);
+                //gamepad_four_state = GamePad.GetState(PlayerIndex.Four);
 
                 if (_input_method == input_method.RawInput) {
 
-                    cursor_pos = Externs.get_cursor_pos_relative_to_window();
+                    p = Externs.get_cursor_pos(); w = Externs.get_window_pos();
+
+                    cursor_pos.X = p.X - w.X; cursor_pos.Y = p.Y - w.Y;
+                    //Externs.get_cursor_pos_relative_to_window(ref cursor_pos);
+
+                    //BIG HACK RIGHT HERE
                     cursor_pos_actual = Externs.get_cursor_pos();
+                    // ^^^ BIG OL HACK ^^^
 
-                    ri_keyboard_state = RawInputKeyboard.GetState();
-
+                    RawInputKeyboard.push_keys(ref ri_keyboard_state);
                     ri_mouse_state = RawInputMouse.GetState();
 
                     mouse_delta = ri_mouse_state.Delta;
@@ -281,7 +288,7 @@ namespace MGRawInputLib {
                 if (limit_thread_rate) {
                     if (use_sleep) {
                         while (run_thread) {
-                            sleep_ts = new TimeSpan((long)(((thread_ms - (DateTime.Now - start_dt).TotalMilliseconds) * 1000000f)) / 100);
+                            sleep_ts = new TimeSpan((long)((((thread_ms - (DateTime.Now - start_dt).TotalMilliseconds) * 1000000f)) / 100) + 10);
                             if (sleep_ts.TotalMilliseconds > 0)
                                 Thread.Sleep(sleep_ts);
                             current_dt = DateTime.Now;

@@ -18,7 +18,10 @@ namespace MGRawInputLib {
     
         public static RawInputKeyboardState GetState() {
             return new RawInputKeyboardState(keyboard_state.pressed_keys);
-        }        
+        }    
+        public static void push_keys(ref RawInputKeyboardState kstate) {
+            kstate.SetPressedKeys(keyboard_state.pressed_keys);
+        }
     }
 
     public struct RawInputKeyboardState {
@@ -29,11 +32,11 @@ namespace MGRawInputLib {
         public HashSet<Keys> pressed_keys = new HashSet<Keys>();
 
         public RawInputKeyboardState() { }
-        public RawInputKeyboardState(HashSet<Keys> keys) { pressed_keys = new HashSet<Keys>(keys); }
+        public RawInputKeyboardState(HashSet<Keys> keys) { pressed_keys = keys; }
         public RawInputKeyboardState(Keys[] keys) { pressed_keys = new HashSet<Keys>(keys); }
 
         public Keys[] GetPressedKeys() { return pressed_keys.ToArray(); }
-                        
+        public void SetPressedKeys(HashSet<Keys> keys) { pressed_keys = keys; }
         public bool IsKeyUp(Keys key) => !pressed_keys.Contains(key);
         public bool IsKeyDown(Keys key) => pressed_keys.Contains(key) && Window.is_active;
 
