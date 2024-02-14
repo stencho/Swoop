@@ -65,6 +65,7 @@ namespace SwoopLib {
 
         XYPair previous_cursor_pos = XYPair.Zero;
         public XYPair cursor_pos = XYPair.Zero;
+        int cursor_pos_stored_X = 0;
 
         //selection handling
         XYPair _selection_start = XYPair.MinusOne;
@@ -193,6 +194,9 @@ namespace SwoopLib {
             lines[cursor_pos.Y].insert_text(cursor, text);
 
             cursor_pos.X += text.Length;
+
+            validate_cursor();
+            store_cursor_X();
         }
 
         int find_word_size_left_of_cursor() {
@@ -351,6 +355,8 @@ namespace SwoopLib {
                     validate_cursor();
                 }
             }
+
+            store_cursor_X();
         }
 
 
@@ -378,6 +384,8 @@ namespace SwoopLib {
 
             cursor_pos.Y++; cursor_pos.X = 0;
             validate_cursor();
+
+            store_cursor_X();
         }
 
 
@@ -392,16 +400,36 @@ namespace SwoopLib {
 
         }
 
+        void store_cursor_X() => cursor_pos_stored_X = cursor_pos.X;
+
         void cursor_up() { 
-            cursor_pos.Y--;
+            cursor_pos.Y--;           
+
+            validate_cursor();
+
+            if (current_line_text_length > cursor_pos_stored_X)
+                cursor_pos.X = cursor_pos_stored_X;
+            else {
+                cursor_pos.X = current_line_text_length;
+            }
+
             validate_cursor();
         }
         void cursor_down() { 
             cursor_pos.Y++;
+
+            validate_cursor();
+
+            if (current_line_text_length > cursor_pos_stored_X)
+                cursor_pos.X = cursor_pos_stored_X;
+            else {
+                cursor_pos.X = current_line_text_length;
+            }
+
             validate_cursor();
         }
         void cursor_left() { 
-            cursor_pos.X--;
+            cursor_pos.X--;            
             validate_cursor();
         }
         void cursor_left(int c) {
@@ -482,6 +510,8 @@ namespace SwoopLib {
 
                     if (input_handler.shift) 
                         end_selection();
+
+                    store_cursor_X();
                     return;
 
                 case Keys.Right:
@@ -496,6 +526,8 @@ namespace SwoopLib {
 
                     if (input_handler.shift) 
                         end_selection();
+
+                    store_cursor_X();
                     return;
 
 
