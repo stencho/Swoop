@@ -161,7 +161,7 @@ namespace SwoopLib {
             }
 
             foreach (Input.KeyTime key_time in input_handler.pressed_keys) {
-                if (key_time.held && !key_time.handled) if (key_time.repeat())
+                if ((key_time.held && !key_time.handled) && (key_time.repeat()))
                     eval_key(key_time);
             }
 
