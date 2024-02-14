@@ -31,7 +31,7 @@ Looks better than it works.
 - [x] Radio Buttons
 - [x] Resize Handle
 - [ ] Tab Control (a bunch of panels stuck together)
-- [ ] Text Box
+- [x] Text Box (and text editor, both need mouse support still)
 - [x] Title Bar (with window dragging)
 - [x] Toggle Button
 - [ ] Tooltip + registration system
