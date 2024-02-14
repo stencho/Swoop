@@ -304,18 +304,20 @@ namespace SwoopLib.UIElements {
                 bool selected = (selected_index == index || selected_index == index + 1);
 
                 //jesus christ
-                if ((item.custom_draw && (item.is_selected || item.is_stored_click)) || (!(item.is_selected || item.is_stored_click))) {
-                    if (stored || mouse_on_index)
+                //draw dotted lines for moused over or stored click items
+                //draw solid lines otherwise
+                //if ((item.custom_draw && (item.is_selected || item.is_stored_click)) || (!(item.is_stored_click))) {
+                    if ((stored || mouse_on_index) && !selected) 
                         Drawing.fill_rect_dither(
                             (XYPair.UnitY * (running_height - scroll_position)),
                             (XYPair.UnitY * (running_height - scroll_position)) + (Vector2.UnitX * size_minus_scroll_bar.X) + (Vector2.UnitY),
-                            selected || stored ? Swoop.UI_highlight_color : Swoop.UI_color, Swoop.UI_background_color);
+                            Swoop.get_color(this),Swoop.UI_background_color);
                     else
                         Drawing.line(
                             (Vector2.UnitY * (running_height - scroll_position)),
                             (Vector2.UnitY * (running_height - scroll_position)) + (Vector2.UnitX * size_minus_scroll_bar.X),
                             /*selected_index == index || selected_index == index + 1 ? */Swoop.get_color(this)/* : Swoop.UI_color*/, 1f);
-                }
+                //}
                 index++;
             }
 
@@ -358,7 +360,10 @@ namespace SwoopLib.UIElements {
 
                 if ((force_selected_item && mouse_over_index >= 0) || !force_selected_item) {
                     if (clicking && !was_clicking) {
-                        stored_index = mouse_over_index;
+                        if (mouse_over_index > -1)
+                            stored_index = mouse_over_index;
+                        else
+                            stored_index = selected_index;
 
                     } else if (!clicking && was_clicking) {
                         if (stored_index == mouse_over_index)
