@@ -362,16 +362,32 @@ namespace SwoopDemo {
                 "\na fairly robust system for editing text" +                
                 "\n" +
                 "\nit is still missing a ton of features though, " +
-                "\nword wrap and scrolling still need to be implemented" +
-                "\nthere is a line counter but no scrolling" +
-                "\nvery good priorities" +
+                "\nword wrap still needs to be implemented because this is a nuisance" +
+                "\n" +
+                "\nthat said, you could probably still edit a small file with this" +
+                "\n" +
                 "\n" +
                 "\n- CTRL + L to toggle line count" +
                 "\n" +
                 "\ntodo:" +
                 "\nmouse support at all" +
-                "\nscrolling/scroll bars" +
-                "\nword wrap",                
+                "\nscroll bars" +
+                "\nword wrap" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "\nsecret" +
+                "",                
 
                 UI.elements["test_listbox"].position + UI.elements["test_listbox"].size.X_only + (XYPair.Right * 8) + (XYPair.Down * 25),
                 UI.elements["test_listbox"].size * 0.75f * (XYPair.One + XYPair.Right)));

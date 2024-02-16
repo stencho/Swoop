@@ -62,6 +62,10 @@ namespace SwoopLib {
         public bool input_enabled = true;
 
         public bool multiline = true;
+        
+        public int longest_line_text_length = 0;
+        public int longest_line_index = -1;        
+
         bool insert_mode = false;
 
         XYPair previous_cursor_pos = XYPair.Zero;
@@ -140,6 +144,10 @@ namespace SwoopLib {
         }
 
         public TextInputManager(string text) {
+
+            insert_text(text);
+
+            return;
             StringReader sr = new StringReader(text);
             while (sr.Peek() > -1) {
                 var l = sr.ReadLine();
@@ -192,61 +200,71 @@ namespace SwoopLib {
                 delete_selected_text();
             }
 
-            StringReader sr = new StringReader(text);
+            if (!multiline) {
+                StringReader sr = new StringReader(text);
 
-            string line = "";
+                int c = 0;
+                int p = 0;
+                string line = "";
 
-            int c = 0;
-            int p = 0;
-            while (p > -1) {
-                line = sr.ReadLine();
-                p = sr.Peek();
+                while (p > -1) {
+                    line = sr.ReadLine();
+                    p = sr.Peek();
 
-                Debug.WriteLine(line);
-
-                if (c == 0) {
-                    //first line
-                    lines[cursor_pos.Y].insert_text(cursor, line);
-                    
+                    lines[0].insert_text(cursor, line);
                     cursor_pos.X += line.Length;
-                    
-                    if (p > -1) //more lines to come                    
-                        insert_newline();
-
-                } else if (p > -1) {
-                    //middle lines
-                    lines.Insert(cursor_pos.Y + c - 1, new TextLine(this, line));                    
-
-                } else if (p == -1) {
-                    //bottom line
-                    lines.Insert(cursor_pos.Y + c - 1, new TextLine(this, line));
-
-                    lines[cursor_pos.Y + c - 1].text += lines[cursor_pos.Y + c].text;
-                    lines.RemoveAt(cursor_pos.Y + c);
-                    
-                    cursor_pos.X = line.Length;
-                    break;
                 }
 
-                c++;
+
+                validate_cursor();
+                store_cursor_X();
+
+            } else {
+
+                StringReader sr = new StringReader(text);
+
+                string line = "";
+
+                int c = 0;
+                int p = 0;
+                while (p > -1) {
+                    line = sr.ReadLine();
+                    p = sr.Peek();
+
+                    if (c == 0) {
+                        //first line
+                        if (lines.Count == 0) lines.Add(new TextLine(this));
+                        lines[cursor_pos.Y].insert_text(cursor, line);
+
+                        cursor_pos.X += line.Length;
+
+                        if (p > -1) //more lines to come                    
+                            insert_newline();
+
+                    } else if (p > -1) {
+                        //middle lines
+                        lines.Insert(cursor_pos.Y + c - 1, new TextLine(this, line));
+
+                    } else if (p == -1) {
+                        //bottom line
+                        lines.Insert(cursor_pos.Y + c - 1, new TextLine(this, line));
+
+                        lines[cursor_pos.Y + c - 1].text += lines[cursor_pos.Y + c].text;
+                        lines.RemoveAt(cursor_pos.Y + c);
+
+                        cursor_pos.X = line.Length;
+                        break;
+                    }
+
+                    c++;
+                }
+
+                cursor_pos.Y += c - 1;
+
+                validate_cursor();
+                store_cursor_X();
+
             }
-
-            cursor_pos.Y += c-1;
-
-            validate_cursor();
-            store_cursor_X();
-
-            return;
-
-            /*
-            validate_cursor();
-            lines[cursor_pos.Y].insert_text(cursor, text);
-
-            cursor_pos.X += text.Length;
-
-            validate_cursor();
-            store_cursor_X();
-            */
         }
 
         void insert_newline() {
@@ -326,13 +344,15 @@ namespace SwoopLib {
                     if (selected_lines >= 2) {
                         for (int i = 1; i <= selected_lines - 1; i++) {
                             //Debug.WriteLine($"line {i}");
-                            lines.RemoveAt(top_line + 1);
+                            lines.RemoveAt(top_line + 1); 
+                            if (longest_line_index == top_line + 1) longest_line_index = -1;
                         }
                     }
 
                     if (lines.Count > 1 && top_line > -1 && lines.Count > top_line+1) {
                         lines[top_line].text += lines[top_line + 1].text;
                         lines.RemoveAt(top_line + 1);
+                        if (longest_line_index == top_line + 1) longest_line_index = -1;
                     }
                 }                
 
@@ -368,6 +388,7 @@ namespace SwoopLib {
 
                             cursor_pos.Y--;
                             lines.RemoveAt(line);
+                            if (longest_line_index == line) longest_line_index = -1;
 
                             line--;
 
@@ -394,6 +415,7 @@ namespace SwoopLib {
                             lines[line].update_size_length();
 
                             lines.RemoveAt(line + 1);
+                            if (longest_line_index == line) longest_line_index = -1;
                             //Debug.Write($"E");
 
                         } else {
@@ -501,16 +523,29 @@ namespace SwoopLib {
             }
 
             if (cursor_pos.X < 0) cursor_pos.X = 0;
-
-            if (_selection_start.X < 0) _selection_start.X = 0;
+            
             if (_selection_start.Y < 0) _selection_start.Y = 0;
-            if (_selection_end.X < 0) _selection_end.X = 0;
             if (_selection_end.Y < 0) _selection_end.Y = 0;
 
-            if (_selection_start.X > lines[line_count - 1].length) _selection_start.X = lines[line_count - 1].length;
             if (_selection_start.Y > line_count - 1) _selection_start.Y = line_count - 1;
-            if (_selection_end.X > lines[line_count - 1].length) _selection_end.X = lines[line_count - 1].length;
             if (_selection_end.Y > line_count - 1) _selection_end.Y = line_count - 1;
+            
+            if (!multiline && line_count > 1) {
+                lines.RemoveRange(1, line_count - 1);
+            }
+
+            find_longest_line(out longest_line_index, out longest_line_text_length);
+        }
+
+        void find_longest_line(out int index, out int length) {
+            index = -1; length = int.MinValue;
+
+            for (int i = 0; i < lines.Count; i++) {                
+                if (lines[i].length > length) {
+                    index = i;
+                    length = lines[i].length;
+                }
+            }
         }
 
 
@@ -573,10 +608,11 @@ namespace SwoopLib {
 
             cursor_pos.X = 0;
 
+            validate_cursor();
+
             if (input_handler.shift)
                 end_selection();
 
-            validate_cursor();
             store_cursor_X();
         }
         void cursor_home_file() {
@@ -586,10 +622,11 @@ namespace SwoopLib {
 
             cursor_pos = XYPair.Zero;
 
+            validate_cursor();
+
             if (input_handler.shift)
                 end_selection();
 
-            validate_cursor();
             store_cursor_X();
         }
 
@@ -600,10 +637,11 @@ namespace SwoopLib {
 
             cursor_pos.X = current_line_text_length;
 
+            validate_cursor();
+
             if (input_handler.shift)
                 end_selection();
 
-            validate_cursor();
             store_cursor_X();
         }
         void cursor_end_file() {
@@ -613,10 +651,11 @@ namespace SwoopLib {
 
             cursor_pos.Y = line_count - 1;
 
+            validate_cursor();
+
             if (input_handler.shift)
                 end_selection();
 
-            validate_cursor();
             store_cursor_X();
         }
         
