@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using System.Diagnostics;
 using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace SwoopLib {    
     public class TextLine {        
@@ -186,11 +187,58 @@ namespace SwoopLib {
             return false;
         }
 
-        void insert_text_at_cursor(string text) {
+        void insert_text(string text) {
             if (has_selection()) {
                 delete_selected_text();
             }
-            
+
+            StringReader sr = new StringReader(text);
+
+            string line = "";
+
+            int c = 0;
+            int p = 0;
+            while (p > -1) {
+                line = sr.ReadLine();
+                p = sr.Peek();
+
+                Debug.WriteLine(line);
+
+                if (c == 0) {
+                    //first line
+                    lines[cursor_pos.Y].insert_text(cursor, line);
+                    
+                    cursor_pos.X += line.Length;
+                    
+                    if (p > -1) //more lines to come                    
+                        insert_newline();
+
+                } else if (p > -1) {
+                    //middle lines
+                    lines.Insert(cursor_pos.Y + c - 1, new TextLine(this, line));                    
+
+                } else if (p == -1) {
+                    //bottom line
+                    lines.Insert(cursor_pos.Y + c - 1, new TextLine(this, line));
+
+                    lines[cursor_pos.Y + c - 1].text += lines[cursor_pos.Y + c].text;
+                    lines.RemoveAt(cursor_pos.Y + c);
+                    
+                    cursor_pos.X = line.Length;
+                    break;
+                }
+
+                c++;
+            }
+
+            cursor_pos.Y += c-1;
+
+            validate_cursor();
+            store_cursor_X();
+
+            return;
+
+            /*
             validate_cursor();
             lines[cursor_pos.Y].insert_text(cursor, text);
 
@@ -198,76 +246,29 @@ namespace SwoopLib {
 
             validate_cursor();
             store_cursor_X();
+            */
         }
 
-        int find_word_size_left_of_cursor() {
-            bool started_on_hit = false;
-            int c = 1;
-
-            while (cursor_pos.X - c > 0) {
-                if (cursor_pos.X - c == current_line_text_length) { c++; continue; }
-                char current = current_line_text[cursor_pos.X - c];
-                
-                Debug.Write(current);
-
-                if (started_on_hit ? !char_switch(current) : char_switch(current)) {
-                    if (c == 1) { started_on_hit = true; c++; continue; }
-                    if (c == 2 && started_on_hit) { c++; started_on_hit = false; continue; }
-
-                    Debug.Write($" {c-1}\n");
-                    return c - 1;
-                }
-
-                c++;
+        void insert_newline() {
+            if (has_selection()) {
+                clear_selection();
             }
 
-            Debug.Write($" {c}\n");
-            return c;
+            validate_cursor();
+
+            string cursor_to_end = current_line_text.Substring(cursor);
+            var sub_len = cursor_to_end.Length;
+
+            delete_text_at_cursor(sub_len);
+            Debug.Print(cursor_to_end + " " + sub_len);
+            lines.Insert(current_line_index + 1, new TextLine(this, cursor_to_end));
+
+            cursor_pos.Y++; cursor_pos.X = 0;
+            validate_cursor();
+
+            store_cursor_X();
         }
-
-        int find_word_size_right_of_cursor() {
-            bool started_on_hit = false;
-            int c = 0;
-            while (cursor_pos.X + c < current_line_text_length) {
-                char current = current_line_text[cursor_pos.X+c];
-                Debug.Write(current);
-
-                if (started_on_hit ? !char_switch(current) : char_switch(current)) {
-
-                    if (c == 0) { started_on_hit = true; c++; continue; } 
-                    if (c == 1 && started_on_hit) { c++; started_on_hit = false; continue; }
-
-                    Debug.Write($" {c}\n");
-                    return c;
-                }
-                c++;
-            }
-
-            Debug.Write($" {c}\n");
-            return c;
-        }
-
-        bool char_switch(char c) {            
-            switch (c) {
-                case ' ':
-                case '_':
-                case '=': case '|':
-                case '+': case '-': case '*':
-                case '&': case '%': case '$': 
-                case '#': case '@':
-                case '/': case '\\':
-                case '!': case '?':
-                case '[': case ']':
-                case '{': case '}':
-                case ':': case ';':
-                case ',': case '.':
-                case '<': case '>':
-                case '\'': case '\"':
-                    return true;                        
-            }
-            return false;
-        }
-
+        
         void backspace() {
             delete_text_at_cursor(-1);            
         }
@@ -329,7 +330,7 @@ namespace SwoopLib {
                         }
                     }
 
-                    if (lines.Count > 1) {
+                    if (lines.Count > 1 && top_line > -1 && lines.Count > top_line+1) {
                         lines[top_line].text += lines[top_line + 1].text;
                         lines.RemoveAt(top_line + 1);
                     }
@@ -409,46 +410,109 @@ namespace SwoopLib {
             store_cursor_X();
         }
 
+        //Cut/copy/paste
+        string get_selected_text() {
+            StringBuilder sb = new StringBuilder();
 
-        internal void validate_cursor() {
-            if (current_line_index < 0) cursor_pos.Y = 0;
-            if (current_line_index >= line_count) cursor_pos.Y = line_count-1;
+            var sel = get_actual_selection_min_max();
 
-            if (cursor_pos.X > current_line.length) {
-                cursor_pos.X = current_line.length;
+            var top_line = sel.min.Y;
+            var bottom_line = sel.max.Y;
+
+            var selected_lines = bottom_line - top_line;
+
+            var top_line_x = (selection_start.Y <= selection_end.Y) ? selection_start.X : selection_end.X;
+            var bottom_line_x = (selection_start.Y > selection_end.Y) ? selection_start.X : selection_end.X;
+
+            var single_line_select = top_line == bottom_line;
+
+            if (single_line_select) {
+                sb.Append(lines[top_line].text.Substring(sel.min.X, sel.max.X - sel.min.X));
+
+            } else {
+                for (int i = 0; i < selected_lines; i++) {
+                    int current_line = top_line + i;
+                    var current_text = lines[current_line].text;
+
+                    if (i == 0) {
+                        //top line
+                        sb.AppendLine(current_text.Substring(top_line_x, current_text.Length - top_line_x));
+
+                    } else if (i > 0 && i < selected_lines) {
+                        //middle lines
+                        sb.AppendLine(current_text);
+
+                    } else if (i == selected_lines) {
+                        //bottom line
+                        sb.Append(current_text.Substring(0, bottom_line_x));
+                    }
+                }
             }
-            if (cursor_pos.X < 0) cursor_pos.X = 0;
+
+            return sb.ToString();
         }
 
-        void insert_newline() {
-            if (has_selection()) {
-                clear_selection();
+        void copy() {
+            string clipboard_text = get_selected_text();
+
+            if (Externs.set_clipboard_string(clipboard_text)) {
+                return;
             }
+        }
 
-            string cursor_to_end = current_line_text.Substring(cursor);
-            var sub_len = cursor_to_end.Length;
-
-            delete_text_at_cursor(sub_len);
-            Debug.Print(cursor_to_end + " " + sub_len);
-            lines.Insert(current_line_index+1, new TextLine(this, cursor_to_end));
-
-            cursor_pos.Y++; cursor_pos.X = 0;
-            validate_cursor();
-
+        void cut() {
+            copy();
+            delete_selected_text();
             store_cursor_X();
         }
 
+        void paste() {
+            string clipboard_text;
+
+            if (Externs.get_clipboard_string(out clipboard_text)) {
+                if (!string.IsNullOrEmpty(clipboard_text)) {
+                    insert_text(clipboard_text);
+                }
+
+                store_cursor_X();
+            }
+        }
+
+        //Cursor
 
         void select_region() {
 
         }
+        void select_all() {            
+            _selection_start = XYPair.Zero;
+            _selection_end = new XYPair(lines[line_count-1].length, line_count-1);
 
-        void copy() {
-
+            validate_cursor();
         }
-        void paste() {
 
+        internal void validate_cursor() {
+            if (lines.Count == 0) lines.Add(new TextLine(this));
+
+            if (current_line_index < 0) cursor_pos.Y = 0;
+            if (current_line_index >= line_count) cursor_pos.Y = line_count - 1;
+
+            if (cursor_pos.X > current_line.length) {
+                cursor_pos.X = current_line.length;
+            }
+
+            if (cursor_pos.X < 0) cursor_pos.X = 0;
+
+            if (_selection_start.X < 0) _selection_start.X = 0;
+            if (_selection_start.Y < 0) _selection_start.Y = 0;
+            if (_selection_end.X < 0) _selection_end.X = 0;
+            if (_selection_end.Y < 0) _selection_end.Y = 0;
+
+            if (_selection_start.X > lines[line_count - 1].length) _selection_start.X = lines[line_count - 1].length;
+            if (_selection_start.Y > line_count - 1) _selection_start.Y = line_count - 1;
+            if (_selection_end.X > lines[line_count - 1].length) _selection_end.X = lines[line_count - 1].length;
+            if (_selection_end.Y > line_count - 1) _selection_end.Y = line_count - 1;
         }
+
 
         void store_cursor_X() => cursor_pos_stored_X = cursor_pos.X;
 
@@ -555,11 +619,79 @@ namespace SwoopLib {
             validate_cursor();
             store_cursor_X();
         }
+        
+        bool char_switch(char c) {            
+            switch (c) {
+                case ' ':
+                case '_':
+                case '=': case '|':
+                case '+': case '-': case '*':
+                case '&': case '%': case '$': 
+                case '#': case '@':
+                case '/': case '\\':
+                case '!': case '?':
+                case '[': case ']':
+                case '{': case '}':
+                case ':': case ';':
+                case ',': case '.':
+                case '<': case '>':
+                case '\'': case '\"':
+                    return true;                        
+            }
+            return false;
+        }
+
+        int find_word_size_left_of_cursor() {
+            bool started_on_hit = false;
+            int c = 1;
+
+            while (cursor_pos.X - c > 0) {
+                if (cursor_pos.X - c == current_line_text_length) { c++; continue; }
+                char current = current_line_text[cursor_pos.X - c];
+                
+                Debug.Write(current);
+
+                if (started_on_hit ? !char_switch(current) : char_switch(current)) {
+                    if (c == 1) { started_on_hit = true; c++; continue; }
+                    if (c == 2 && started_on_hit) { c++; started_on_hit = false; continue; }
+
+                    Debug.Write($" {c-1}\n");
+                    return c - 1;
+                }
+
+                c++;
+            }
+
+            Debug.Write($" {c}\n");
+            return c;
+        }
+
+        int find_word_size_right_of_cursor() {
+            bool started_on_hit = false;
+            int c = 0;
+            while (cursor_pos.X + c < current_line_text_length) {
+                char current = current_line_text[cursor_pos.X+c];
+                Debug.Write(current);
+
+                if (started_on_hit ? !char_switch(current) : char_switch(current)) {
+
+                    if (c == 0) { started_on_hit = true; c++; continue; } 
+                    if (c == 1 && started_on_hit) { c++; started_on_hit = false; continue; }
+
+                    Debug.Write($" {c}\n");
+                    return c;
+                }
+                c++;
+            }
+
+            Debug.Write($" {c}\n");
+            return c;
+        }
 
         // haha, oh boy
         void eval_key(Input.KeyTime key) {
             switch (key.key) {
-                case Keys.None: return; 
+                case Keys.None: return;
                 case Keys.Escape: return;
 
                 //cursor movement
@@ -599,7 +731,7 @@ namespace SwoopLib {
 
                 case Keys.Left:
                     if (!input_handler.shift) clear_selection();
-                    if (input_handler.shift && !has_selection()) 
+                    if (input_handler.shift && !has_selection())
                         start_selection();
 
                     if (!input_handler.ctrl)
@@ -607,7 +739,7 @@ namespace SwoopLib {
                     else
                         cursor_left(find_word_size_left_of_cursor());
 
-                    if (input_handler.shift) 
+                    if (input_handler.shift)
                         end_selection();
 
                     store_cursor_X();
@@ -615,7 +747,7 @@ namespace SwoopLib {
 
                 case Keys.Right:
                     if (!input_handler.shift) clear_selection();
-                    if (input_handler.shift && !has_selection()) 
+                    if (input_handler.shift && !has_selection())
                         start_selection();
 
                     if (!input_handler.ctrl)
@@ -623,7 +755,7 @@ namespace SwoopLib {
                     else
                         cursor_right(find_word_size_right_of_cursor());
 
-                    if (input_handler.shift) 
+                    if (input_handler.shift)
                         end_selection();
 
                     store_cursor_X();
@@ -632,7 +764,7 @@ namespace SwoopLib {
 
                 //spacing
                 case Keys.Tab:
-                    if (capture_tab) insert_text_at_cursor("    ");
+                    if (capture_tab) insert_text("    ");
                     return;
 
                 case Keys.Enter:
@@ -640,7 +772,7 @@ namespace SwoopLib {
                     return;
 
                 case Keys.Space:
-                    insert_text_at_cursor(" ");
+                    insert_text(" ");
                     return;
 
                 case Keys.Back:
@@ -664,49 +796,49 @@ namespace SwoopLib {
 
                 //numbers
                 case Keys.D0:
-                    if (!input_handler.shift) insert_text_at_cursor("0");
-                    else insert_text_at_cursor(")");
+                    if (!input_handler.shift) insert_text("0");
+                    else insert_text(")");
                     return;
                 case Keys.D1:
-                    if (!input_handler.shift) insert_text_at_cursor("1");
-                    else insert_text_at_cursor("!");
+                    if (!input_handler.shift) insert_text("1");
+                    else insert_text("!");
                     return;
                 case Keys.D2:
-                    if (!input_handler.shift) insert_text_at_cursor("2");
-                    else insert_text_at_cursor("@");
+                    if (!input_handler.shift) insert_text("2");
+                    else insert_text("@");
                     return;
                 case Keys.D3:
-                    if (!input_handler.shift) insert_text_at_cursor("3");
-                    else insert_text_at_cursor("#");
+                    if (!input_handler.shift) insert_text("3");
+                    else insert_text("#");
                     return;
                 case Keys.D4:
-                    if (!input_handler.shift) insert_text_at_cursor("4");
-                    else insert_text_at_cursor("$");
+                    if (!input_handler.shift) insert_text("4");
+                    else insert_text("$");
                     return;
                 case Keys.D5:
-                    if (!input_handler.shift) insert_text_at_cursor("5");
-                    else insert_text_at_cursor("%");
+                    if (!input_handler.shift) insert_text("5");
+                    else insert_text("%");
                     return;
                 case Keys.D6:
-                    if (!input_handler.shift) insert_text_at_cursor("6");
-                    else insert_text_at_cursor("^");
+                    if (!input_handler.shift) insert_text("6");
+                    else insert_text("^");
                     return;
                 case Keys.D7:
-                    if (!input_handler.shift) insert_text_at_cursor("7");
-                    else insert_text_at_cursor("&");
+                    if (!input_handler.shift) insert_text("7");
+                    else insert_text("&");
                     return;
                 case Keys.D8:
-                    if (!input_handler.shift) insert_text_at_cursor("8");
-                    else insert_text_at_cursor("*");
+                    if (!input_handler.shift) insert_text("8");
+                    else insert_text("*");
                     return;
                 case Keys.D9:
-                    if (!input_handler.shift) insert_text_at_cursor("9");
-                    else insert_text_at_cursor("(");
+                    if (!input_handler.shift) insert_text("9");
+                    else insert_text("(");
                     return;
 
-                case Keys.NumPad0: 
+                case Keys.NumPad0:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text_at_cursor("0");
+                        if (!input_handler.shift) insert_text("0");
                         else insert_mode = !insert_mode;
                     } else {
                         if (!input_handler.shift) insert_mode = !insert_mode;
@@ -716,7 +848,7 @@ namespace SwoopLib {
 
                 case Keys.NumPad1:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text_at_cursor("1");
+                        if (!input_handler.shift) insert_text("1");
                         else cursor_end_line();
                     } else {
                         if (!input_handler.shift) cursor_end_line();
@@ -726,7 +858,7 @@ namespace SwoopLib {
 
                 case Keys.NumPad2:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text_at_cursor("2");
+                        if (!input_handler.shift) insert_text("2");
                         else cursor_down();
                     } else {
                         if (!input_handler.shift) cursor_down();
@@ -736,7 +868,7 @@ namespace SwoopLib {
 
                 case Keys.NumPad3:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text_at_cursor("3");
+                        if (!input_handler.shift) insert_text("3");
                         else page_down();
                     } else {
                         if (!input_handler.shift) page_down();
@@ -746,8 +878,8 @@ namespace SwoopLib {
 
                 case Keys.NumPad4:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text_at_cursor("4");
-                        else cursor_left ();
+                        if (!input_handler.shift) insert_text("4");
+                        else cursor_left();
                     } else {
                         if (!input_handler.shift) cursor_left();
                         else cursor_left(); //also select
@@ -756,7 +888,7 @@ namespace SwoopLib {
 
                 case Keys.NumPad5:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text_at_cursor("5");
+                        if (!input_handler.shift) insert_text("5");
                         else return;
                     } else {
                         return;
@@ -765,7 +897,7 @@ namespace SwoopLib {
 
                 case Keys.NumPad6:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text_at_cursor("6");
+                        if (!input_handler.shift) insert_text("6");
                         else cursor_right();
                     } else {
                         if (!input_handler.shift) cursor_right();
@@ -775,7 +907,7 @@ namespace SwoopLib {
 
                 case Keys.NumPad7:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text_at_cursor("7");
+                        if (!input_handler.shift) insert_text("7");
                         else cursor_home_line();
                     } else {
                         if (!input_handler.shift) cursor_home_line();
@@ -785,7 +917,7 @@ namespace SwoopLib {
 
                 case Keys.NumPad8:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text_at_cursor("8");
+                        if (!input_handler.shift) insert_text("8");
                         else cursor_up();
                     } else {
                         if (!input_handler.shift) cursor_up();
@@ -795,7 +927,7 @@ namespace SwoopLib {
 
                 case Keys.NumPad9:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text_at_cursor("9");
+                        if (!input_handler.shift) insert_text("9");
                         else page_up();
                     } else {
                         if (!input_handler.shift) page_up();
@@ -803,169 +935,199 @@ namespace SwoopLib {
                     }
                     return;
 
-                case Keys.Multiply: insert_text_at_cursor("*"); return;
-                case Keys.Add: insert_text_at_cursor("+"); return;
+                case Keys.Multiply: insert_text("*"); return;
+                case Keys.Add: insert_text("+"); return;
                 case Keys.Separator: break;
-                case Keys.Subtract: insert_text_at_cursor("-"); return;
+                case Keys.Subtract: insert_text("-"); return;
                 case Keys.Decimal:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text_at_cursor(".");
+                        if (!input_handler.shift) insert_text(".");
                         else delete_text_at_cursor(1);
                     } else {
-                        delete_text_at_cursor(1); 
+                        delete_text_at_cursor(1);
                     }
                     return;
-                case Keys.Divide: insert_text_at_cursor("/"); return;
+                case Keys.Divide: insert_text("/"); return;
 
                 //A-Z
                 case Keys.A:
-                    if (!input_handler.shift) insert_text_at_cursor("a");
-                    else insert_text_at_cursor("A");
+                    if (input_handler.ctrl) {
+                        select_all();
+
+                    } else { 
+                            if (!input_handler.shift) insert_text("a");
+                            else insert_text("A");
+                    }
                     return;
+
                 case Keys.B:
-                    if (!input_handler.shift) insert_text_at_cursor("b");
-                    else insert_text_at_cursor("B");
+                    if (!input_handler.shift) insert_text("b");
+                    else insert_text("B");
                     return;
+
                 case Keys.C:
-                    if (!input_handler.shift) insert_text_at_cursor("c");
-                    else insert_text_at_cursor("C");
+                    if (input_handler.ctrl) {
+                        copy();
+
+                    } else {
+                        if (!input_handler.shift) insert_text("c");
+                        else insert_text("C");
+                    }
+
                     return;
+
                 case Keys.D:
-                    if (!input_handler.shift) insert_text_at_cursor("d");
-                    else insert_text_at_cursor("D");
+                    if (!input_handler.shift) insert_text("d");
+                    else insert_text("D");
                     return;
                 case Keys.E:
-                    if (!input_handler.shift) insert_text_at_cursor("e");
-                    else insert_text_at_cursor("E");
+                    if (!input_handler.shift) insert_text("e");
+                    else insert_text("E");
                     return;
                 case Keys.F:
-                    if (!input_handler.shift) insert_text_at_cursor("f");
-                    else insert_text_at_cursor("F");
+                    if (!input_handler.shift) insert_text("f");
+                    else insert_text("F");
                     return;
                 case Keys.G:
-                    if (!input_handler.shift) insert_text_at_cursor("g");
-                    else insert_text_at_cursor("G");
+                    if (!input_handler.shift) insert_text("g");
+                    else insert_text("G");
                     return;
                 case Keys.H:
-                    if (!input_handler.shift) insert_text_at_cursor("h");
-                    else insert_text_at_cursor("H");
+                    if (!input_handler.shift) insert_text("h");
+                    else insert_text("H");
                     return;
                 case Keys.I:
-                    if (!input_handler.shift) insert_text_at_cursor("i");
-                    else insert_text_at_cursor("I");
+                    if (!input_handler.shift) insert_text("i");
+                    else insert_text("I");
                     return;
                 case Keys.J:
-                    if (!input_handler.shift) insert_text_at_cursor("j");
-                    else insert_text_at_cursor("J");
+                    if (!input_handler.shift) insert_text("j");
+                    else insert_text("J");
                     return;
                 case Keys.K:
-                    if (!input_handler.shift) insert_text_at_cursor("k");
-                    else insert_text_at_cursor("K");
+                    if (!input_handler.shift) insert_text("k");
+                    else insert_text("K");
                     return;
                 case Keys.L:
-                    if (!input_handler.shift) insert_text_at_cursor("l");
-                    else insert_text_at_cursor("L");
+                    if (!input_handler.shift) insert_text("l");
+                    else insert_text("L");
                     return;
                 case Keys.M:
-                    if (!input_handler.shift) insert_text_at_cursor("m");
-                    else insert_text_at_cursor("M");
+                    if (!input_handler.shift) insert_text("m");
+                    else insert_text("M");
                     return;
                 case Keys.N:
-                    if (!input_handler.shift) insert_text_at_cursor("n");
-                    else insert_text_at_cursor("N");
+                    if (!input_handler.shift) insert_text("n");
+                    else insert_text("N");
                     return;
                 case Keys.O:
-                    if (!input_handler.shift) insert_text_at_cursor("o");
-                    else insert_text_at_cursor("O");
+                    if (!input_handler.shift) insert_text("o");
+                    else insert_text("O");
                     return;
                 case Keys.P:
-                    if (!input_handler.shift) insert_text_at_cursor("p");
-                    else insert_text_at_cursor("P");
+                    if (!input_handler.shift) insert_text("p");
+                    else insert_text("P");
                     return;
                 case Keys.Q:
-                    if (!input_handler.shift) insert_text_at_cursor("q");
-                    else insert_text_at_cursor("Q");
+                    if (!input_handler.shift) insert_text("q");
+                    else insert_text("Q");
                     return;
                 case Keys.R:
-                    if (!input_handler.shift) insert_text_at_cursor("r");
-                    else insert_text_at_cursor("R");
+                    if (!input_handler.shift) insert_text("r");
+                    else insert_text("R");
                     return;
                 case Keys.S:
-                    if (!input_handler.shift) insert_text_at_cursor("s");
-                    else insert_text_at_cursor("S");
+                    if (!input_handler.shift) insert_text("s");
+                    else insert_text("S");
                     return;
                 case Keys.T:
-                    if (!input_handler.shift) insert_text_at_cursor("t");
-                    else insert_text_at_cursor("T");
+                    if (!input_handler.shift) insert_text("t");
+                    else insert_text("T");
                     return;
                 case Keys.U:
-                    if (!input_handler.shift) insert_text_at_cursor("u");
-                    else insert_text_at_cursor("U");
+                    if (!input_handler.shift) insert_text("u");
+                    else insert_text("U");
                     return;
+
                 case Keys.V:
-                    if (!input_handler.shift) insert_text_at_cursor("v");
-                    else insert_text_at_cursor("V");
+                    if (input_handler.ctrl) {
+                        paste();
+
+                    } else {
+                        if (!input_handler.shift) insert_text("v");
+                        else insert_text("V");
+                    }
+
                     return;
+
                 case Keys.W:
-                    if (!input_handler.shift) insert_text_at_cursor("w");
-                    else insert_text_at_cursor("W");
+                    if (!input_handler.shift) insert_text("w");
+                    else insert_text("W");
                     return;
+
                 case Keys.X:
-                    if (!input_handler.shift) insert_text_at_cursor("x");
-                    else insert_text_at_cursor("X");
+                    if (input_handler.ctrl) {
+                        cut();
+                    
+                    } else {
+                        if (!input_handler.shift) insert_text("x");
+                        else insert_text("X");
+                    }
+
                     return;
+
                 case Keys.Y:
-                    if (!input_handler.shift) insert_text_at_cursor("y");
-                    else insert_text_at_cursor("Y");
+                    if (!input_handler.shift) insert_text("y");
+                    else insert_text("Y");
                     return;
                 case Keys.Z:
-                    if (!input_handler.shift) insert_text_at_cursor("z");
-                    else insert_text_at_cursor("Z");
+                    if (!input_handler.shift) insert_text("z");
+                    else insert_text("Z");
                     return;
 
                 case Keys.OemSemicolon:
-                    if (!input_handler.shift) insert_text_at_cursor(";");
-                    else insert_text_at_cursor(":");
+                    if (!input_handler.shift) insert_text(";");
+                    else insert_text(":");
                     return;
                 case Keys.OemPlus:
-                    if (!input_handler.shift) insert_text_at_cursor("=");
-                    else insert_text_at_cursor("+");
+                    if (!input_handler.shift) insert_text("=");
+                    else insert_text("+");
                     return;
                 case Keys.OemComma:
-                    if (!input_handler.shift) insert_text_at_cursor(",");
-                    else insert_text_at_cursor("<");
+                    if (!input_handler.shift) insert_text(",");
+                    else insert_text("<");
                     return;
                 case Keys.OemMinus:
-                    if (!input_handler.shift) insert_text_at_cursor("-");
-                    else insert_text_at_cursor("_");
+                    if (!input_handler.shift) insert_text("-");
+                    else insert_text("_");
                     return;
                 case Keys.OemPeriod:
-                    if (!input_handler.shift) insert_text_at_cursor(".");
-                    else insert_text_at_cursor(">");
+                    if (!input_handler.shift) insert_text(".");
+                    else insert_text(">");
                     return;
                 case Keys.OemQuestion:
-                    if (!input_handler.shift) insert_text_at_cursor("/");
-                    else insert_text_at_cursor("?");
+                    if (!input_handler.shift) insert_text("/");
+                    else insert_text("?");
                     return;
                 case Keys.OemTilde:
-                    if (!input_handler.shift) insert_text_at_cursor("`");
-                    else insert_text_at_cursor("~");
+                    if (!input_handler.shift) insert_text("`");
+                    else insert_text("~");
                     return;
                 case Keys.OemOpenBrackets:
-                    if (!input_handler.shift) insert_text_at_cursor("[");
-                    else insert_text_at_cursor("{");
+                    if (!input_handler.shift) insert_text("[");
+                    else insert_text("{");
                     return;
                 case Keys.OemPipe:
-                    if (!input_handler.shift) insert_text_at_cursor("\\");
-                    else insert_text_at_cursor("|");
+                    if (!input_handler.shift) insert_text("\\");
+                    else insert_text("|");
                     return;
                 case Keys.OemCloseBrackets:
-                    if (!input_handler.shift) insert_text_at_cursor("]");
-                    else insert_text_at_cursor("}");
+                    if (!input_handler.shift) insert_text("]");
+                    else insert_text("}");
                     return;
                 case Keys.OemQuotes:
-                    if (!input_handler.shift) insert_text_at_cursor("'");
-                    else insert_text_at_cursor("\"");
+                    if (!input_handler.shift) insert_text("'");
+                    else insert_text("\"");
                     return;
                 case Keys.OemBackslash: break;
 

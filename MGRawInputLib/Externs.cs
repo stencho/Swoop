@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Text;
 using static MGRawInputLib.RawInputTypes;
@@ -1783,6 +1784,62 @@ namespace MGRawInputLib {
         [DllImport("user32.dll")] static extern bool SetCursorPos(int X, int Y);
 
         [DllImport("user32.dll")] static extern nint WindowFromPoint(System.Drawing.Point Point);
+
+
+        //Clipboard
+        [DllImport("kernel32.dll")] static unsafe extern void* GlobalLock(nint hwnd);
+        [DllImport("kernel32.dll")] static extern void GlobalUnlock(in IntPtr hwnd);
+
+        [DllImport("user32.dll")] static extern bool OpenClipboard(nint hwnd_new_owned);
+        [DllImport("user32.dll")] static extern bool CloseClipboard();
+        [DllImport("user32.dll")] static extern bool EmptyClipboard();
+        [DllImport("user32.dll")] static extern nint GetClipboardData(uint format);
+        [DllImport("user32.dll")] static extern unsafe nint SetClipboardData(uint format, void* data);
+
+
+        static bool OpenClipboard() { return OpenClipboard(nint.Zero); }
+
+        public enum ClipboardDataType : uint {
+            CF_TEXT = 1,
+            CF_BITMAP = 2,
+            CF_UNICODETEXT = 13
+        };
+
+        unsafe public static bool get_clipboard_string(out string text) {
+            text = "";
+
+            if (!OpenClipboard()) return false;
+
+            nint hData = GetClipboardData((uint)ClipboardDataType.CF_UNICODETEXT);
+            if (hData == nint.Zero) return false;
+                        
+            char* text_handle = (char*)GlobalLock(hData);
+            if (text_handle == null) return false;
+
+            text = new string(text_handle);
+
+            GlobalUnlock(hData);
+            CloseClipboard();
+
+            return true;
+        }
+
+        unsafe public static bool set_clipboard_string(string text) {
+            nint t_Data = Marshal.StringToHGlobalUni(text);
+            if (t_Data == nint.Zero) return false;
+            char* text_handle = (char*)GlobalLock(t_Data);
+            if (text_handle == null) return false;
+
+            if (!OpenClipboard()) return false;
+            if (!EmptyClipboard()) return false;
+
+            nint cdh = SetClipboardData((uint)ClipboardDataType.CF_UNICODETEXT, text_handle);
+            
+            GlobalUnlock(t_Data);
+            CloseClipboard();
+            
+            return cdh != nint.Zero;
+        }
 
         public static bool window_under_cursor() {
             System.Drawing.Point cp = get_cursor_pos_ms();            

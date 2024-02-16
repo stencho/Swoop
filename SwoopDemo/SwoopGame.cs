@@ -348,7 +348,6 @@ namespace SwoopDemo {
             UI.add_element(test_listbox);
             UI.add_element(test_listbox_add_button);
 
-
             UI.add_element(new TextBox("text_box", "this is a test textbox",
                 UI.elements["test_listbox"].position + UI.elements["test_listbox"].size.X_only + (XYPair.Right * 8),
                 ((UI.elements["test_listbox"].size * 0.75f) * (XYPair.UnitX * 2)) + (XYPair.UnitY * 19)
@@ -367,11 +366,15 @@ namespace SwoopDemo {
                 "\nthere is a line counter but no scrolling" +
                 "\nvery good priorities" +
                 "\n" +
-                "\n- CTRL + L to toggle line count",
+                "\n- CTRL + L to toggle line count" +
+                "\n" +
+                "\ntodo:" +
+                "\nmouse support at all" +
+                "\nscrolling/scroll bars" +
+                "\nword wrap",                
 
                 UI.elements["test_listbox"].position + UI.elements["test_listbox"].size.X_only + (XYPair.Right * 8) + (XYPair.Down * 25),
                 UI.elements["test_listbox"].size * 0.75f * (XYPair.One + XYPair.Right)));
-
 
         }
 
