@@ -146,6 +146,7 @@ namespace SwoopLib {
         public TextInputManager(string text) {
 
             insert_text(text);
+            cursor_pos = XYPair.Zero;
 
             return;
             StringReader sr = new StringReader(text);
@@ -304,6 +305,7 @@ namespace SwoopLib {
         }
 
         void delete_selected_text() {
+            Debug.Write(get_selected_text());
             var sel = get_actual_selection_min_max();
 
             var top_line = sel.min.Y;
@@ -347,13 +349,15 @@ namespace SwoopLib {
                             lines.RemoveAt(top_line + 1); 
                             if (longest_line_index == top_line + 1) longest_line_index = -1;
                         }
+
+                        if ((lines.Count > 1 && top_line > -1 && lines.Count > top_line + 1) /*&& (!String.IsNullOrEmpty(lines[top_line+1].text))*/) {
+                            lines[top_line].text += lines[top_line + 1].text;
+                            lines.RemoveAt(top_line + 1);
+
+                            if (longest_line_index == top_line + 1) longest_line_index = -1;
+                        }
                     }
 
-                    if (lines.Count > 1 && top_line > -1 && lines.Count > top_line+1) {
-                        lines[top_line].text += lines[top_line + 1].text;
-                        lines.RemoveAt(top_line + 1);
-                        if (longest_line_index == top_line + 1) longest_line_index = -1;
-                    }
                 }                
 
                 clear_selection();
@@ -373,7 +377,7 @@ namespace SwoopLib {
             validate_cursor();
         }
 
-        public void delete_text(int line, int start, int count) {
+        public void delete_text(int line, int start, int count, bool auto_remove_lines = true) {
             lock (lines) {
                 //stupid loop to handle deleting text within the TextLine system
                 if (count < 0) {
@@ -383,6 +387,7 @@ namespace SwoopLib {
                         //we need to move the current line's text to the above line
                         //and delete the current one
                         if (start - i <= 0) {
+                            if (!auto_remove_lines) break;
                             if (line <= 0) break;
                             var t = lines[line].text;
 
@@ -410,6 +415,7 @@ namespace SwoopLib {
                     for (int i = 0; i < count; i++) {
                         if (start + i >= lines[line].length) {
                             //Debug.Write($"L");
+                            if (!auto_remove_lines) break;
                             if (line + 1 >= line_count) break;
                             lines[line].text += lines[line + 1].text;
                             lines[line].update_size_length();
@@ -498,6 +504,11 @@ namespace SwoopLib {
 
                 store_cursor_X();
             }
+        }
+
+        void duplicate_line() {
+            lines.Insert(current_line_index, new TextLine(this, current_line_text));
+            cursor_pos.Y++;
         }
 
         //Cursor
@@ -1016,9 +1027,16 @@ namespace SwoopLib {
                     return;
 
                 case Keys.D:
-                    if (!input_handler.shift) insert_text("d");
-                    else insert_text("D");
+                    if (input_handler.ctrl) {
+                        duplicate_line();
+                    } else {
+                        if (!input_handler.shift) insert_text("d");
+                        else insert_text("D");
+                    }
+
                     return;
+
+
                 case Keys.E:
                     if (!input_handler.shift) insert_text("e");
                     else insert_text("E");
