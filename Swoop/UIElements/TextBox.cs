@@ -228,10 +228,17 @@ namespace SwoopLib.UIElements {
 
             int start_line = view_offset.Y / single_character_size.Y;
             int count = view_size.Y / single_character_size.Y;
+            count += 1;
+
             ctop = start_line * single_character_size.Y;
+
+            int drawing_lines = 0;
 
             //draw each TextLine
             for (int i = start_line; i < start_line + count; i++) {
+                if (i >= text_manager.line_count) break;
+
+                drawing_lines++;
                 TextLine tl = text_manager.lines[i];
                 bool cursor_on_line = i == text_manager.cursor_pos.Y;
                 bool empty_line = (text_manager.lines[i].length == 0);
@@ -329,6 +336,8 @@ namespace SwoopLib.UIElements {
                 (XYPair.UnitX * line_count_width) + single_character_size + (single_character_size.X_only*2), Color.White, Color.Black);
             */
             //status text
+            status_text += $" {drawing_lines}";
+
             var ds = Drawing.measure_string_profont_xy(status_text);
             Drawing.text(status_text, size - (ds + (XYPair.One * 3)), Swoop.UI_disabled_color);
 
@@ -346,14 +355,19 @@ namespace SwoopLib.UIElements {
                     Swoop.UI_background_color, Swoop.UI_disabled_color);
 
                 start_line = view_offset.Y / single_character_size.Y;
+                start_line -= 1;
+
+                if (start_line < 0) start_line = 0;
+                    
                 count = view_size.Y / single_character_size.Y;
+                count += 1;
 
                 ctop = start_line * single_character_size.Y;
+
                 for (int i = start_line; i < start_line+count; i++) {
-                    if (i >= text_manager.line_count) {
-                        break;
-                    }
-                    Drawing.text((i + 1).ToString(), -view_offset.Y_only + (XYPair.Down * ctop) + (XYPair.Down * 2) + (XYPair.Right * 1), Swoop.UI_highlight_color);
+                    if (i >= text_manager.line_count) break;
+
+                    Drawing.text((i + 1).ToString(), -view_offset.Y_only + (XYPair.Down * ctop) + (XYPair.Down * 2) + (XYPair.Right * 2), Swoop.UI_highlight_color);
                     ctop += single_character_size.Y;
                 }
             }
