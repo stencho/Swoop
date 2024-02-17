@@ -481,11 +481,47 @@ namespace SwoopLib {
         }
 
         void copy() {
-            string clipboard_text = get_selected_text();
+            if (has_selection()) {
+                string clipboard_text = get_selected_text();
 
-            if (Externs.set_clipboard_string(clipboard_text)) {
-                return;
+                Externs.set_clipboard_string(clipboard_text);
+                
+            } else {
+                if (cursor == 0) {
+                    Externs.set_clipboard_string(current_line_text);
+
+                } else {
+                    int start, end;
+                    find_word_at_cursor(out start, out end);
+
+                    int cursor_pos_in_word = cursor - start;
+                    string copy = current_line_text.Substring(start, end - start);
+
+
+                    if (cursor_pos_in_word > 0 && separator_char_switch(copy[cursor_pos_in_word-1])) {
+                        //right side
+                        var c = copy[cursor_pos_in_word-1];
+                        var split = copy.Split(c);
+
+                        Externs.set_clipboard_string(split[1]);
+
+                    } else if (cursor_pos_in_word < current_line_text_length-1
+                        && separator_char_switch(copy[cursor_pos_in_word])) {
+
+                        var c = copy[cursor_pos_in_word];
+                        var split = copy.Split(c);
+
+                        Externs.set_clipboard_string(split[0]);
+
+                    } else {
+                        if (!string.IsNullOrWhiteSpace(copy)) {
+                            Externs.set_clipboard_string(copy);
+                        }
+                    }
+
+                }
             }
+             
         }
 
         void cut() {
@@ -670,7 +706,7 @@ namespace SwoopLib {
             store_cursor_X();
         }
         
-        bool char_switch(char c) {            
+        bool separator_char_switch(char c) {            
             switch (c) {
                 case ' ':
                 case '_':
@@ -691,6 +727,13 @@ namespace SwoopLib {
             return false;
         }
 
+        void find_word_at_cursor(out int start, out int end) {
+            int l = find_word_size_left_of_cursor();
+            int r = find_word_size_right_of_cursor();
+            
+            start = cursor - l; end = start + l + r;
+        }
+
         int find_word_size_left_of_cursor() {
             bool started_on_hit = false;
             int c = 1;
@@ -701,7 +744,7 @@ namespace SwoopLib {
                 
                 Debug.Write(current);
 
-                if (started_on_hit ? !char_switch(current) : char_switch(current)) {
+                if (started_on_hit ? !separator_char_switch(current) : separator_char_switch(current)) {
                     if (c == 1) { started_on_hit = true; c++; continue; }
                     if (c == 2 && started_on_hit) { c++; started_on_hit = false; continue; }
 
@@ -723,7 +766,7 @@ namespace SwoopLib {
                 char current = current_line_text[cursor_pos.X+c];
                 Debug.Write(current);
 
-                if (started_on_hit ? !char_switch(current) : char_switch(current)) {
+                if (started_on_hit ? !separator_char_switch(current) : separator_char_switch(current)) {
 
                     if (c == 0) { started_on_hit = true; c++; continue; } 
                     if (c == 1 && started_on_hit) { c++; started_on_hit = false; continue; }
