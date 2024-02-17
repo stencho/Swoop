@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -374,23 +375,87 @@ namespace SwoopLib.UIElements {
             switch (key_time.key) {
                 case Keys.Up:
                     select_item_above();
+                    move_selected_item_into_view();
                     break;
                 case Keys.Down:
                     select_item_below();
+                    move_selected_item_into_view();
                     break;
             }
         }
 
-        public void move_item_into_view(int index) {
+        enum ViewCollisionInfo {
+            Above,Below,
+            Visible
+        }
 
+        void find_selected_top_bottom(out int selected_top, out int selected_bottom) {
+            find_index_top_bottom(selected_index, out selected_top, out selected_bottom);
+        }
+        void find_index_top_bottom(int index, out int selected_top, out int selected_bottom) {
+            selected_top = 0; selected_bottom = 0;
+            int d = 0;
+
+            foreach (ListBoxItem item in items) {
+
+                int ih = 0;
+                if (item.custom_draw) { ih = item.height; } 
+                else { ih = item.height + top_margin + bottom_margin + 1; };
+
+                selected_bottom += ih;
+
+                //Debug.WriteLine($"{d.ToString()} {selected_top} -> {selected_bottom}");
+
+                d++; if (d == index + 1) break;
+                selected_top += ih;
+            }
+        }
+
+        bool item_in_view(int index, out ViewCollisionInfo result, out int selected_top, out int selected_bottom) {
+            result = ViewCollisionInfo.Visible;
+            selected_top = 0; selected_bottom = 0;
+            find_index_top_bottom(index, out selected_top, out selected_bottom);
+
+            //Debug.WriteLine($"{top_position_fract * total_height}");
+            //Debug.WriteLine($"{bottom_position_fract * total_height}");
+
+            //as
+            if (selected_top < scroll_position) {
+                result = ViewCollisionInfo.Above;
+            //so
+            } else if (selected_bottom > scroll_position + lb_height) {
+                result = ViewCollisionInfo.Below;
+
+            } else { 
+                result = ViewCollisionInfo.Visible;
+                return true;
+            }
+            return false;
+
+        }
+
+        public void move_item_into_view(int index) {
+            int selected_top = 0; int selected_bottom = 0; ViewCollisionInfo res;
+
+            item_in_view(selected_index, out res, out selected_top, out selected_bottom);
+            switch (res) {
+                case ViewCollisionInfo.Above:
+                    scroll_position = selected_top;
+                    break;
+
+                case ViewCollisionInfo.Below:
+                    scroll_position = selected_bottom - lb_height;
+                    break;
+
+                case ViewCollisionInfo.Visible: break;
+            }
         }
 
         internal void move_selected_item_into_view() {
-            //move_item_into_view(selected_index)
+            move_item_into_view(selected_index);
         }
 
         internal override void update() {
-
             handler.update();
 
             if (focused) {
@@ -428,8 +493,10 @@ namespace SwoopLib.UIElements {
                             stored_index = selected_index;
 
                     } else if (!clicking && was_clicking) {
-                        if (stored_index == mouse_over_index)
+                        if (stored_index == mouse_over_index) {
                             selected_index = stored_index;
+                            move_selected_item_into_view();
+                        }
 
                         stored_index = -1;
                     }
