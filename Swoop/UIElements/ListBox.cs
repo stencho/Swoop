@@ -352,9 +352,23 @@ namespace SwoopLib.UIElements {
         internal override void handle_focused_input() {}
 
         internal void check_keys(KeyTime key_time) {
+            if (!Window.is_active) return;
+            if (!focused) return;
+
             if (key_time.held == false) {
                 //JUST PRESSED ONLY
-                switch (key_time.key) {}
+                switch (key_time.key) {
+                    case Keys.Enter:
+                        break;
+                    case Keys.Home:
+                        scroll_position = 0f;
+                        selected_index = 0;
+                        break;
+                    case Keys.End:
+                        scroll_position = total_height - lb_height;
+                        selected_index = items.Count - 1;
+                        break;
+                }
             }
 
             switch (key_time.key) {
@@ -367,7 +381,16 @@ namespace SwoopLib.UIElements {
             }
         }
 
+        public void move_item_into_view(int index) {
+
+        }
+
+        internal void move_selected_item_into_view() {
+            //move_item_into_view(selected_index)
+        }
+
         internal override void update() {
+
             handler.update();
 
             if (focused) {
