@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using static MGRawInputLib.Input;
@@ -281,42 +282,52 @@ namespace SwoopLib.UIElements {
         internal override void draw_rt() {
             int running_height = 0;
             int index = 0;
+            //int drawn = 0;
 
             foreach (ListBoxItem item in items) {
-                if (item.custom_draw) {
-                    var item_bottom = running_height + item.height;
-                    if ((item_bottom > scroll_position && item_bottom < scroll_position + lb_height) ||
-                        (running_height > scroll_position && running_height < scroll_position + lb_height)) {
+                //only draw if the item is in view
+                if (running_height + item.height >= scroll_position && running_height < scroll_position + lb_height) {
+                    if (item.custom_draw) {
+                        var item_bottom = running_height + item.height;
+                        if ((item_bottom > scroll_position && item_bottom < scroll_position + lb_height) ||
+                            (running_height > scroll_position && running_height < scroll_position + lb_height)) {
 
-                        if (item.render_target != null)
-                            Drawing.image(item.render_target, (XYPair.UnitY * (running_height - scroll_position)), item.size);
-                    }
-
-                    running_height += item.height;
-
-                } else {
-                    var item_bottom = running_height + item.height;
-                    if ((item_bottom > scroll_position && item_bottom < scroll_position + lb_height) ||
-                        (running_height > scroll_position && running_height < scroll_position + lb_height)) {
-
-
-                        if (item.is_selected) {
-                            Drawing.fill_rect(
-                                (XYPair.UnitY * (running_height - scroll_position)),
-                                (XYPair.UnitY * (running_height - scroll_position)) + item.size + (XYPair.UnitY * (top_margin + bottom_margin + 2)),
-                                Swoop.get_color(this));
-                        } else if (item.is_stored_click) { 
-                            Drawing.fill_rect_dither(
-                                (XYPair.UnitY * (running_height - scroll_position)),
-                                (XYPair.UnitY * (running_height - scroll_position)) + item.size + (XYPair.UnitY * (top_margin + bottom_margin + 2)),
-                                Swoop.get_color(this), Swoop.UI_background_color);
+                            if (item.render_target != null)
+                                Drawing.image(item.render_target, (XYPair.UnitY * (running_height - scroll_position)), item.size);
                         }
 
-                        if (item.render_target != null)
-                            Drawing.image(item.render_target, (XYPair.UnitY * (running_height - scroll_position)) + (Vector2.UnitY * top_margin), item.size);
+                        running_height += item.height;
+
+                    } else {
+                        var item_bottom = running_height + item.height;
+                        if ((item_bottom > scroll_position && item_bottom < scroll_position + lb_height) ||
+                            (running_height > scroll_position && running_height < scroll_position + lb_height)) {
+
+
+                            if (item.is_selected) {
+                                Drawing.fill_rect(
+                                    (XYPair.UnitY * (running_height - scroll_position)),
+                                    (XYPair.UnitY * (running_height - scroll_position)) + item.size + (XYPair.UnitY * (top_margin + bottom_margin + 2)),
+                                    Swoop.get_color(this));
+                            } else if (item.is_stored_click) {
+                                Drawing.fill_rect_dither(
+                                    (XYPair.UnitY * (running_height - scroll_position)),
+                                    (XYPair.UnitY * (running_height - scroll_position)) + item.size + (XYPair.UnitY * (top_margin + bottom_margin + 2)),
+                                    Swoop.get_color(this), Swoop.UI_background_color);
+                            }
+
+                            if (item.render_target != null)
+                                Drawing.image(item.render_target, (XYPair.UnitY * (running_height - scroll_position)) + (Vector2.UnitY * top_margin), item.size);
+                        }
+
+                        running_height += item.height + top_margin + bottom_margin + 1;
                     }
 
-                    running_height += item.height + top_margin + bottom_margin + 1;
+                    //drawn++;
+                } else {
+                    //just add to running height, item out of view
+                    if (item.custom_draw) running_height += item.height;
+                    else running_height += item.height + top_margin + bottom_margin + 1;
                 }
 
                 bool stored = (stored_index == index || stored_index == index + 1);
@@ -340,6 +351,8 @@ namespace SwoopLib.UIElements {
                 //}
                 index++;
             }
+
+            //Drawing.text($"{drawn}", XYPair.One * 2, Swoop.UI_highlight_color);
 
             //draw scroll bar            
             Drawing.fill_rect(
@@ -414,6 +427,7 @@ namespace SwoopLib.UIElements {
         bool item_in_view(int index, out ViewCollisionInfo result, out int selected_top, out int selected_bottom) {
             result = ViewCollisionInfo.Visible;
             selected_top = 0; selected_bottom = 0;
+
             find_index_top_bottom(index, out selected_top, out selected_bottom);
 
             //Debug.WriteLine($"{top_position_fract * total_height}");
@@ -434,10 +448,15 @@ namespace SwoopLib.UIElements {
 
         }
 
+        public void center_view_on_item() {
+
+        }
+
         public void move_item_into_view(int index) {
             int selected_top = 0; int selected_bottom = 0; ViewCollisionInfo res;
 
             item_in_view(selected_index, out res, out selected_top, out selected_bottom);
+
             switch (res) {
                 case ViewCollisionInfo.Above:
                     scroll_position = selected_top;
