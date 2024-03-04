@@ -37,6 +37,11 @@ Looks better than it works.
 - [x] TextBox and a multi-line TextEditor *(both still need mouse support, editor still needs scrolling and word wrap at minimum)*
 - [x] Title Bar (with window dragging)
 - [x] Toggle Button
+- [ ] UI Editor Mode
+- [ ] - Add/Delete elements
+- [ ] - Reposition/resize elements (different elements should be able to specify which axes they allow resizing on)
+- [ ] - Layout Save/Load
+- [ ] - C#-Script-able element Actions, able to act on other elements
 
 ### Implemented useful features and effects
 - UIElements are simple to build, fully aware of mouse state, and can automatically draw all of their contents to a RenderTarget2D by setting a bool, to avoid drawing outside their bounds
