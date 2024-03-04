@@ -101,7 +101,7 @@ namespace MGRawInputLib {
         ~InputHandler() { Input.handlers.Remove(this); }
 
         public string ri_info() {
-            return $"[keyboard] -> {list_keys()}\n[held keys] -> {list_held_keys()}\n[mouse] -> {rawinput_mouse_state.info()}";
+            return $"[keyboard] -> {list_keys()}\n[held keys] -> {list_held_keys()}\n[mouse] -> {rawinput_mouse_state.info()}\n[Under Cursor] {Externs.window_under_cursor()} \n";
         }
 
         public string list_keys() {
