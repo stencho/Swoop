@@ -138,6 +138,12 @@ namespace SwoopLib
             fill_circle(A, thickness + 1f, color);
             fill_circle(B, thickness + 1f, color);
         }
+        public static void line_rounded_ends(XYPair A, XYPair B, Color color, float thickness) {
+            line(A, B, color, thickness);
+
+            fill_circle(A.ToVector2(), thickness / 2f, color);
+            fill_circle(B.ToVector2(), thickness / 2f, color);
+        }
 
         public static void cross(Vector2 center, float size, Color color) {
             center.Round();
@@ -162,6 +168,9 @@ namespace SwoopLib
             for (var i = 0; i < points.Length; i++) {
                 //fill_circle(points[i], thickness, color);
             }
+        }
+
+        public static void fill_poly() {
         }
 
         public static void tri(Vector2 A, Vector2 B, Vector2 C, Color color, float thickness) {
@@ -251,6 +260,9 @@ namespace SwoopLib
         public static void fill_circle(Vector2 P, float radius, Color color) {
             SDF.fill_circle(P, radius, color);
         }
+        public static void fill_circle(XYPair P, float radius, Color color) {
+            SDF.fill_circle(P.ToVector2(), radius, color);
+        }
 
         public static void image(Texture2D image, Vector2 position, Vector2 size) {
             begin();
@@ -339,6 +351,43 @@ namespace SwoopLib
         public static void text(string text, XYPair position, Color color) {
             Drawing.text(text, position.ToVector2(), color);
         }
+
+        public static void text_centered(string text, XYPair position, Color color) {
+            string line = string.Empty;
+            XYPair size = XYPair.Zero;
+            Vector2 pos = position.ToVector2();
+
+            int max_w = 0;
+
+            using (StringReader sr = new StringReader(text)) {
+                while (sr.Peek() > -1) {
+                    line = sr.ReadLine();
+                    size = measure_string_profont_xy(line);
+                    if (size.X > max_w) max_w = size.X;
+                }
+            }
+
+            line = string.Empty;
+            size = XYPair.Zero;
+            pos = position.ToVector2();
+
+            //Drawing.fill_circle(pos, 1f, Color.Red);
+
+            using (StringReader sr = new StringReader(text)) {      
+                while (sr.Peek() > -1) {
+                    line = sr.ReadLine();
+                    size = measure_string_profont_xy(line);
+                    
+                    pos.X = (position.X) - (size.X / 2f) + 1;
+
+                    //Drawing.fill_circle(pos, 1f, Color.Green);
+
+                    Drawing.text(line, pos, color);
+                    pos.Y += size.Y;
+                }
+            }
+        }
+
 
         public static void text(string text, Vector2 position, Color color) {
             begin();
