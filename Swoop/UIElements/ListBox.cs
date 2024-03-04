@@ -323,32 +323,34 @@ namespace SwoopLib.UIElements {
                         running_height += item.height + top_margin + bottom_margin + 1;
                     }
 
-                    //drawn++;
-                } else {
-                    //just add to running height, item out of view
-                    if (item.custom_draw) running_height += item.height;
-                    else running_height += item.height + top_margin + bottom_margin + 1;
-                }
+                    bool stored = (stored_index == index || stored_index == index + 1);
+                    bool mouse_on_index = (mouse_over_index == index || mouse_over_index == index + 1);
+                    bool selected = (selected_index == index || selected_index == index + 1);
 
-                bool stored = (stored_index == index || stored_index == index + 1);
-                bool mouse_on_index = (mouse_over_index == index || mouse_over_index == index + 1);
-                bool selected = (selected_index == index || selected_index == index + 1);
-
-                //jesus christ
-                //draw dotted lines for moused over or stored click items
-                //draw solid lines otherwise
-                //if ((item.custom_draw && (item.is_selected || item.is_stored_click)) || (!(item.is_stored_click))) {
-                    if ((stored || mouse_on_index) && !selected) 
+                    //jesus christ
+                    //draw dotted lines for moused over or stored click items
+                    //draw solid lines otherwise
+                    //if ((item.custom_draw && (item.is_selected || item.is_stored_click)) || (!(item.is_stored_click))) {
+                    if ((stored || mouse_on_index) && !selected)
                         Drawing.fill_rect_dither(
                             (XYPair.UnitY * (running_height - scroll_position)),
                             (XYPair.UnitY * (running_height - scroll_position)) + (Vector2.UnitX * size_minus_scroll_bar.X) + (Vector2.UnitY),
-                            Swoop.get_color(this),Swoop.UI_background_color);
+                            Swoop.get_color(this), Swoop.UI_background_color);
                     else
                         Drawing.line(
                             (Vector2.UnitY * (running_height - scroll_position)),
                             (Vector2.UnitY * (running_height - scroll_position)) + (Vector2.UnitX * size_minus_scroll_bar.X),
                             /*selected_index == index || selected_index == index + 1 ? */Swoop.get_color(this)/* : Swoop.UI_color*/, 1f);
-                //}
+                    //}
+
+                    //drawn++;
+                } else {
+                    //not in view
+                    //just add to running height, item out of view
+                    if (item.custom_draw) running_height += item.height;
+                    else running_height += item.height + top_margin + bottom_margin + 1;
+                }
+
                 index++;
             }
 
