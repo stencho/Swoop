@@ -21,6 +21,7 @@ Looks better than it works. This readme is, more or less, a public TODO and a se
 - [ ] Context menu + registration system
 - [ ] Cursor replacement + switching system
 - [x] DialogBox
+- [ ] EPA
 - [x] Label
 - [x] ListBox *(still needs mouse support for scrolling + actions for events)*
 - [ ] MenuStrip (file, edit, view, etc. the strip of buttons itself)
