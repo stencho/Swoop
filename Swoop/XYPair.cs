@@ -108,8 +108,6 @@ namespace SwoopLib {
         }
 
         #region int
-        public static XYPair operator -(XYPair a, int b) => new XYPair() { X = a.X - b, Y = a.Y - b };
-        public static XYPair operator +(XYPair a, int b) => new XYPair() { X = a.X + b, Y = a.Y + b };
         public static XYPair operator *(XYPair a, int b) => new XYPair() { X = a.X * b, Y = a.Y * b };
         public static XYPair operator *(XYPair a, float b) => new XYPair() { X = (int)(a.X * b), Y = (int)(a.Y * b) };
         public static XYPair operator /(XYPair a, int b) => new XYPair() { X = a.X / b, Y = a.Y / b };
@@ -125,8 +123,6 @@ namespace SwoopLib {
         #region float
         public static Vector2 operator *(float b, XYPair a) => new Vector2(b * a.X, b * a.Y);
         public static Vector2 operator /(XYPair a, float b) => new Vector2(a.X / b, a.Y / b);
-        public static Vector2 operator -(XYPair a, float b) => new Vector2(a.X - b, a.Y - b);
-        public static Vector2 operator +(XYPair a, float b) => new Vector2(a.X + b, a.Y + b);
 
         #endregion
         #region Vector2

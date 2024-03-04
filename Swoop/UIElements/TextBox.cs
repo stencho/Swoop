@@ -193,7 +193,7 @@ namespace SwoopLib.UIElements {
 
         internal override void draw_rt() {
             Drawing.fill_rect(XYPair.Zero, size, Swoop.UI_background_color);
-            Drawing.fill_rect_dither(XYPair.Zero, (size.Y_only + (XYPair.UnitY * 25)) + (XYPair.UnitX * line_count_width - 3), Swoop.UI_background_color, Swoop.UI_disabled_color);
+            Drawing.fill_rect_dither(XYPair.Zero, (size.Y_only + (XYPair.UnitY * 25)) + (XYPair.UnitX * (line_count_width.X - 3)), Swoop.UI_background_color, Swoop.UI_disabled_color);
 
             if (text_manager.has_selection() && text_manager.select_shape == TextInputManager.selection_shape.BLOCK) {
                 var select_min_max = text_manager.get_actual_selection_min_max();
@@ -346,12 +346,12 @@ namespace SwoopLib.UIElements {
             if (line_count) {
                 Drawing.fill_rect(
                     XYPair.Zero,
-                    (size.Y_only + (XYPair.UnitY * 25)) + (XYPair.UnitX * line_count_width - 3),
+                    (size.Y_only + (XYPair.UnitY * 25)) + (XYPair.UnitX * (line_count_width.X - 3)),
                     Swoop.UI_background_color);
 
                 Drawing.fill_rect_dither(
                     XYPair.Zero,
-                    (size.Y_only + (XYPair.UnitY * 25)) + (XYPair.UnitX * line_count_width - 3),
+                    (size.Y_only + (XYPair.UnitY * 25)) + (XYPair.UnitX * (line_count_width.X - 3)),
                     Swoop.UI_background_color, Swoop.UI_disabled_color);
 
                 start_line = view_offset.Y / single_character_size.Y;
