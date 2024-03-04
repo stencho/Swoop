@@ -1,9 +1,9 @@
 ## Swoop
 A set of UI elements, tools to use them, and systems to manage them. Designed to be used for projects which need a WinForms-like UI, highly managed 2D drawing, and even some 3D drawing. Everything is implemented as small ProFont and extreme minimalist 1px bright lines on dark backgrounds, inspired by BlackBox/bbLean. 
 
-Currently mostly a mess, and requires an up-to-date github version of MonoGame in the same folder as this one, with mgcb.exe in the PATH. 
+Currently mostly a mess, and requires an up-to-date github version of MonoGame in the same folder as this one, with mgcb.exe in the PATH. This is temporary, and due to the current installer version's font processor. Probably will not run on any PC but mine because of this.
 
-Looks better than it works.
+Looks better than it works. This readme is, more or less, a public TODO and a set of notes for my future self.
 
 ### Most current SwoopDemo screenshot
 ![Most current major change screenshot](current.png)
