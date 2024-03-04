@@ -357,9 +357,14 @@ namespace SwoopDemo {
             UI.add_element(new TextEditor("text_editor", 
                 "this is a literal actual text editor" +
                 "\n" +
+                "\nand this line is extra long for testing scrolling and word wrap" +
+                "\nthis line is similarly excellently long for the testing of the word wrap and scrolling and it needs to be at least three lines maybe even four lines long" +
+                "\n" +
                 "\nI don't really know why I thought that this" +
                 "\nwas a good idea but it did let me implement" +
-                "\na fairly robust system for editing text" +                
+                "\na fairly robust system for editing text" +        
+                "\n" +
+                "\nthe TextBox above actually uses the same system" +
                 "\n" +
                 "\nit is still missing a ton of features though, " +
                 "\nword wrap still needs to be implemented because this is a nuisance" +
@@ -392,6 +397,12 @@ namespace SwoopDemo {
                 UI.elements["test_listbox"].position + UI.elements["test_listbox"].size.X_only + (XYPair.Right * 8) + (XYPair.Down * 25),
                 UI.elements["test_listbox"].size * 0.75f * (XYPair.One + XYPair.Right)));
 
+            UI.add_element(new OptionSlider("option_slider", 
+                UI.elements["text_editor"].bottom_xy + (XYPair.UnitY * 10) + (UI.elements["text_editor"].size.X_only / 6), 
+                UI.elements["text_editor"].size.X_only * 0.75f, 
+                "Option Slider", 
+                "No", "Low", "Medium", "High", "Ultra", "Yes"
+                ));
         }
 
         static float progress_bar_test_value = 0.5f;
@@ -460,7 +471,6 @@ namespace SwoopDemo {
 
             GraphicsDevice.SetRenderTarget(null);
             Drawing.image(output_rt, XYPair.Zero, resolution);
-
             //test.set_param("main_texture", Drawing.OnePXWhite);
             //test.draw_plane(Swoop.resolution);
 
