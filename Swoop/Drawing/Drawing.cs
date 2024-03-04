@@ -257,6 +257,9 @@ namespace SwoopLib
         public static void circle(Vector2 P, float radius, float thickness, Color color) {
             SDF.draw_circle(P, radius, thickness, color);
         }
+        public static void circle(XYPair P, float radius, float thickness, Color color) {
+            SDF.draw_circle(P.ToVector2(), radius, thickness, color);
+        }
         public static void fill_circle(Vector2 P, float radius, Color color) {
             SDF.fill_circle(P, radius, color);
         }
