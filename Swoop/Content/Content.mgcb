@@ -31,6 +31,12 @@
 /processorParam:DebugMode=Auto
 /build:effects/draw_3d.fx
 
+#begin effects/glyph.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:effects/glyph.fx
+
 #begin effects/render_target_screen_pos.fx
 /importer:EffectImporter
 /processor:EffectProcessor

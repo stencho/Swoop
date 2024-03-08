@@ -19,8 +19,8 @@ namespace SwoopLib {
     }
 
 
-    internal class RenderableGDIBitmap {
-        System.Drawing.Graphics graphics;
+    public class RenderableGDIBitmap {
+        public System.Drawing.Graphics graphics;
         
         public System.Drawing.Bitmap bitmap;
         public Texture2D texture;
@@ -85,9 +85,55 @@ namespace SwoopLib {
             //Drawing.begin();
         //}
 
-        public void copy_bitmap_to_texture() {
-            uint trgb;
+        public void copy_bitmap_region_to_external_texture_region(
+            XYPair bitmap_position, XYPair bitmap_size, XYPair texture_position, ref RenderTarget2D texture_2d) {
+            
+            System.Drawing.Imaging.BitmapData data = bitmap.LockBits(
+                new System.Drawing.Rectangle(bitmap_position.X, bitmap_position.Y, bitmap_size.X, bitmap_size.Y),
 
+                System.Drawing.Imaging.ImageLockMode.ReadOnly,
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            
+            Color[] cdata = new Color[bitmap_size.X * bitmap_size.Y];
+
+            int i = 0;
+            unsafe {
+                uint* ptr = (uint*)data.Scan0;
+                int add_index=0;
+
+                for (i = 0; i < size.X * size.Y; i++) {
+                    //check if the current linear index converted to X/Y coords sits within the bitmap bounds
+                    var x = i % size.X;
+                    var y = Math.Floor((double)(i / size.X));
+
+                    if (x >= bitmap_position.X && x < bitmap_position.X + bitmap_size.X &&
+                        y >= bitmap_position.Y && y < bitmap_position.Y + bitmap_size.Y) {
+                        
+                        cdata[add_index].A = (byte)(*(ptr + (i)) >> 24);
+                        
+                        cdata[add_index].R = (byte)(*(ptr + (i)) >> 16);
+                        
+                        cdata[add_index].G = (byte)(*(ptr + (i)) >> 8);
+                        cdata[add_index].B = (byte)(*(ptr + (i)));
+                        add_index++;
+                    }
+
+                }
+
+                lock (texture_2d) texture_2d.SetData(0, 0,
+                    new Rectangle(texture_position.X, texture_position.Y, bitmap_size.X, bitmap_size.Y),
+                    cdata, 0, cdata.Length);
+
+                bitmap.UnlockBits(data);
+
+                cdata = null;
+                ptr = null;
+                GC.Collect();
+            }
+
+        }
+
+        public void copy_bitmap_to_texture() {
             System.Drawing.Imaging.BitmapData data = bitmap.LockBits(
                 new System.Drawing.Rectangle(0, 0, size.X, size.Y), 
                 System.Drawing.Imaging.ImageLockMode.ReadWrite, 
@@ -95,11 +141,7 @@ namespace SwoopLib {
 
             Color[] cdata = new Color[size.X * size.Y];
 
-            Debug.WriteLine("BITMAP");
-
             int i = 0;
-            byte a, r, g, b;
-
             unsafe {
                 uint* ptr = (uint*)data.Scan0;
 

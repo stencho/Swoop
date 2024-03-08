@@ -309,6 +309,35 @@ namespace SwoopLib
             begin();
             sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), Color.White);
         }
+        public static void image(RenderTarget2D image, XYPair position, XYPair size, XYPair crop_position, XYPair crop_size) {
+            begin();
+            sb.Draw(image, 
+                new Rectangle(position.ToPoint(), size.ToPoint()), 
+                new Rectangle(crop_position.X, crop_position.Y, crop_size.X, crop_size.Y), 
+                Color.White);
+        }
+        public static void image(Texture2D image, XYPair position, XYPair size, XYPair crop_position, XYPair crop_size) {
+            begin();
+            sb.Draw(image,
+                new Rectangle(position.ToPoint(), size.ToPoint()),
+                new Rectangle(crop_position.X, crop_position.Y, crop_size.X, crop_size.Y),
+                Color.White);
+        }
+        public static void image(RenderTarget2D image, XYPair position, XYPair size, XYPair crop_position, XYPair crop_size, Color tint) {
+            begin();
+            sb.Draw(image,
+                new Rectangle(position.ToPoint(), size.ToPoint()),
+                new Rectangle(crop_position.X, crop_position.Y, crop_size.X, crop_size.Y),
+                tint);
+        }
+        public static void image(Texture2D image, XYPair position, XYPair size, XYPair crop_position, XYPair crop_size, Color tint) {
+            begin();
+            sb.Draw(image,
+                new Rectangle(position.ToPoint(), size.ToPoint()),
+                new Rectangle(crop_position.X, crop_position.Y, crop_size.X, crop_size.Y),
+                tint);
+        }
+
         public static void image(Texture2D image, Vector2 position, Vector2 size, Color tint) {
             begin();
             sb.Draw(image, new Rectangle(position.ToPoint(), size.ToPoint()), tint);

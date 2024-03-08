@@ -10,12 +10,17 @@ namespace SwoopLib {
     public static class BaseExt {
         public static XYPair ToXYPair(this Point p) => new XYPair(p.X, p.Y);
         public static XYPair ToXYPair(this Vector2 p) => new XYPair(p.X, p.Y);
+        public static XYPair ToXYPair(this System.Drawing.SizeF size) => new XYPair(size.Width, size.Height);
+        public static XYPair ToXYPair(this System.Drawing.Point size) => new XYPair(size.X, size.Y);
+        public static XYPair ToXYPair(this System.Drawing.Size size) => new XYPair(size.Width, size.Height);
 
         public static XYPair positionToXYPair(this Rectangle r) => r.Location.ToXYPair();
         public static XYPair sizeToXYPair(this Rectangle r) => r.Size.ToXYPair();
 
         public static System.Drawing.PointF ToPointF(this Vector2 v2) => new System.Drawing.PointF(v2.X, v2.Y);
         public static System.Drawing.PointF ToPointF(this XYPair v2) => new System.Drawing.PointF(v2.X, v2.Y);
+
+        
     }
 
     //disable warnings for equals/hashcode overrides - works fine without

@@ -1,0 +1,449 @@
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
+using SwoopLib;
+using SwoopLib.Effects;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Eventing.Reader;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace SwoopLib {
+    
+    public class GlyphInfo {
+        public string character;
+        
+        public XYPair position;
+        public XYPair size;
+
+        public int pixels_start;
+        public int pixels_end;
+
+        public bool needs_adding;
+
+        public GlyphInfo(string character, XYPair position, XYPair size) {
+            this.character = character;
+            this.position = position;
+            this.size = size;
+            needs_adding = true;
+        }
+    }
+
+    public class GlyphRow {        
+        public XYPair size = XYPair.Zero;
+        public int row_top = 0;
+
+        string row = "";
+        public bool needs_adding;
+
+        public Dictionary<string, GlyphInfo> glyphs = new Dictionary<string, GlyphInfo>();
+
+        public GlyphRow(int row_top) {
+            this.row_top = row_top;
+        }
+
+        /// <summary>
+        /// Returns true if the glyph was able to fit at the end of the row
+        /// </summary>
+        /// <param name="character"></param>
+        /// <param name="font"></param>
+        /// <param name="graphics"></param>
+        /// <returns></returns>
+        public bool add_glyph(string character, FontManager parent) {            
+            var char_size = parent.graphics.MeasureString(character.ToString(), parent.gdi_font);
+            if (glyphs.ContainsKey(character)) return true;
+
+            //glyph won't fit on X
+            if (size.X + (int)char_size.Width > parent.char_map_size.X) return false;            
+                      
+            if (char_size.Height > size.Y) {
+                size.Y = (int)char_size.Height;
+            }
+            var pos = size.X_only + (XYPair.UnitY * row_top);
+
+            
+            glyphs.Add(character, new GlyphInfo(character, pos, char_size.ToXYPair()));
+
+            parent.clear_canvas();
+            parent.draw_glyph_to_canvas(character, XYPair.Zero);
+
+            parent.copy_glyph_to_texture_and_trim_sides(parent, character, ref parent.char_map_texture, pos);
+
+            size.X += (int)char_size.Width;
+            needs_adding = true;
+
+            return true;
+        }
+
+    }
+
+    public class FontManager {
+        string font_family = "BadaBoom BB";
+        float font_size = 27f;
+        internal System.Drawing.Font gdi_font;
+
+        private float kerning_scale = 1.0f;
+
+        internal System.Drawing.Color transparency = System.Drawing.Color.FromArgb(255, 0, 255, 0);
+        internal System.Drawing.SolidBrush text_brush = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(255, 255, 0, 0));
+
+        bool monospace = false;
+        XYPair monospace_glyph_size;
+
+        List<GlyphRow> glyph_rows = new List<GlyphRow>();
+
+        public readonly XYPair char_map_size = new XYPair(1024, 1024);
+        public RenderTarget2D char_map_texture;
+
+        public readonly XYPair glyph_canvas_size = new XYPair(100, 100);
+        public RenderableGDIBitmap current_glyph_bmp;
+
+        DrawGlyph test_glyph_draw;
+
+        public System.Drawing.Graphics graphics => current_glyph_bmp.graphics;
+
+        public FontManager(string font_family, float font_size, float kerning_scale) {
+            this.font_family = font_family;
+            this.font_size = font_size;
+            this.kerning_scale = kerning_scale;
+
+            init();
+            add_glyphs_to_texture(32, 126);
+        }
+
+        public FontManager(string font_family, float font_size) {
+            this.font_family = font_family;
+            this.font_size = font_size;
+
+            init();
+            add_glyphs_to_texture(32, 126);
+        }
+
+        public FontManager() {
+            init();
+            add_glyphs_to_texture(32, 126);
+        }
+
+        void init() {
+            gdi_font = new System.Drawing.Font(font_family, font_size);
+
+            char_map_texture = new RenderTarget2D(Drawing.graphics_device, char_map_size.X, char_map_size.Y, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+            current_glyph_bmp = new RenderableGDIBitmap(glyph_canvas_size.X, glyph_canvas_size.Y);
+
+            Drawing.graphics_device.SetRenderTarget(char_map_texture);
+            Drawing.graphics_device.Clear(Color.FromNonPremultiplied(transparency.R, transparency.G, transparency.B, transparency.A));
+
+            test_glyph_draw = new DrawGlyph(Swoop.content);
+
+            //add default glyphs
+        }
+
+        internal void clear_canvas() {
+            graphics.Clear(transparency);
+        }
+
+        internal void draw_glyph_to_canvas(char character, XYPair pos) {
+            graphics.DrawString(character.ToString(), gdi_font, text_brush, pos.ToPointF());
+        }
+        internal void draw_glyph_to_canvas(string characters, XYPair pos) {
+            graphics.DrawString(characters, gdi_font, text_brush, pos.ToPointF());
+        }
+        internal void copy_glyph_to_texture(XYPair size, XYPair char_map_pos) {
+            //oh boy
+        }
+
+        public bool glyph_exists(string str, out int row_index) {
+            int r = 0;
+            foreach(GlyphRow row in glyph_rows) {
+                foreach (string g in row.glyphs.Keys) {
+                    if (str == g) {
+                        row_index = r;
+                        return true;
+                    }
+                }
+                r++;
+            }
+            row_index = -1;
+            return false;
+        }
+
+        public void add_glyphs_to_texture(int start_value, int end_value) {
+            for (int i = start_value; i <= end_value; i++) {
+                if (glyph_rows.Count == 0) {
+                    glyph_rows.Add(new GlyphRow(0));
+                }
+
+                //glyph didn't fit at end of row
+                if (!glyph_rows[^1].add_glyph(((char)i).ToString(), this)) {
+                    glyph_rows.Add(new GlyphRow(glyph_rows[^1].row_top + glyph_rows[^1].size.Y));
+                    glyph_rows[^1].add_glyph(((char)i).ToString(), this);
+                }
+            }
+        }
+
+
+        public void add_glyphs_to_texture(string characters) {
+            foreach (char character in characters) {
+                if (glyph_rows.Count == 0) {
+                    glyph_rows.Add(new GlyphRow(0));
+                }
+
+                //glyph didn't fit at end of row
+                if (!glyph_rows[^1].add_glyph(character.ToString(), this)) {
+                    glyph_rows.Add(new GlyphRow(glyph_rows[^1].row_top + glyph_rows[^1].size.Y));
+                    glyph_rows[^1].add_glyph(character.ToString(), this);
+                }
+            }
+        }
+
+        public void add_unicode_glyph_to_texture(string s) {
+            if (glyph_rows.Count == 0) {
+                glyph_rows.Add(new GlyphRow(0));
+            }
+
+            //glyph didn't fit at end of row
+            if (!glyph_rows[^1].add_glyph(s, this)) {
+                glyph_rows.Add(new GlyphRow(glyph_rows[^1].row_top + glyph_rows[^1].size.Y));
+
+                glyph_rows[^1].add_glyph(s, this);
+            }
+
+            //iterate through each row
+            //if the row has enough room at the end, smoosh the glyph in there
+            //if the row DOESN'T have enough room at the end, add a new row, add to the start of it
+
+            //when adding a new row, add it at the lowest point of the above row
+
+            //also when adding new glyphs on lines after the first, check if it's possible to pack them higher up than the top of the last row
+
+            //ez pz            
+        }
+
+
+        public void draw_glyph(char character, XYPair position) {
+            foreach (GlyphRow row in glyph_rows) {
+                if (row.glyphs.ContainsKey(character.ToString())) {
+                    var g = row.glyphs[character.ToString()];
+
+                    test_glyph_draw.configure_shader(this, g);
+                    Drawing.begin(test_glyph_draw.effect);
+
+                    Drawing.image(char_map_texture, position, g.size, g.position, g.size);
+                    return;
+                }
+            }
+            Drawing.end();
+        }
+
+
+        public void draw_string(string s, XYPair position, Color color, float scale = 1.0f) {
+            int index = 0;
+            string current_str = s.Substring(index, 1);
+            char current_char = s[index];
+            int current_x = 0;
+
+            while (index < s.Length) {
+                int r = 0;
+                if (glyph_exists(current_str, out r)) { 
+                        var g = glyph_rows[r].glyphs[current_str];
+
+                        test_glyph_draw.configure_shader(this, g);
+                        test_glyph_draw.begin_spritebatch(Drawing.sb, SamplerState.AnisotropicWrap);
+
+                        Drawing.image(char_map_texture,
+                            position + (XYPair.UnitX * (current_x - g.pixels_start)),
+                            g.size * scale,
+                            g.position, g.size,
+                            color);
+
+                        current_x += (int)((g.size.X -
+                            (g.pixels_start < int.MaxValue && g.pixels_end > int.MinValue ? (g.pixels_start + (g.size.X - g.pixels_end)) - (((font_size / 10f) * kerning_scale)) : 0))
+                            * scale);
+
+                        if (current_char > 50000)
+                            index++;
+
+                        index++;
+
+                        if (index < s.Length) {
+                            current_str = s.Substring(index, 1);
+                            current_char = s[index];
+                        }                    
+                } else {
+                    if (index < s.Length - 1 && current_char > 50000 && s[index + 1] > 50000) {
+                        add_unicode_glyph_to_texture(current_char.ToString() + s[index + 1].ToString());
+
+                        if (index < s.Length) {
+                            current_str = current_char.ToString() + s[index + 1].ToString();
+                            current_char = s[index];
+                        }
+                    } else {
+                        add_glyphs_to_texture(current_char.ToString());
+                    }
+                }                           
+            }
+
+            Drawing.end();
+        }
+        public void draw_string_shadow(string s, XYPair position, Color color, Color shadow_color, XYPair shadow_offset, float scale = 1.0f) {
+            draw_string(s, position + shadow_offset, shadow_color, scale);
+            draw_string(s, position, color, scale);
+        }
+        public void draw_string_shadow(string s, XYPair position, Color color, Color shadow_color, float scale = 1.0f) {
+            draw_string(s, position + XYPair.One, shadow_color, scale);
+            draw_string(s, position, color, scale);
+        }
+
+        public void draw_map_debug_layer(XYPair position, XYPair size, ContentManager content) {
+            /*
+            if (test_glyph_draw == null) test_glyph_draw = new DrawGlyph(content);
+
+            foreach (GlyphRow row in glyph_rows) {
+                foreach(GlyphInfo glyph in row.glyphs.Values) {
+                    Drawing.rect(glyph.position, glyph.position + glyph.size, Color.Red, 1f);
+                    
+                    Drawing.rect(
+                        glyph.position + (XYPair.UnitX * glyph.pixels_start), 
+                        glyph.position + (XYPair.UnitX * glyph.pixels_end) + (XYPair.UnitY * glyph.size.Y), 
+                        Color.Purple, 1f);
+
+                }
+
+                Drawing.line(
+                    XYPair.UnitY * (row.row_top + row.size.Y),
+                    XYPair.UnitY * (row.row_top + row.size.Y) + (XYPair.UnitX * char_map_size.X),
+                    Color.Purple, 1f);
+            }
+            */
+            draw_string("I like elephants and God likes elephants", position, Swoop.UI_disabled_color, .5f);
+            draw_string("I like elephants and God likes elephants", position + (XYPair.UnitY * 15), Swoop.UI_color, .75f);
+            draw_string("I like elephants and God likes elephants", position + (XYPair.UnitY * 35), Swoop.UI_highlight_color, 1f);
+            draw_string_shadow("Bazinga! ❤ ❶❷❸❹❺❻❼❽❾❿",                          position + (XYPair.UnitY * 75), Color.Red, Swoop.UI_disabled_color, 1f);
+            //var g = glyph_rows[0].glyphs['a'];
+
+            //test_glyph_draw.configure_shader(this, g);
+            //Drawing.begin(test_glyph_draw.effect);
+
+            //Drawing.image(char_map_texture, XYPair.One * 200 + (XYPair.UnitX * 900), g.size, g.position, g.size);
+
+            Drawing.end();
+        }
+
+
+
+        public void copy_glyph_to_texture(FontManager parent, GlyphInfo glyph, ref RenderTarget2D texture_2d, XYPair position_on_texture) {
+            System.Drawing.Imaging.BitmapData data = parent.current_glyph_bmp.bitmap.LockBits(
+                new System.Drawing.Rectangle(0, 0, glyph.size.X, glyph.size.Y),
+
+                System.Drawing.Imaging.ImageLockMode.ReadWrite,
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            Color[] cdata = new Color[glyph.size.X * glyph.size.Y];
+
+            int i = 0;
+            unsafe {
+                uint* ptr = (uint*)data.Scan0;
+                int add_index = 0;
+
+                for (i = 0; i < parent.glyph_canvas_size.X * parent.glyph_canvas_size.Y; i++) {
+                    //check if the current linear index converted to X/Y coords sits within the bitmap bounds
+                    var x = i % parent.glyph_canvas_size.X;
+                    var y = Math.Floor((double)(i / parent.glyph_canvas_size.X));
+
+                    if (x >= 0 && x < glyph.size.X &&
+                        y >= 0 && y < glyph.size.Y) {
+
+                        cdata[add_index].A = (byte)(*(ptr + (i)) >> 24);
+
+                        cdata[add_index].R = (byte)(*(ptr + (i)) >> 16);
+
+                        cdata[add_index].G = (byte)(*(ptr + (i)) >> 8);
+                        cdata[add_index].B = (byte)(*(ptr + (i)));
+                        add_index++;
+                    }
+
+                }
+
+                lock (texture_2d) texture_2d.SetData(0, 0,
+                    new Rectangle(position_on_texture.X, position_on_texture.Y, glyph.size.X, glyph.size.Y),
+                    cdata, 0, cdata.Length);
+
+                parent.current_glyph_bmp.bitmap.UnlockBits(data);
+
+                cdata = null;
+                ptr = null;
+                GC.Collect();
+            }
+        }
+        public void copy_glyph_to_texture_and_trim_sides(FontManager parent, string character, ref RenderTarget2D texture_2d, XYPair position_on_texture) {
+            //find row
+            int row_index = 0;
+
+            foreach (var row in glyph_rows) {
+                if (row.glyphs.ContainsKey(character))
+                    break;               
+                row_index++;
+            }
+
+            System.Drawing.Imaging.BitmapData data = parent.current_glyph_bmp.bitmap.LockBits(
+                new System.Drawing.Rectangle(0, 0, glyph_rows[row_index].glyphs[character].size.X, glyph_rows[row_index].glyphs[character].size.Y),
+
+                System.Drawing.Imaging.ImageLockMode.ReadWrite,
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            Color[] cdata = new Color[glyph_rows[row_index].glyphs[character].size.X * glyph_rows[row_index].glyphs[character].size.Y];
+
+            int i = 0;
+            unsafe {
+                uint* ptr = (uint*)data.Scan0;
+                int add_index = 0;
+
+                int first_pixel = int.MaxValue;
+                int last_pixel = int.MinValue;
+
+                for (i = 0; i < parent.glyph_canvas_size.X * parent.glyph_canvas_size.Y; i++) {
+                    //check if the current linear index converted to X/Y coords sits within the bitmap bounds
+                    var x = i % parent.glyph_canvas_size.X;
+                    var y = Math.Floor((double)(i / parent.glyph_canvas_size.X));
+
+                    if (x >= 0 && x < glyph_rows[row_index].glyphs[character].size.X &&
+                        y >= 0 && y < glyph_rows[row_index].glyphs[character].size.Y) {
+
+                        cdata[add_index].A = (byte)(*(ptr + (i)) >> 24);
+                        cdata[add_index].R = (byte)(*(ptr + (i)) >> 16);
+                        cdata[add_index].G = (byte)(*(ptr + (i)) >> 8);
+                        cdata[add_index].B = (byte)(*(ptr + (i)));
+
+                        var r = cdata[add_index].R;
+
+                        if (r > 0 && x < first_pixel)
+                            first_pixel = x;
+
+                        if (r > 0 && x > last_pixel)
+                            last_pixel = x;
+
+                        add_index++;
+                    }
+                }
+
+                glyph_rows[row_index].glyphs[character].pixels_start = first_pixel;
+                glyph_rows[row_index].glyphs[character].pixels_end = last_pixel;
+
+                lock (texture_2d) texture_2d.SetData(0, 0,
+                    new Rectangle(position_on_texture.X, position_on_texture.Y, glyph_rows[row_index].glyphs[character].size.X, glyph_rows[row_index].glyphs[character].size.Y),
+                    cdata, 0, cdata.Length);
+
+                parent.current_glyph_bmp.bitmap.UnlockBits(data);
+
+                cdata = null;
+                ptr = null;
+                GC.Collect();
+            }
+        }
+    }
+}

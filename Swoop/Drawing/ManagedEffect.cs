@@ -72,6 +72,11 @@ namespace SwoopLib.Effects {
             sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, null, null, effect, null);
             Drawing.sb_drawing = true;
         }
+        public virtual void begin_spritebatch(SpriteBatch sb, SamplerState sampler_state) {
+            if (Drawing.sb_drawing) sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, sampler_state, null, null, effect, null);
+            Drawing.sb_drawing = true;
+        }
 
         public virtual void draw(XYPair position, XYPair size) {
             begin_spritebatch(Drawing.sb);
@@ -81,6 +86,14 @@ namespace SwoopLib.Effects {
         public virtual void draw_texture(Texture2D texture, XYPair position, XYPair size) {
             begin_spritebatch(Drawing.sb);
             Drawing.sb.Draw(texture, new Rectangle(position.ToPoint(), size.ToPoint()), Color.White);
+            Drawing.end();
+        }
+        public virtual void draw_texture(Texture2D texture, XYPair position, XYPair size, XYPair crop_position, XYPair crop_size) {
+            begin_spritebatch(Drawing.sb);
+            Drawing.sb.Draw(texture, 
+                new Rectangle(position.ToPoint(), size.ToPoint()),
+                new Rectangle(crop_position.X, crop_position.Y, crop_size.X, crop_size.Y),
+                Color.White);
             Drawing.end();
         }
 

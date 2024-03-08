@@ -15,6 +15,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Microsoft.VisualBasic.Devices;
+using System.Diagnostics;
 
 namespace SwoopDemo {
     public class SwoopGame : Game {
@@ -23,7 +24,7 @@ namespace SwoopDemo {
         public static double target_fps = 250;
         FPSCounter fps;
 
-        public static XYPair resolution = new XYPair(1000, 700);
+        public static XYPair resolution = new XYPair(1000, 830);
 
         bool capture_demo_screenshot_on_exit = true;
 
@@ -36,6 +37,13 @@ namespace SwoopDemo {
 
         ShadedQuadWVP draw_shader;
         ShadedQuadWVP tint_effect;
+
+        ShadedQuad test_quad;
+        FontManager font_manager_test;
+        FontManager font_manager_test_two;
+        FontManager font_manager_test_three;
+        FontManager font_manager_emoji;
+
         public SwoopGame() {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
@@ -61,7 +69,12 @@ namespace SwoopDemo {
             output_rt = new RenderTarget2D(GraphicsDevice, resolution.X, resolution.Y, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
 
             Swoop.Load(GraphicsDevice, graphics, Content, Window);
-             
+
+            font_manager_test = new FontManager("BadaBoom BB", 21f, 0f);          
+            font_manager_test_two = new FontManager("Impact", 27f, 1.2f);
+            font_manager_test_three = new FontManager("ProFontWindows", 9f, 2f);
+            font_manager_emoji = new FontManager("Segoe UI Emoji", 16f, 2f);
+
             build_UI();
         }
 
@@ -70,7 +83,7 @@ namespace SwoopDemo {
             e_g.Clear(Swoop.UI_background_color.ToGDIColor());
 
             e_g.DrawString("BAZINGA!", new System.Drawing.Font("BadaBoom BB", 24), new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(255, 255, 0, 0)), Vector2.Zero.ToPointF());
-            e_g.DrawString("❤🦶🦶👀👅", new System.Drawing.Font("Segoe UI Emoji", 24), System.Drawing.Brushes.White, (Vector2.UnitY * 25).ToPointF());
+            e_g.DrawString("❤🦶\U0001f9b6🦶🦶👀👅", new System.Drawing.Font("Segoe UI Emoji", 24), System.Drawing.Brushes.White, (Vector2.UnitY * 25).ToPointF());
 
             spinny += (float)(90f * Swoop.game_time.ElapsedGameTime.TotalSeconds);
             if (spinny > 360f) spinny -= 360f;
@@ -475,11 +488,9 @@ namespace SwoopDemo {
             base.Update(gameTime);
         }
 
-        ShadedQuad test;
 
         protected override void Draw(GameTime gameTime) {
-            if (test == null) test = new ShadedQuad(Content, "draw_2d", XYPair.One * 100, XYPair.One * 100);
-            
+            if (test_quad == null) test_quad = new ShadedQuad(Content, "draw_2d", XYPair.One * 100, XYPair.One * 100);
 
             if (!Swoop.enable_draw) {
                 GraphicsDevice.SetRenderTarget(null);
@@ -488,6 +499,7 @@ namespace SwoopDemo {
                 base.Draw(gameTime);
                 return;
             }
+
 
             //update any ManagedEffects which are registered for updates
             ManagedEffect.Manager.do_updates();
@@ -507,8 +519,22 @@ namespace SwoopDemo {
             Drawing.image(Swoop.render_target_output, XYPair.Zero, resolution);
             AutoRenderTarget.Manager.draw_rts_to_target_foreground();
 
+            font_manager_test_two.draw_string("SPRITE FONT RENDERER", (XYPair.UnitX * 10) + (XYPair.UnitY * 440), Swoop.UI_highlight_color);
+            font_manager_test.draw_map_debug_layer((XYPair.UnitX * 10) + (XYPair.UnitY * 480), font_manager_test.char_map_size, Content);
+
+            font_manager_test_three.draw_string("FontManager vs SpriteFont", (XYPair.UnitX * 10) + (XYPair.UnitY * 595), Swoop.UI_highlight_color);
+            font_manager_test_three.draw_string("[ProFontWindows]", (XYPair.UnitX * 10) + (XYPair.UnitY * 610), Swoop.UI_highlight_color);
+            Drawing.text("[ProFontWindows]", (XYPair.UnitX * 10) + (XYPair.UnitY * 625), Swoop.UI_highlight_color);
+
+            font_manager_emoji.draw_string("🤔🤔🤔 I like the top one", (XYPair.UnitX * 110) + (XYPair.UnitY * 605), Swoop.UI_highlight_color);
+
             GraphicsDevice.SetRenderTarget(null);
             Drawing.image(output_rt, XYPair.Zero, resolution);
+            
+            //Drawing.image(font_manager_emoji.char_map_texture, XYPair.Zero, font_manager_test.char_map_size);
+            //Drawing.text("I like elephants and God likes elephants", (XYPair.One * 200) + (XYPair.UnitX * 850) + (XYPair.UnitY * 280), Color.HotPink);
+
+
             //test.set_param("main_texture", Drawing.OnePXWhite);
             //test.draw_plane(Swoop.resolution);
 
