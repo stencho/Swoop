@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -9,9 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="MonoGame.Framework">
-      <HintPath>..\..\MonoGame\Artifacts\MonoGame.Framework\DesktopGL\Debug\MonoGame.Framework.dll</HintPath>
-    </Reference>
+  	<Using Remove="System.Drawing" />
+	<Using Remove="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
