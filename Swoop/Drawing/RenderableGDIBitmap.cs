@@ -9,6 +9,16 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SwoopLib {
+    public static class GDIExt { 
+        public static System.Drawing.Color ToGDIColor(this Color color) {
+            return System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
+        }
+        public static Color ToXNAColor(this System.Drawing.Color color) {
+            return Color.FromNonPremultiplied(color.R, color.G, color.B, color.A);
+        }
+    }
+
+
     internal class RenderableGDIBitmap {
         System.Drawing.Graphics graphics;
         
