@@ -23,7 +23,7 @@ namespace SwoopDemo {
         public static double target_fps = 250;
         FPSCounter fps;
 
-        public static XYPair resolution = new XYPair(1000, 600);
+        public static XYPair resolution = new XYPair(1000, 700);
 
         bool capture_demo_screenshot_on_exit = true;
 
@@ -80,15 +80,24 @@ namespace SwoopDemo {
 
         protected void build_UI() {
             render_target_bg = new AutoRenderTarget(
-                resolution.X_only - (resolution.X_only / 4.5f) + ((UI.elements["title_bar"].height + 30) * XYPair.UnitY),
-                resolution / 5, true);
+                resolution.X_only - (resolution.X_only / 4.5f) + ((UI.elements["title_bar"].height + 28) * XYPair.UnitY),
+                (XYPair.UnitX * 200) + (XYPair.UnitY * 100), true);
+
             render_target_fg = new AutoRenderTarget(
-                resolution.X_only - (resolution.X_only / 4.5f) + ((UI.elements["title_bar"].height + 167) * XYPair.UnitY),
-                resolution / 5, true);
+                resolution.X_only - (resolution.X_only / 4.5f) + ((render_target_bg.position.Y + render_target_bg.size.Y + 20) * XYPair.UnitY),
+                (XYPair.UnitX * 200) + (XYPair.UnitY * 100), true);
+
+            UI.add_element(new Label(
+                "test_3d_label_2", "shader > rt > foreground",
+                (resolution.X_only - (resolution.X_only / 4.5f)) + ((render_target_fg.position.Y - 11) * XYPair.UnitY)));
+            UI.add_element(new Label(
+                "test_3d_label_3", "this text is behind the top\nrt layer and being passed\nthrough via a shader which is\naware of each pixel's screen\nposition, so it can pull data\nfrom the main screen render\ntarget and tint it for example\nwheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                (resolution.X_only - (resolution.X_only / 4.5f)) + ((render_target_fg.position.Y + 5) * XYPair.UnitY) + (XYPair.UnitX * -20f)));
+            
 
             UI.add_element(new GDICanvas("gdi_canvas", 
-                resolution.X_only - (resolution.X_only / 4.5f) + ((UI.elements["title_bar"].height + 304) * XYPair.UnitY),
-                resolution / 5, 
+                resolution.X_only - (resolution.X_only / 4.5f) + ((render_target_fg.position.Y + render_target_fg.size.Y + 20) * XYPair.UnitY),
+                (XYPair.UnitX * 200) + (XYPair.UnitY * 100), 
                 draw_gdi_canvas));
 
             UI.add_element(new Label("gdi_label",
@@ -111,13 +120,6 @@ namespace SwoopDemo {
             }, UI.elements["test_3d_label"].position - (XYPair.UnitX * 30), XYPair.One * 28));
             UI.elements["test_custom_draw_button"].can_be_focused = false;
 
-            UI.add_element(new Label(
-                "test_3d_label_2", "shader > rt > foreground", 
-                (resolution.X_only - (resolution.X_only / 4.5f)) + ((UI.elements["title_bar"].height + 155) * XYPair.UnitY)));
-            UI.add_element(new Label(
-                "test_3d_label_3", "this text is behind the top\nrt layer and being passed\nthrough via a shader which is\naware of each pixel's screen\nposition, so it can pull data\nfrom the main screen render\ntarget and tint it for example\nwheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", 
-                (resolution.X_only - (resolution.X_only / 4.5f)) + ((UI.elements["title_bar"].height + 175) * XYPair.UnitY) + (XYPair.UnitX * -20f)));
-            
             //draw_shader.projection = Matrix.CreateOrthographic(2f, 2f, 0f, 5f);
             //draw_shader.projection = Matrix.CreateOrthographic(1f,1f, 0f, 5f);
             draw_shader.projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90f), render_target_bg.size.aspect_ratio, 0.01f, 5f);
