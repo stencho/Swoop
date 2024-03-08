@@ -60,9 +60,8 @@ namespace SwoopLib.Effects {
             else if (t == typeof(Vector2)) shader.Parameters[param].SetValue((Vector2)obj);
             else if (t == typeof(Vector3)) shader.Parameters[param].SetValue((Vector3)obj);
             else if (t == typeof(Vector4)) shader.Parameters[param].SetValue((Vector4)obj);
-            else if (t == typeof(Color)) {
-                shader.Parameters[param].SetValue(((Color)obj).ToVector4());
-            } else if (t == typeof(Texture2D)) shader.Parameters[param].SetValue((Texture2D)obj);
+            else if (t == typeof(Color)) shader.Parameters[param].SetValue(((Color)obj).ToVector4());            
+            else if (t == typeof(Texture2D)) shader.Parameters[param].SetValue((Texture2D)obj);
             else if (t == typeof(TextureCube)) shader.Parameters[param].SetValue((TextureCube)obj);
             else if (t == typeof(RenderTarget2D)) shader.Parameters[param].SetValue((RenderTarget2D)obj);
             else { throw new Exception("Bad shader object type"); }

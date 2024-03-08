@@ -14,6 +14,7 @@ using Microsoft.Xna.Framework.Input;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using Microsoft.VisualBasic.Devices;
 
 namespace SwoopDemo {
     public class SwoopGame : Game {
@@ -61,10 +62,37 @@ namespace SwoopDemo {
             build_UI();
         }
 
+        float spinny = 0;
+        void draw_gdi_canvas(System.Drawing.Graphics e_g) {
+            e_g.Clear(System.Drawing.Color.Transparent);
+
+            e_g.DrawString("BAZINGA!", new System.Drawing.Font("BadaBoom BB", 24), new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(255, 255, 0, 0)), Vector2.Zero.ToPointF());
+            e_g.DrawString("❤🦶🦶👀👅", new System.Drawing.Font("Segoe UI Emoji", 24), System.Drawing.Brushes.White, (Vector2.UnitY * 25).ToPointF());
+
+            spinny += (float)(90f * Swoop.game_time.ElapsedGameTime.TotalSeconds);
+            if (spinny > 360f) spinny -= 360f;
+
+            e_g.FillPie(System.Drawing.Brushes.LightGray, new System.Drawing.Rectangle(5, 75, 20, 20), -90f, 0f + spinny);
+        }
+
         protected void build_UI() {
-            render_target_bg = new AutoRenderTarget(resolution.X_only - (resolution.X_only / 4.5f) + ((UI.elements["title_bar"].height + 30) * XYPair.UnitY), resolution / 5, true);
-            render_target_fg = new AutoRenderTarget(resolution.X_only - (resolution.X_only / 4.5f) + ((UI.elements["title_bar"].height + 167) * XYPair.UnitY), resolution / 5, true);
-            
+            render_target_bg = new AutoRenderTarget(
+                resolution.X_only - (resolution.X_only / 4.5f) + ((UI.elements["title_bar"].height + 30) * XYPair.UnitY),
+                resolution / 5, true);
+            render_target_fg = new AutoRenderTarget(
+                resolution.X_only - (resolution.X_only / 4.5f) + ((UI.elements["title_bar"].height + 167) * XYPair.UnitY),
+                resolution / 5, true);
+
+            UI.add_element(new GDICanvas("gdi_canvas", 
+                resolution.X_only - (resolution.X_only / 4.5f) + ((UI.elements["title_bar"].height + 304) * XYPair.UnitY),
+                resolution / 5, 
+                draw_gdi_canvas));
+
+            UI.add_element(new Label("gdi_label",
+                "GDI+ drawing canvas, for some reason",
+                UI.elements["gdi_canvas"].position - (XYPair.UnitY * 13)
+                )); ;
+
             AutoRenderTarget.Manager.register_background_draw(render_target_bg);
             AutoRenderTarget.Manager.register_foreground_draw(render_target_fg);
 
@@ -80,10 +108,13 @@ namespace SwoopDemo {
             }, UI.elements["test_3d_label"].position - (XYPair.UnitX * 30), XYPair.One * 28));
             UI.elements["test_custom_draw_button"].can_be_focused = false;
 
-            UI.add_element(new Label("test_3d_label_2", "shader > rt > foreground", (resolution.X_only - (resolution.X_only / 4.5f)) + ((UI.elements["title_bar"].height + 155) * XYPair.UnitY)));
-            UI.add_element(new Label("test_3d_label_3", "this text is behind the top\nrt layer and being passed\nthrough via a shader which is\naware of each pixel's screen\nposition, so it can pull data\nfrom the main screen render\ntarget and tint it for example\nwheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", 
+            UI.add_element(new Label(
+                "test_3d_label_2", "shader > rt > foreground", 
+                (resolution.X_only - (resolution.X_only / 4.5f)) + ((UI.elements["title_bar"].height + 155) * XYPair.UnitY)));
+            UI.add_element(new Label(
+                "test_3d_label_3", "this text is behind the top\nrt layer and being passed\nthrough via a shader which is\naware of each pixel's screen\nposition, so it can pull data\nfrom the main screen render\ntarget and tint it for example\nwheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", 
                 (resolution.X_only - (resolution.X_only / 4.5f)) + ((UI.elements["title_bar"].height + 175) * XYPair.UnitY) + (XYPair.UnitX * -20f)));
-
+            
             //draw_shader.projection = Matrix.CreateOrthographic(2f, 2f, 0f, 5f);
             //draw_shader.projection = Matrix.CreateOrthographic(1f,1f, 0f, 5f);
             draw_shader.projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90f), render_target_bg.size.aspect_ratio, 0.01f, 5f);
@@ -128,7 +159,6 @@ namespace SwoopDemo {
                 Drawing.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
                 Drawing.graphics_device.DepthStencilState = DepthStencilState.Default;
             };
-
 
             ((Button)UI.elements["exit_button"]).click_action = () => {
                 if (capture_demo_screenshot_on_exit) {
@@ -403,6 +433,9 @@ namespace SwoopDemo {
                 "Option Slider", 
                 "No", "Low", "Medium", "High", "Ultra", "Yes"
                 ));
+
+            
+
         }
 
         static float progress_bar_test_value = 0.5f;

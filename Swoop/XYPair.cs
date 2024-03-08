@@ -13,6 +13,9 @@ namespace SwoopLib {
 
         public static XYPair positionToXYPair(this Rectangle r) => r.Location.ToXYPair();
         public static XYPair sizeToXYPair(this Rectangle r) => r.Size.ToXYPair();
+
+        public static System.Drawing.PointF ToPointF(this Vector2 v2) => new System.Drawing.PointF(v2.X, v2.Y);
+        public static System.Drawing.PointF ToPointF(this XYPair v2) => new System.Drawing.PointF(v2.X, v2.Y);
     }
 
     //disable warnings for equals/hashcode overrides - works fine without
