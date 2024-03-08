@@ -102,9 +102,9 @@ namespace MGRawInputLib {
         static bool use_sleep = true;
         static double thread_ms => (1000.0 / (double)poll_hz);
 
-        static DateTime start_dt = DateTime.Now;
-        static DateTime current_dt = DateTime.Now;
-        static TimeSpan ts;
+        static long start_tick   = 0;
+        static long current_tick = 0;
+        static long time_span_ticks;
 
         static volatile bool run_thread = true;
 
@@ -160,7 +160,7 @@ namespace MGRawInputLib {
         static TimeSpan sleep_ts;
         static void update() {
             while (run_thread) {
-                start_dt = DateTime.Now;
+                start_tick = DateTime.Now.Ticks;
 
                 //gamepad_one_state = GamePad.GetState(PlayerIndex.One);
                 //gamepad_two_state = GamePad.GetState(PlayerIndex.Two);
@@ -269,7 +269,7 @@ namespace MGRawInputLib {
                 was_active = parent.IsActive;
                 _was_locked = lock_mouse;
                 //FPS stuff here
-                _fps_timer += ts.TotalMilliseconds;
+                _fps_timer += time_span_ticks / 10000.0;
                 _frame_count++;
 
                 if (_fps_timer >= fps_update_frequency_ms) {
@@ -281,26 +281,27 @@ namespace MGRawInputLib {
                 if (limit_thread_rate) {
                     if (use_sleep) {
                         while (run_thread) {
-                            sleep_ts = new TimeSpan((long)(((thread_ms - (DateTime.Now - start_dt).TotalMilliseconds) * 1000000f)) / 100);
+                            sleep_ts = new TimeSpan((long)(thread_ms - ((DateTime.Now.Ticks - start_tick) / 10000.0)) * 10000);
                             if (sleep_ts.TotalMilliseconds > 0)
                                 Thread.Sleep(sleep_ts);
-                            current_dt = DateTime.Now;
-                            ts = (current_dt - start_dt);
-                            if (ts.TotalMilliseconds >= thread_ms) break;
+                            current_tick = DateTime.Now.Ticks;
+                            time_span_ticks = (current_tick - start_tick);
+                            if (time_span_ticks / 10000.0 >= thread_ms) break;
                         }
                     } else {
                         while (run_thread) {
-                            current_dt = DateTime.Now;
-                            ts = (current_dt - start_dt);
+                            current_tick = DateTime.Now.Ticks;
+                            time_span_ticks = (current_tick - start_tick);
 
-                            if (ts.TotalMilliseconds >= thread_ms) break;
+                            if (time_span_ticks / 10000.0 >= thread_ms) break;
                         }
                     }
                 } else {
-                    current_dt = DateTime.Now;
-                    ts = (current_dt - start_dt);
+                    current_tick = DateTime.Now.Ticks;
+                    time_span_ticks = (current_tick - start_tick);
                     //Thread.Sleep(one_tick);
                 }
+                start_tick = DateTime.Now.Ticks;
             }
         }
 
