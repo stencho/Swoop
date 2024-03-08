@@ -103,30 +103,33 @@ namespace SwoopLib {
         public readonly XYPair glyph_canvas_size = new XYPair(100, 100);
         public RenderableGDIBitmap current_glyph_bmp;
 
-        DrawGlyph test_glyph_draw;
+        public static DrawGlyph glyph_draw_shader;
 
         public System.Drawing.Graphics graphics => current_glyph_bmp.graphics;
 
-        public FontManager(string font_family, float font_size, float kerning_scale) {
+        public FontManager(string font_family, float font_size, float kerning_scale, bool default_glyphs = true) {
             this.font_family = font_family;
             this.font_size = font_size;
             this.kerning_scale = kerning_scale;
 
             init();
-            add_glyphs_to_texture(32, 126);
+            if (default_glyphs)
+                add_glyphs_to_texture(32, 126);
         }
 
-        public FontManager(string font_family, float font_size) {
+        public FontManager(string font_family, float font_size, bool default_glyphs = true) {
             this.font_family = font_family;
             this.font_size = font_size;
 
             init();
-            add_glyphs_to_texture(32, 126);
+            if (default_glyphs)
+                add_glyphs_to_texture(32, 126);
         }
 
-        public FontManager() {
+        public FontManager(bool default_glyphs = true) {
             init();
-            add_glyphs_to_texture(32, 126);
+            if (default_glyphs)
+                add_glyphs_to_texture(32, 126);
         }
 
         void init() {
@@ -138,7 +141,8 @@ namespace SwoopLib {
             Drawing.graphics_device.SetRenderTarget(char_map_texture);
             Drawing.graphics_device.Clear(Color.FromNonPremultiplied(transparency.R, transparency.G, transparency.B, transparency.A));
 
-            test_glyph_draw = new DrawGlyph(Swoop.content);
+            if (glyph_draw_shader == null)
+                glyph_draw_shader = new DrawGlyph(Swoop.content);
 
             //add default glyphs
         }
@@ -230,8 +234,8 @@ namespace SwoopLib {
                 if (row.glyphs.ContainsKey(character.ToString())) {
                     var g = row.glyphs[character.ToString()];
 
-                    test_glyph_draw.configure_shader(this, g);
-                    Drawing.begin(test_glyph_draw.effect);
+                    glyph_draw_shader.configure_shader(this, g);
+                    Drawing.begin(glyph_draw_shader.effect);
 
                     Drawing.image(char_map_texture, position, g.size, g.position, g.size);
                     return;
@@ -252,8 +256,7 @@ namespace SwoopLib {
                 if (glyph_exists(current_str, out r)) { 
                         var g = glyph_rows[r].glyphs[current_str];
 
-                        test_glyph_draw.configure_shader(this, g);
-                        test_glyph_draw.begin_spritebatch(Drawing.sb, SamplerState.AnisotropicWrap);
+                        glyph_draw_shader.begin_spritebatch(Drawing.sb, SamplerState.AnisotropicWrap);
 
                         Drawing.image(char_map_texture,
                             position + (XYPair.UnitX * (current_x - g.pixels_start)),
@@ -261,8 +264,9 @@ namespace SwoopLib {
                             g.position, g.size,
                             color);
 
-                        current_x += (int)((g.size.X -
-                            (g.pixels_start < int.MaxValue && g.pixels_end > int.MinValue ? (g.pixels_start + (g.size.X - g.pixels_end)) - (((font_size / 10f) * kerning_scale)) : 0))
+                        current_x += (int)(((g.size.X 
+                            - (g.pixels_start < int.MaxValue && g.pixels_end > int.MinValue ? (g.pixels_start + (g.size.X - g.pixels_end)) : 0)) 
+                            + (((font_size / 10f) * kerning_scale))) 
                             * scale);
 
                         if (current_char > 50000)

@@ -70,10 +70,10 @@ namespace SwoopDemo {
 
             Swoop.Load(GraphicsDevice, graphics, Content, Window);
 
-            font_manager_test = new FontManager("BadaBoom BB", 21f, 0f);          
+            font_manager_test = new FontManager("BadaBoom BB", 18f, 1f);          
             font_manager_test_two = new FontManager("Impact", 27f, 1.2f);
             font_manager_test_three = new FontManager("ProFontWindows", 9f, 2f);
-            font_manager_emoji = new FontManager("Segoe UI Emoji", 16f, 2f);
+            font_manager_emoji = new FontManager("Segoe UI Emoji", 16f, 2f, false);
 
             build_UI();
         }
@@ -83,7 +83,7 @@ namespace SwoopDemo {
             e_g.Clear(Swoop.UI_background_color.ToGDIColor());
 
             e_g.DrawString("BAZINGA!", new System.Drawing.Font("BadaBoom BB", 24), new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(255, 255, 0, 0)), Vector2.Zero.ToPointF());
-            e_g.DrawString("❤🦶\U0001f9b6🦶🦶👀👅", new System.Drawing.Font("Segoe UI Emoji", 24), System.Drawing.Brushes.White, (Vector2.UnitY * 25).ToPointF());
+            e_g.DrawString("🦶🦶👀👅", new System.Drawing.Font("Segoe UI Emoji", 24), System.Drawing.Brushes.White, (Vector2.UnitY * 25).ToPointF());
 
             spinny += (float)(90f * Swoop.game_time.ElapsedGameTime.TotalSeconds);
             if (spinny > 360f) spinny -= 360f;
@@ -522,15 +522,17 @@ namespace SwoopDemo {
             font_manager_test_two.draw_string("SPRITE FONT RENDERER", (XYPair.UnitX * 10) + (XYPair.UnitY * 440), Swoop.UI_highlight_color);
             font_manager_test.draw_map_debug_layer((XYPair.UnitX * 10) + (XYPair.UnitY * 480), font_manager_test.char_map_size, Content);
 
-            font_manager_test_three.draw_string("FontManager vs SpriteFont", (XYPair.UnitX * 10) + (XYPair.UnitY * 595), Swoop.UI_highlight_color);
-            font_manager_test_three.draw_string("[ProFontWindows]", (XYPair.UnitX * 10) + (XYPair.UnitY * 610), Swoop.UI_highlight_color);
-            Drawing.text("[ProFontWindows]", (XYPair.UnitX * 10) + (XYPair.UnitY * 625), Swoop.UI_highlight_color);
+            font_manager_test_three.draw_string("FontManager vs SpriteFont", (XYPair.UnitX * 10) + (XYPair.UnitY * 595), Swoop.UI_color);
+            font_manager_test_three.draw_string("[ProFontWindows]", (XYPair.UnitX * 10) + (XYPair.UnitY * 610), Swoop.UI_color);
+            Drawing.text("[ProFontWindows]", (XYPair.UnitX * 10) + (XYPair.UnitY * 625), Swoop.UI_color);
 
-            font_manager_emoji.draw_string("🤔🤔🤔 I like the top one", (XYPair.UnitX * 110) + (XYPair.UnitY * 605), Swoop.UI_highlight_color);
+            font_manager_emoji.draw_string("🤔🤔🤔 I like the top one", (XYPair.UnitX * 110) + (XYPair.UnitY * 605), Swoop.UI_color);
 
             GraphicsDevice.SetRenderTarget(null);
             Drawing.image(output_rt, XYPair.Zero, resolution);
-            
+
+
+            //font_manager_emoji.glyph_draw_shader.begin_spritebatch(Drawing.sb, SamplerState.AnisotropicWrap);
             //Drawing.image(font_manager_emoji.char_map_texture, XYPair.Zero, font_manager_test.char_map_size);
             //Drawing.text("I like elephants and God likes elephants", (XYPair.One * 200) + (XYPair.UnitX * 850) + (XYPair.UnitY * 280), Color.HotPink);
 
