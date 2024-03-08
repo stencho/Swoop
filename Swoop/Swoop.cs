@@ -63,9 +63,6 @@ namespace SwoopLib {
             window.IsBorderless = borderless;
             window.Title = "Swoop";
 
-            gdm.PreferMultiSampling = false;
-            gdm.SynchronizeWithVerticalRetrace = true;
-
             gdm.PreferredBackBufferWidth = resolution.X;
             gdm.PreferredBackBufferHeight = resolution.Y;
 

@@ -20,7 +20,7 @@ namespace SwoopDemo {
     public class SwoopGame : Game {
         GraphicsDeviceManager graphics;
 
-        public static double target_fps = 60;
+        public static double target_fps = 250;
         FPSCounter fps;
 
         public static XYPair resolution = new XYPair(1000, 600);
@@ -40,6 +40,9 @@ namespace SwoopDemo {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+
+            graphics.PreferMultiSampling = false;
+            graphics.SynchronizeWithVerticalRetrace = false;
 
             this.IsFixedTimeStep = true;
             this.InactiveSleepTime = System.TimeSpan.Zero;
@@ -64,7 +67,7 @@ namespace SwoopDemo {
 
         float spinny = 0;
         void draw_gdi_canvas(System.Drawing.Graphics e_g) {
-            e_g.Clear(System.Drawing.Color.Transparent);
+            e_g.Clear(Swoop.UI_background_color.ToGDIColor());
 
             e_g.DrawString("BAZINGA!", new System.Drawing.Font("BadaBoom BB", 24), new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(255, 255, 0, 0)), Vector2.Zero.ToPointF());
             e_g.DrawString("❤🦶🦶👀👅", new System.Drawing.Font("Segoe UI Emoji", 24), System.Drawing.Brushes.White, (Vector2.UnitY * 25).ToPointF());
