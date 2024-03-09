@@ -22,6 +22,8 @@ Looks better than it works. This readme is, more or less, a public TODO and a se
 - [ ] Cursor replacement + switching system
 - [x] DialogBox
 - [ ] EPA
+- [ ] GDI+ based runtime spritefont generator and renderer *(still needs monospacing and newlines)*
+- [x] GDI+ canvas
 - [x] Label
 - [x] ListBox *(still needs mouse support for scrolling + actions for events)*
 - [ ] MenuStrip (file, edit, view, etc. the strip of buttons itself)
