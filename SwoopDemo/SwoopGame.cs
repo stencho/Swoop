@@ -528,17 +528,15 @@ namespace SwoopDemo {
 
             font_manager_emoji.draw_string("🤔🤔🤔 I like the top one", (XYPair.UnitX * 110) + (XYPair.UnitY * 605), Swoop.UI_color);
 
+            font_manager_test.draw_string_shadow("Bazinga! ❤", (XYPair.UnitX * 10) + (XYPair.UnitY * 480) + (XYPair.UnitY * 65), Color.Red, Swoop.UI_disabled_color, 2f);
+
             GraphicsDevice.SetRenderTarget(null);
             Drawing.image(output_rt, XYPair.Zero, resolution);
 
 
-            //font_manager_emoji.glyph_draw_shader.begin_spritebatch(Drawing.sb, SamplerState.AnisotropicWrap);
-            //Drawing.image(font_manager_emoji.char_map_texture, XYPair.Zero, font_manager_test.char_map_size);
-            //Drawing.text("I like elephants and God likes elephants", (XYPair.One * 200) + (XYPair.UnitX * 850) + (XYPair.UnitY * 280), Color.HotPink);
+            //FontManager.glyph_draw_shader.begin_spritebatch(Drawing.sb, SamplerState.AnisotropicWrap);
+            //Drawing.image(font_manager_test.char_map_texture, XYPair.Zero, font_manager_test.char_map_size);
 
-
-            //test.set_param("main_texture", Drawing.OnePXWhite);
-            //test.draw_plane(Swoop.resolution);
 
             base.Draw(gameTime);
         }

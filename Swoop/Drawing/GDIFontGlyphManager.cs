@@ -70,7 +70,7 @@ namespace SwoopLib {
             glyphs.Add(character, new GlyphInfo(character, pos, char_size.ToXYPair()));
 
             parent.clear_canvas();
-            parent.draw_glyph_to_canvas(character, XYPair.Zero);
+            parent.draw_glyph_to_canvas(character, XYPair.One);
 
             parent.copy_glyph_to_texture_and_trim_sides(parent, character, ref parent.char_map_texture, pos);
 
@@ -215,17 +215,7 @@ namespace SwoopLib {
                 glyph_rows.Add(new GlyphRow(glyph_rows[^1].row_top + glyph_rows[^1].size.Y));
 
                 glyph_rows[^1].add_glyph(s, this);
-            }
-
-            //iterate through each row
-            //if the row has enough room at the end, smoosh the glyph in there
-            //if the row DOESN'T have enough room at the end, add a new row, add to the start of it
-
-            //when adding a new row, add it at the lowest point of the above row
-
-            //also when adding new glyphs on lines after the first, check if it's possible to pack them higher up than the top of the last row
-
-            //ez pz            
+            }         
         }
 
 
@@ -254,30 +244,34 @@ namespace SwoopLib {
             while (index < s.Length) {
                 int r = 0;
                 if (glyph_exists(current_str, out r)) { 
-                        var g = glyph_rows[r].glyphs[current_str];
+                    var g = glyph_rows[r].glyphs[current_str];
 
-                        glyph_draw_shader.begin_spritebatch(Drawing.sb, SamplerState.AnisotropicWrap);
+                    if (scale > 1.0f)
+                        glyph_draw_shader.begin_spritebatch(Drawing.sb, SamplerState.PointClamp);
+                    else
+                        glyph_draw_shader.begin_spritebatch(Drawing.sb, SamplerState.LinearWrap);
 
-                        Drawing.image(char_map_texture,
-                            position + (XYPair.UnitX * (current_x - g.pixels_start)),
-                            g.size * scale,
-                            g.position, g.size,
-                            color);
+                    Drawing.image(char_map_texture,
+                        position + (XYPair.UnitX * (current_x - g.pixels_start)),
+                        g.size * scale,
+                        g.position, g.size,
+                        color);
 
-                        current_x += (int)(((g.size.X 
-                            - (g.pixels_start < int.MaxValue && g.pixels_end > int.MinValue ? (g.pixels_start + (g.size.X - g.pixels_end)) : 0)) 
-                            + (((font_size / 10f) * kerning_scale))) 
-                            * scale);
+                    current_x += (int)(((g.size.X 
+                        - (g.pixels_start < int.MaxValue && g.pixels_end > int.MinValue ? (g.pixels_start + (g.size.X - g.pixels_end)) : 0)) 
+                        + (((font_size / 10f) * kerning_scale))) 
+                        * scale);
 
-                        if (current_char > 50000)
-                            index++;
-
+                    if (current_char > 50000)
                         index++;
 
-                        if (index < s.Length) {
-                            current_str = s.Substring(index, 1);
-                            current_char = s[index];
-                        }                    
+                    index++;
+
+                    if (index < s.Length) {
+                        current_str = s.Substring(index, 1);
+                        current_char = s[index];
+                    }     
+                    
                 } else {
                     if (index < s.Length - 1 && current_char > 50000 && s[index + 1] > 50000) {
                         add_unicode_glyph_to_texture(current_char.ToString() + s[index + 1].ToString());
@@ -327,13 +321,7 @@ namespace SwoopLib {
             draw_string("I like elephants and God likes elephants", position, Swoop.UI_disabled_color, .5f);
             draw_string("I like elephants and God likes elephants", position + (XYPair.UnitY * 15), Swoop.UI_color, .75f);
             draw_string("I like elephants and God likes elephants", position + (XYPair.UnitY * 35), Swoop.UI_highlight_color, 1f);
-            draw_string_shadow("Bazinga! ❤ ❶❷❸❹❺❻❼❽❾❿",                          position + (XYPair.UnitY * 75), Color.Red, Swoop.UI_disabled_color, 1f);
-            //var g = glyph_rows[0].glyphs['a'];
 
-            //test_glyph_draw.configure_shader(this, g);
-            //Drawing.begin(test_glyph_draw.effect);
-
-            //Drawing.image(char_map_texture, XYPair.One * 200 + (XYPair.UnitX * 900), g.size, g.position, g.size);
 
             Drawing.end();
         }
