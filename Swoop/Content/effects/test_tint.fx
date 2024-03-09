@@ -47,7 +47,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float4 col = bg;
 
     if (screen_tex.a > 0)
-        col = screen_tex * tint;
+        col.rgb = screen_tex.rgb * tint.rgb;
 	
     return col;
 }
