@@ -37,7 +37,9 @@ namespace SwoopLib {
             graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
             graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
             graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
-
+            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+            graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
         }
 
         public RenderableGDIBitmap(int width, int height) {
