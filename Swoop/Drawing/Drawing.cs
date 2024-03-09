@@ -39,6 +39,8 @@ namespace SwoopLib
         static Effects.Dither dither_effect;
         static Effects.InvertingText color_flip_effect;
 
+        public static FontManager font_manager_profont;
+
         public static void load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, XYPair resolution) {
             sb = new SpriteBatch(gd);
 
@@ -72,6 +74,9 @@ namespace SwoopLib
 
             sdf_circle = new Texture2D(gd, sdf_circle_res, sdf_circle_res);
             sdf_circle.SetData<Color>(sdf_data);
+            //
+            font_manager_profont = new FontManager("ProFontWindows", 9f, 1f);
+            font_manager_profont.alter_line_height(-2);
 
             fnt_profont = content.Load<SpriteFont>("profont");
         }
@@ -424,7 +429,7 @@ namespace SwoopLib
         public static void text(string text, Vector2 position, Color color) {
             begin();
             position.Ceiling(); //this prevents half-pixel positioning which helps keep text crisp and artifact-free
-            sb.DrawString(fnt_profont, text, position, color);
+            font_manager_profont.draw_string(text, position.ToXYPair(), color);//sb.DrawString(fnt_profont, text, position, color);
         }
         public static void text_vertical(string text, Vector2 position, Color color) {
             begin();
@@ -448,13 +453,16 @@ namespace SwoopLib
         }
 
         public static Vector2 measure_string_profont(string text) {
-            return fnt_profont.MeasureString(text);
+            //return fnt_profont.MeasureString(text);
+            return font_manager_profont.measure_string(text).ToVector2();
         }
         public static Point measure_string_profont_pt(string text) {
-            return fnt_profont.MeasureString(text).ToPoint();
+            //return fnt_profont.MeasureString(text).ToPoint();
+            return font_manager_profont.measure_string(text).ToPoint();
         }
         public static XYPair measure_string_profont_xy(string text) {
-            return fnt_profont.MeasureString(text).ToXYPair();
+            //return fnt_profont.MeasureString(text).ToXYPair();
+            return font_manager_profont.measure_string(text);
         }
     }
 }

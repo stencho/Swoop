@@ -24,7 +24,7 @@ namespace SwoopDemo {
         public static double target_fps = 250;
         FPSCounter fps;
 
-        public static XYPair resolution = new XYPair(1000, 830);
+        public static XYPair resolution = new XYPair(1050, 830);
 
         bool capture_demo_screenshot_on_exit = true;
 
@@ -39,10 +39,13 @@ namespace SwoopDemo {
         ShadedQuadWVP tint_effect;
 
         ShadedQuad test_quad;
-        FontManager font_manager_test;
-        FontManager font_manager_test_two;
-        FontManager font_manager_test_three;
+        FontManager font_manager_badaboom;
+        FontManager font_manager_impact;
+        FontManager font_manager_profont;
         FontManager font_manager_emoji;
+        FontManager font_manager_assets;
+        FontManager font_manager_print;
+        FontManager font_manager_bebop;
 
         public SwoopGame() {
             graphics = new GraphicsDeviceManager(this);
@@ -70,10 +73,27 @@ namespace SwoopDemo {
 
             Swoop.Load(GraphicsDevice, graphics, Content, Window);
 
-            font_manager_test = new FontManager("BadaBoom BB", 18f, 1f);          
-            font_manager_test_two = new FontManager("Impact", 27f, 1.2f);
-            font_manager_test_three = new FontManager("ProFontWindows", 9f, 2f);
-            font_manager_emoji = new FontManager("Segoe UI Emoji", 16f, 2f, false);
+            font_manager_badaboom = new FontManager("BadaBoom BB", 18f, -0.5f);
+            font_manager_badaboom.alter_glyph_width_size("P", -2);
+            font_manager_badaboom.alter_glyph_width_size("p", -2);
+            font_manager_badaboom.alter_glyph_width_size("i", -1);
+            font_manager_badaboom.alter_glyph_width_size("h", -1);
+            font_manager_badaboom.alter_glyph_width_size("B", -2);
+            font_manager_badaboom.alter_glyph_width_size("g", -1);
+            font_manager_badaboom.alter_glyph_width_size("o", -1);
+
+            font_manager_impact = new FontManager("Impact", 27f, 1f);
+            font_manager_profont = new FontManager("ProFontWindows", 9f, 1f);
+            font_manager_emoji = new FontManager("Segoe UI Emoji", 16f, System.Drawing.FontStyle.Regular, 3f, false);
+            font_manager_assets = new FontManager("Segoe MDL2 Assets", 27f, 1.8f, false);
+            font_manager_print = new FontManager("Segoe Print", 27f, 1.8f, false);
+            font_manager_bebop = new FontManager("Nueva Std", 27f, System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic, -0.2f);
+
+            font_manager_bebop.alter_glyph_width_size("P", -4);
+            font_manager_bebop.alter_glyph_width_size("W", -2);
+            font_manager_bebop.alter_glyph_width_size("O", 1);
+            font_manager_bebop.alter_glyph_width_size("Y", -3);
+            font_manager_bebop.alter_glyph_width_size(".", 3);
 
             build_UI();
         }
@@ -510,33 +530,42 @@ namespace SwoopDemo {
             //draw each of the bg/fg AutoRenderTargets
             AutoRenderTarget.Manager.draw_rts();
 
-            GraphicsDevice.SetRenderTarget(output_rt);
-            GraphicsDevice.Clear(Color.Transparent);
             //Draw the UI to an output RT
             //this is not required, but it makes screenshots easier
+            GraphicsDevice.SetRenderTarget(output_rt);
+            GraphicsDevice.Clear(Color.Transparent);
             Swoop.DrawBackground();
+
+
+            font_manager_impact.draw_string("SPRITE FONT RENDERER", (XYPair.UnitX * 10) + (XYPair.UnitY * 440), Swoop.UI_highlight_color);
+            font_manager_badaboom.draw_map_debug_layer((XYPair.UnitX * 10) + (XYPair.UnitY * 480), font_manager_badaboom.char_map_size, Content);
+
+            font_manager_profont.draw_string("FontManager vs SpriteFont\n[ProFontWindows]", (XYPair.UnitX * 10) + (XYPair.UnitY * 595), Swoop.UI_color);
+            Drawing.begin();
+            Drawing.sb.DrawString(Drawing.fnt_profont,"[ProFontWindows]", ((XYPair.UnitX * 10) + (XYPair.UnitY * 621)).ToVector2(), Swoop.UI_color);
+
+            font_manager_emoji.draw_string("🤔 hmmm...\nI like the top one 👍", (XYPair.UnitX * 110) + (XYPair.UnitY * 605), Swoop.UI_color);
+
+            font_manager_badaboom.draw_string_shadow("Bazinga!", (XYPair.UnitX * 10) + (XYPair.UnitY * 480) + (XYPair.UnitY * 65), Color.Red, Color.Black, XYPair.One * 2, 2f);
+            font_manager_assets.draw_string("       ", (XYPair.UnitX * 200) + (XYPair.UnitY * 480) + (XYPair.UnitY * 65), Color.White, 1f);
+            
+            font_manager_print.draw_string_rainbow("wet socks...", (XYPair.UnitX * 260) + (XYPair.UnitY * 480) + (XYPair.UnitY * 95), 1f, XYPair.One * 2, Swoop.UI_highlight_color, Color.Magenta, Color.LawnGreen, Color.Blue);
+
+            font_manager_bebop.draw_string("SEE YOU SPACE COWBOY...", resolution - (font_manager_bebop.measure_string("SEE YOU SPACE COWBOY...") + (XYPair.UnitX * 20)), Swoop.UI_color, 1f);
+
+
+            //draw background RTs, then the main RT output, then the foreground RTs
             AutoRenderTarget.Manager.draw_rts_to_target_background();
             Drawing.image(Swoop.render_target_output, XYPair.Zero, resolution);
             AutoRenderTarget.Manager.draw_rts_to_target_foreground();
-
-            font_manager_test_two.draw_string("SPRITE FONT RENDERER", (XYPair.UnitX * 10) + (XYPair.UnitY * 440), Swoop.UI_highlight_color);
-            font_manager_test.draw_map_debug_layer((XYPair.UnitX * 10) + (XYPair.UnitY * 480), font_manager_test.char_map_size, Content);
-
-            font_manager_test_three.draw_string("FontManager vs SpriteFont", (XYPair.UnitX * 10) + (XYPair.UnitY * 595), Swoop.UI_color);
-            font_manager_test_three.draw_string("[ProFontWindows]", (XYPair.UnitX * 10) + (XYPair.UnitY * 610), Swoop.UI_color);
-            Drawing.text("[ProFontWindows]", (XYPair.UnitX * 10) + (XYPair.UnitY * 625), Swoop.UI_color);
-
-            font_manager_emoji.draw_string("🤔🤔🤔 I like the top one", (XYPair.UnitX * 110) + (XYPair.UnitY * 605), Swoop.UI_color);
-
-            font_manager_test.draw_string_shadow("Bazinga! ❤", (XYPair.UnitX * 10) + (XYPair.UnitY * 480) + (XYPair.UnitY * 65), Color.Red, Swoop.UI_disabled_color, 2f);
 
             GraphicsDevice.SetRenderTarget(null);
             Drawing.image(output_rt, XYPair.Zero, resolution);
 
 
             //FontManager.glyph_draw_shader.begin_spritebatch(Drawing.sb, SamplerState.AnisotropicWrap);
-            //Drawing.image(font_manager_test.char_map_texture, XYPair.Zero, font_manager_test.char_map_size);
-
+            //Drawing.image(font_manager_small.char_map_texture, XYPair.Zero, Drawing.font_manager_profont.char_map_size);
+            //font_manager_emoji.draw_map_debug_layer((XYPair.UnitX * 10) + (XYPair.UnitY * 480), font_manager_emoji.char_map_size, Content);
 
             base.Draw(gameTime);
         }

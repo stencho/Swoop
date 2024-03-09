@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Content;
 using System.Runtime.InteropServices;
+
 namespace SwoopLib.UIElements {
     public class TextBox : UIElement {
         TextInputManager text_manager;
@@ -41,7 +42,7 @@ namespace SwoopLib.UIElements {
                 text_manager.update_input();
             }
 
-            cursor_pixel_pos = text_manager.cursor * single_character_size.X;
+            cursor_pixel_pos = Drawing.font_manager_profont.find_x_position_in_string(text_manager.current_line_text, text_manager.cursor);
             
             if (cursor_pixel_pos >= view_offset + size.X - single_character_size.X) {
                 view_offset = cursor_pixel_pos - size.X + single_character_size.X;
@@ -57,17 +58,17 @@ namespace SwoopLib.UIElements {
                 var minmax = text_manager.get_actual_selection_min_max();
 
                 Drawing.fill_rect_dither(
-                    (XYPair.UnitX) + (single_character_size.X_only * minmax.min.X) + (XYPair.UnitY * 2) - (XYPair.UnitX * view_offset),
-                    (single_character_size.X_only * minmax.max.X) + size.Y_only - (XYPair.UnitY * 3) - (XYPair.UnitX * view_offset),
+                    (XYPair.UnitX) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.current_line_text, minmax.min.X)) + (XYPair.UnitY * 2) - (XYPair.UnitX * view_offset),
+                    (XYPair.UnitX * (Drawing.font_manager_profont.find_x_position_in_string(text_manager.current_line_text, minmax.max.X)+1)) + size.Y_only - (XYPair.UnitY * 3) - (XYPair.UnitX * view_offset),
                     Swoop.UI_disabled_color,
                     Swoop.UI_background_color);
             }
 
-            Drawing.text(text_manager.lines[0].text, (XYPair.One * 2) - (XYPair.UnitX * view_offset), Swoop.get_color(this));
+            Drawing.text(text_manager.lines[0].text, (XYPair.One * 1) + (XYPair.UnitY * 2) - (XYPair.UnitX * view_offset), Swoop.get_color(this));
 
             Drawing.line(
-                    (XYPair.UnitX*2) + (text_manager.cursor * single_character_size.X_only) - (XYPair.UnitX * view_offset) + (XYPair.UnitY * 2),
-                    (XYPair.UnitX*2) + (text_manager.cursor * single_character_size.X_only) - (XYPair.UnitX * view_offset) + size.Y_only - (XYPair.UnitY * 3),
+                    (XYPair.UnitX*2) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.current_line_text, text_manager.cursor)) - (XYPair.UnitX * view_offset) + (XYPair.UnitY * 2),
+                    (XYPair.UnitX*2) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.current_line_text, text_manager.cursor)) - (XYPair.UnitX * view_offset) + size.Y_only - (XYPair.UnitY * 3),
 
                     Swoop.get_color(this), 1f
                     );
@@ -105,12 +106,12 @@ namespace SwoopLib.UIElements {
             text_manager.external_input_handler = handle_input;
         }
 
-        int longest_line_width => text_manager.longest_line_text_length * single_character_size.X;
-
         void scroll_view_to_cursor() {
             if (!check_if_cursor_in_view()) {
-                var cursor_top = (text_manager.cursor_pos * single_character_size);
-                var cursor_bottom = cursor_top + single_character_size.Y_only;
+                var cursor_top = 
+                    (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) +
+                    (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X));
+                var cursor_bottom = cursor_top + (XYPair.UnitY * Drawing.font_manager_profont.line_height);
 
                 //up
                 if (cursor_bottom.Y < view_offset.Y + (view_margin.Y * 2)) {
@@ -177,7 +178,9 @@ namespace SwoopLib.UIElements {
         }
 
         bool check_if_cursor_in_view() {
-            var cursor_px = text_manager.cursor_pos * single_character_size;
+            var cursor_px = 
+                    (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) +
+                    (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X));
 
             if (AABB(
                 cursor_px, 
@@ -193,7 +196,9 @@ namespace SwoopLib.UIElements {
 
         internal override void draw_rt() {
             Drawing.fill_rect(XYPair.Zero, size, Swoop.UI_background_color);
-            Drawing.fill_rect_dither(XYPair.Zero, (size.Y_only + (XYPair.UnitY * 25)) + (XYPair.UnitX * (line_count_width.X - 3)), Swoop.UI_background_color, Swoop.UI_disabled_color);
+            Drawing.fill_rect_dither(XYPair.Zero, 
+                (size.Y_only + (XYPair.UnitY * 25)) + (XYPair.UnitX * (line_count_width.X-1)), 
+                Swoop.UI_background_color, Swoop.UI_disabled_color);
 
             if (text_manager.has_selection() && text_manager.select_shape == TextInputManager.selection_shape.BLOCK) {
                 var select_min_max = text_manager.get_actual_selection_min_max();
@@ -226,11 +231,11 @@ namespace SwoopLib.UIElements {
                     Swoop.UI_background_color, Swoop.UI_disabled_color);
             }
 
-            int start_line = view_offset.Y / single_character_size.Y;
-            int count = view_size.Y / single_character_size.Y;
+            int start_line = view_offset.Y / Drawing.font_manager_profont.line_height;
+            int count = view_size.Y / Drawing.font_manager_profont.line_height;
             count += 1;
 
-            ctop = start_line * single_character_size.Y;
+            ctop = start_line * Drawing.font_manager_profont.line_height;
 
             int drawing_lines = 0;
 
@@ -300,27 +305,27 @@ namespace SwoopLib.UIElements {
                 //Drawing.rect(-view_offset + line_min, -view_offset + line_max, i == text_manager.longest_line_index ? Color.Green : Color.Red, 1f);
                 
                 //top of line counter
-                ctop += single_character_size.Y;
+                ctop += Drawing.font_manager_profont.line_height;
             }
 
             //Draw cursor
             if (focused) {
                 if (cursor_mode == cursor_display_mode.BOX) {
                     Drawing.rect(
-                        -view_offset + (single_character_size * text_manager.cursor_pos) + line_count_width + (XYPair.One + XYPair.Down),
-                        -view_offset + (single_character_size * text_manager.cursor_pos) + line_count_width + (XYPair.One * 3) + single_character_size,
+                        -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + line_count_width + (XYPair.One + XYPair.Down),
+                        -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + line_count_width + (XYPair.One * 3) + single_character_size,
                         Swoop.get_color(this), 1f);
 
                 } else if (cursor_mode == cursor_display_mode.LINE) {
                     Drawing.line(
-                        -view_offset + (single_character_size * text_manager.cursor_pos) + line_count_width + (XYPair.One * 2),
-                        -view_offset + (single_character_size * text_manager.cursor_pos) + line_count_width + (XYPair.One * 2) + single_character_size.Y_only,
+                        -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + line_count_width + (XYPair.One * 2),
+                        -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + line_count_width + (XYPair.One * 2) + single_character_size.Y_only,
                         Swoop.get_color(this), 1f);
                 }
             } else {
                 Drawing.line(
-                    -view_offset + (single_character_size * text_manager.cursor_pos) + line_count_width + (XYPair.One * 2),
-                    -view_offset + (single_character_size * text_manager.cursor_pos) + line_count_width + (XYPair.One * 2) + single_character_size.Y_only,
+                    -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + line_count_width + (XYPair.One * 2),
+                    -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + line_count_width + (XYPair.One * 2) + single_character_size.Y_only,
                     Swoop.UI_disabled_color, 1f);
             }
 
@@ -354,21 +359,21 @@ namespace SwoopLib.UIElements {
                     (size.Y_only + (XYPair.UnitY * 25)) + (XYPair.UnitX * (line_count_width.X - 3)),
                     Swoop.UI_background_color, Swoop.UI_disabled_color);
 
-                start_line = view_offset.Y / single_character_size.Y;
+                start_line = view_offset.Y / Drawing.font_manager_profont.line_height;
                 start_line -= 1;
 
                 if (start_line < 0) start_line = 0;
                     
-                count = view_size.Y / single_character_size.Y;
+                count = view_size.Y / Drawing.font_manager_profont.line_height;
                 count += 1;
 
-                ctop = start_line * single_character_size.Y;
+                ctop = start_line * Drawing.font_manager_profont.line_height;
 
                 for (int i = start_line; i < start_line+count; i++) {
                     if (i >= text_manager.line_count) break;
 
-                    Drawing.text((i + 1).ToString(), -view_offset.Y_only + (XYPair.Down * ctop) + (XYPair.Down * 2) + (XYPair.Right * 2), Swoop.UI_highlight_color);
-                    ctop += single_character_size.Y;
+                    Drawing.text((i + 1).ToString(), -view_offset.Y_only + (XYPair.Down * ctop) + (XYPair.Down * 2) + (XYPair.Right * 1), Swoop.UI_highlight_color);
+                    ctop += Drawing.font_manager_profont.line_height;
                 }
             }
         }

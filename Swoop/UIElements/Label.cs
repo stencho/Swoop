@@ -80,7 +80,7 @@ namespace SwoopLib.UIElements {
             if (!visible) return;
             StringReader sr = new StringReader(text);
             int line_num = 0;
-            float line_height = Drawing.measure_string_profont("A").Y;
+            float line_height = Drawing.font_manager_profont.line_height;
 
 
             while (sr.Peek() > -1) {

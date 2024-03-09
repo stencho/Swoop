@@ -70,6 +70,13 @@ namespace SwoopLib {
         public float aspect_ratio => (float)X/(float)Y;
         public float aspect_ratio_inverse => (float)Y / (float)X;
 
+        public static XYPair from_angle_degrees(float angle) {
+            return new XYPair((int)Math.Sin(MathHelper.ToRadians(angle)), (int)Math.Cos(MathHelper.ToRadians(angle)));
+        }
+        public static XYPair from_angle_radians(float angle) {
+            return new XYPair((int)Math.Sin(angle), (int)Math.Cos(angle));
+        }
+
         public int Length() {
             float y2 = this.Y;
             float x2 = this.X;

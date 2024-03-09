@@ -73,10 +73,10 @@ namespace SwoopLib {
         }        
 
         public static void Load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, GameWindow window, bool default_window_UI = true) {
+            Swoop.content = content;
             Drawing.load(gd, gdm, content, resolution);
             SDF.load(content);
             GraphicsDevice.DiscardColor = Color.Transparent;
-            Swoop.content = content;
             UI = new UIElementManager(XYPair.Zero, resolution);
 
             if (default_window_UI)
