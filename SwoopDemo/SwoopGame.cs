@@ -21,7 +21,7 @@ namespace SwoopDemo {
     public class SwoopGame : Game {
         GraphicsDeviceManager graphics;
 
-        public static double target_fps = 250;
+        public static double target_fps = 60;
         FPSCounter fps;
 
         public static XYPair resolution = new XYPair(1050, 830);
@@ -127,7 +127,7 @@ namespace SwoopDemo {
                 "test_3d_label_3", "this text is behind the top\nrt layer and being passed\nthrough via a shader which is\naware of each pixel's screen\nposition, so it can pull data\nfrom the main screen render\ntarget and tint it for example\nwheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
                 (resolution.X_only - (resolution.X_only / 4.5f)) + ((render_target_fg.position.Y + 5) * XYPair.UnitY) + (XYPair.UnitX * -20f)));
             
-
+            /*
             UI.add_element(new GDICanvas("gdi_canvas", 
                 resolution.X_only - (resolution.X_only / 4.5f) + ((render_target_fg.position.Y + render_target_fg.size.Y + 20) * XYPair.UnitY),
                 (XYPair.UnitX * 200) + (XYPair.UnitY * 100), 
@@ -137,6 +137,7 @@ namespace SwoopDemo {
                 "GDI+ drawing canvas, for some reason",
                 UI.elements["gdi_canvas"].position - (XYPair.UnitY * 13)
                 )); ;
+            */
 
             AutoRenderTarget.Manager.register_background_draw(render_target_bg);
             AutoRenderTarget.Manager.register_foreground_draw(render_target_fg);
@@ -543,14 +544,10 @@ namespace SwoopDemo {
             font_manager_profont.draw_string("FontManager vs SpriteFont\n[ProFontWindows]", (XYPair.UnitX * 10) + (XYPair.UnitY * 595), Swoop.UI_color);
             Drawing.begin();
             Drawing.sb.DrawString(Drawing.fnt_profont,"[ProFontWindows]", ((XYPair.UnitX * 10) + (XYPair.UnitY * 621)).ToVector2(), Swoop.UI_color);
-
             font_manager_emoji.draw_string("🤔 hmmm...\nI like the top one 👍", (XYPair.UnitX * 110) + (XYPair.UnitY * 605), Swoop.UI_color);
-
             font_manager_badaboom.draw_string_shadow("Bazinga!", (XYPair.UnitX * 10) + (XYPair.UnitY * 480) + (XYPair.UnitY * 65), Color.Red, Color.Black, XYPair.One * 2, 2f);
-            font_manager_assets.draw_string("       ", (XYPair.UnitX * 200) + (XYPair.UnitY * 480) + (XYPair.UnitY * 65), Color.White, 1f);
-            
+            font_manager_assets.draw_string("       ", (XYPair.UnitX * 200) + (XYPair.UnitY * 480) + (XYPair.UnitY * 65), Color.White, 1f);            
             font_manager_print.draw_string_rainbow("wet socks...", (XYPair.UnitX * 260) + (XYPair.UnitY * 480) + (XYPair.UnitY * 95), 1f, XYPair.One * 2, Swoop.UI_highlight_color, Color.Magenta, Color.LawnGreen, Color.Blue);
-
             font_manager_bebop.draw_string("SEE YOU SPACE COWBOY...", resolution - (font_manager_bebop.measure_string("SEE YOU SPACE COWBOY...") + (XYPair.UnitX * 20)), Swoop.UI_color, 1f);
 
 
