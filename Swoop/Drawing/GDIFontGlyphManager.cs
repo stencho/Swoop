@@ -108,7 +108,7 @@ namespace SwoopLib {
 
         public List<GlyphRow> glyph_rows = new List<GlyphRow>();
 
-        public readonly XYPair char_map_size = new XYPair(1024, 1024);
+        public readonly XYPair char_map_size = new XYPair(512, 512);
         public RenderTarget2D char_map_texture;
 
         public readonly XYPair glyph_canvas_size = new XYPair(100, 100);
@@ -234,8 +234,8 @@ namespace SwoopLib {
 
         public bool glyph_exists(string str, out int row_index) {
             int r = 0;
-            foreach(GlyphRow row in glyph_rows) {
-                foreach (string g in row.glyphs.Keys) {
+            for (int i = 0; i < glyph_rows.Count; i++) {
+                foreach (string g in glyph_rows[i].glyphs.Keys) {
                     if (str == g) {
                         row_index = r;
                         return true;
@@ -319,7 +319,8 @@ namespace SwoopLib {
             return measure_string(sub).X;
         }
 
-
+        //this shit is outstandingly fucking stupid why am I maintaining two borderline identical methods
+        //do better
         public XYPair measure_string(string s, float scale = 1.0f) {
             if (String.IsNullOrEmpty(s)) return XYPair.Zero;
 
@@ -340,10 +341,14 @@ namespace SwoopLib {
                         current_y += _line_height;
 
                         index++;
+
                         if (index < s.Length) {
                             current_str = s.Substring(index, 1);
                             current_char = s[index];
-                        } else break;
+                            if (current_char > 50000 && index < s.Length - 1) {
+                                current_str = current_char.ToString() + s[index + 1].ToString();
+                            }
+                        } else goto end;
                         goto start;
 
                     case '\r':
@@ -351,7 +356,10 @@ namespace SwoopLib {
                         if (index < s.Length) {
                             current_str = s.Substring(index, 1);
                             current_char = s[index];
-                        } else break;
+                            if (current_char > 50000 && index < s.Length - 1) {
+                                current_str = current_char.ToString() + s[index + 1].ToString();
+                            }
+                        } else goto end;
                         goto start;
 
                     case ' ':
@@ -366,48 +374,56 @@ namespace SwoopLib {
                         if (index < s.Length) {
                             current_str = s.Substring(index, 1);
                             current_char = s[index];
-                        } else break;
+                            if (current_char > 50000 && index < s.Length - 1) {
+                                current_str = current_char.ToString() + s[index + 1].ToString();
+                            }
+                        } else goto end;
                         goto start;
                 }
 
+                if (current_char != ' ')
+                    current_str = current_str.TrimEnd();
+
                 int r = 0;
                 if (glyph_exists(current_str, out r)) {
-                    var g = glyph_rows[r].glyphs[current_str];
-
                     if (!monospace) {
-                        current_x += (int)(((g.glyph_width + (((font_size / 10f) * kerning_scale))) * (scale)));
+                        current_x += (int)(((glyph_rows[r].glyphs[current_str].glyph_width + (((font_size / 10f) * kerning_scale))) * (scale)));
                     } else {
                         current_x += monospace_width;
                     }
 
                     if (current_x > highest_x) highest_x = current_x;
 
-                    if (current_char > 50000)
+                    if (current_char > 50000) {
+                        index++;
                         index++;
 
-                    index++;
+                        if (index < s.Length) {
+                            current_str = s.Substring(index, 1);
+                            current_char = s[index];
+                        } else break;
+                    } else {
+                        index++;
 
-
-                    if (index < s.Length) {
-                        current_str = s.Substring(index, 1);
-                        current_char = s[index];
-                    } else break;
+                        if (index < s.Length) {
+                            current_str = s.Substring(index, 1);
+                            current_char = s[index];
+                        } else break;
+                    }
 
 
                 } else { //add a new glyph
                     if (index < s.Length - 1 && current_char > 50000 && s[index + 1] > 50000) {
-                        add_unicode_glyph_to_texture(current_char.ToString() + s[index + 1].ToString());
+                        current_str = current_char.ToString() + s[index + 1].ToString();
+                        current_char = s[index];
 
-                        if (index < s.Length) {
-                            current_str = current_char.ToString() + s[index + 1].ToString();
-                            current_char = s[index];
-                        }
-                    } else {
+                        add_unicode_glyph_to_texture(current_str);
+                    } else if (index < s.Length) {
                         add_glyphs_to_texture(current_char.ToString());
-                    }
+                    } else break;
                 }
             }
-
+            end:
             return new XYPair(highest_x, current_y + _line_height);
         }
 
@@ -416,11 +432,19 @@ namespace SwoopLib {
             int index = 0;
             string current_str = s.Substring(index, 1);
             char current_char = s[index];
+            if (current_char > 50000 && index < s.Length - 1) {
+                current_str = current_char.ToString() + s[index + 1].ToString();
+            }
             int current_x = 0;
             int current_y = 0;
 
+            if (scale >= 1.0f)
+                glyph_draw_shader.begin_spritebatch(Drawing.sb, SamplerState.PointClamp);
+            else
+                glyph_draw_shader.begin_spritebatch(Drawing.sb, SamplerState.LinearWrap);
+
             while (index < s.Length) {
-                start:
+            start:
                 //fancy chars
                 switch (current_char) {
                     case '\n':
@@ -430,15 +454,21 @@ namespace SwoopLib {
                         if (index < s.Length) {
                             current_str = s.Substring(index, 1);
                             current_char = s[index];
-                        }else break;
-                        goto start;                        
+                            if (current_char > 50000 && index < s.Length - 1) {
+                                current_str = current_char.ToString() + s[index + 1].ToString();
+                            }
+                        } else goto end;
+                        goto start;
 
-                    case '\r': 
+                    case '\r':
                         index++;
                         if (index < s.Length) {
                             current_str = s.Substring(index, 1);
                             current_char = s[index];
-                        } else break;
+                            if (current_char > 50000 && index < s.Length - 1) {
+                                current_str = current_char.ToString() + s[index + 1].ToString();
+                            }
+                        } else goto end;
                         goto start;
 
                     case ' ':
@@ -452,56 +482,67 @@ namespace SwoopLib {
                         if (index < s.Length) {
                             current_str = s.Substring(index, 1);
                             current_char = s[index];
-                        } else break;
+                            if (current_char > 50000 && index < s.Length - 1) {
+                                current_str = current_char.ToString() + s[index + 1].ToString();
+                            }
+                        } else goto end;
                         goto start;
                 }
 
+                if (current_char != ' ')
+                    current_str = current_str.TrimEnd();
+
                 int r = 0;
                 if (glyph_exists(current_str, out r)) { 
-                    var g = glyph_rows[r].glyphs[current_str];
-
-                    if (scale >= 1.0f)
-                        glyph_draw_shader.begin_spritebatch(Drawing.sb, SamplerState.PointClamp);
-                    else
-                        glyph_draw_shader.begin_spritebatch(Drawing.sb, SamplerState.LinearWrap);
 
                     if (current_char != ' ')
-                    Drawing.image(char_map_texture,
-                        position + (XYPair.UnitX * current_x) + (XYPair.UnitY * current_y),
-                        g.size * scale,
-                        g.position, g.size,
-                        color);
+                        Drawing.sb.Draw(char_map_texture,
+                            new Rectangle((position + (XYPair.UnitX * current_x) + (XYPair.UnitY * current_y)).ToPoint(), (glyph_rows[r].glyphs[current_str].size * scale).ToPoint()),
+                            new Rectangle(glyph_rows[r].glyphs[current_str].position.X, glyph_rows[r].glyphs[current_str].position.Y, glyph_rows[r].glyphs[current_str].size.X, glyph_rows[r].glyphs[current_str].size.Y),
+                            color);
+                   // Drawing.image(char_map_texture,
+                   //         position + (XYPair.UnitX * current_x) + (XYPair.UnitY * current_y),
+                   //         glyph_rows[r].glyphs[current_str].size * scale,
+                   //         glyph_rows[r].glyphs[current_str].position, glyph_rows[r].glyphs[current_str].size,
+                   //         color);
 
                     if (!monospace) {
-                        current_x += (int)(((g.glyph_width + (((font_size / 10f) * kerning_scale))) * (scale)));
+                        current_x += (int)(((glyph_rows[r].glyphs[current_str].glyph_width + (((font_size / 10f) * kerning_scale))) * (scale)));
                     } else {
                         current_x += monospace_width;
                     }
-                    
-                    if (current_char > 50000)
+
+                    if (current_char > 50000) {
+                        index++;
                         index++;
 
-                    index++;
+                        if (index < s.Length) {
+                            current_str = s.Substring(index, 1);
+                            current_char = s[index];
+                        } else break;
+                    } else {
+                        index++;
 
-                    if (index < s.Length) {
-                        current_str = s.Substring(index, 1);
-                        current_char = s[index];
-                    }     
+                        if (index < s.Length) {
+                            current_str = s.Substring(index, 1);
+                            current_char = s[index];
+                        } else break;
+                    }
+
+   
                     
                 } else { //add a new glyph
                     if (index < s.Length - 1 && current_char > 50000 && s[index + 1] > 50000) {
-                        add_unicode_glyph_to_texture(current_char.ToString() + s[index + 1].ToString());
+                        current_str = current_char.ToString() + s[index + 1].ToString();
+                        current_char = s[index];
 
-                        if (index < s.Length) {
-                            current_str = current_char.ToString() + s[index + 1].ToString();
-                            current_char = s[index];
-                        }
+                        add_unicode_glyph_to_texture(current_str);
                     } else {
                         add_glyphs_to_texture(current_char.ToString());
                     }
                 }                           
             }
-
+            end:
             Drawing.end();
         }
         public void draw_string_shadow(string s, XYPair position, Color color, Color shadow_color, XYPair shadow_offset, float scale = 1.0f) {
