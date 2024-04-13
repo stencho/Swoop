@@ -211,7 +211,7 @@ namespace SwoopLib {
             return w / (float)count;
         }
 
-        public void alter_glyph_width_size(string glyph, int alter_by) {
+        public void alter_glyph_width(string glyph, int alter_by) {
             int ri = -1;
             if (glyph_exists(glyph, out ri)) {
                 glyph_rows[ri].glyphs[glyph].glyph_width += alter_by;

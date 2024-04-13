@@ -74,13 +74,13 @@ namespace SwoopDemo {
             Swoop.Load(GraphicsDevice, graphics, Content, Window);
 
             font_manager_badaboom = new FontManager("BadaBoom BB", 18f, -0.5f);
-            font_manager_badaboom.alter_glyph_width_size("P", -2);
-            font_manager_badaboom.alter_glyph_width_size("p", -2);
-            font_manager_badaboom.alter_glyph_width_size("i", -1);
-            font_manager_badaboom.alter_glyph_width_size("h", -1);
-            font_manager_badaboom.alter_glyph_width_size("B", -2);
-            font_manager_badaboom.alter_glyph_width_size("g", -1);
-            font_manager_badaboom.alter_glyph_width_size("o", -1);
+            font_manager_badaboom.alter_glyph_width("P", -2);
+            font_manager_badaboom.alter_glyph_width("p", -2);
+            font_manager_badaboom.alter_glyph_width("i", -1);
+            font_manager_badaboom.alter_glyph_width("h", -1);
+            font_manager_badaboom.alter_glyph_width("B", -2);
+            font_manager_badaboom.alter_glyph_width("g", -1);
+            font_manager_badaboom.alter_glyph_width("o", -1);
 
             font_manager_impact = new FontManager("Impact", 27f, 1f);
             font_manager_profont = new FontManager("ProFontWindows", 9f, 1f);
@@ -89,11 +89,11 @@ namespace SwoopDemo {
             font_manager_print = new FontManager("Segoe Print", 27f, 1.8f, false);
             font_manager_bebop = new FontManager("Nueva Std", 27f, System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic, -0.2f);
 
-            font_manager_bebop.alter_glyph_width_size("P", -4);
-            font_manager_bebop.alter_glyph_width_size("W", -2);
-            font_manager_bebop.alter_glyph_width_size("O", 1);
-            font_manager_bebop.alter_glyph_width_size("Y", -3);
-            font_manager_bebop.alter_glyph_width_size(".", 3);
+            font_manager_bebop.alter_glyph_width("P", -4);
+            font_manager_bebop.alter_glyph_width("W", -2);
+            font_manager_bebop.alter_glyph_width("O", 1);
+            font_manager_bebop.alter_glyph_width("Y", -3);
+            font_manager_bebop.alter_glyph_width(".", 3);
 
             build_UI();
         }
