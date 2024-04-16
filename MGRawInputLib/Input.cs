@@ -76,7 +76,10 @@ namespace MGRawInputLib {
             return false;
         }
 
-        public static void end() { run_thread = false; }
+        public static void end() { 
+            run_thread = false;
+            Externs.RawInput.destroy_rawinput_message_loop();
+        }
 
         public static bool num_lock => keyboard_state.NumLock;
         public static bool caps_lock => keyboard_state.CapsLock;
@@ -97,7 +100,7 @@ namespace MGRawInputLib {
         static long _frame_count = 0;
 
         public static int fps_update_frequency_ms { get; set; } = 1000;
-        public static int poll_hz { get; private set; } = 200;
+        public static int poll_hz { get; private set; } = 120;
         static bool limit_thread_rate = true;
         static bool use_sleep = true;
         static double thread_ms => (1000.0 / (double)poll_hz);
@@ -154,6 +157,16 @@ namespace MGRawInputLib {
             Externs.RawInput.create_rawinput_message_loop();
 
             control_update_thread.Start();
+            parent.Exiting += Parent_Exiting;
+            parent.Disposed += Parent_Disposed;
+        }
+
+        private static void Parent_Disposed(object? sender, EventArgs e) {
+            run_thread = false;
+        }
+
+        private static void Parent_Exiting(object? sender, EventArgs e) {
+            run_thread = false;
         }
 
         static TimeSpan one_tick = new TimeSpan((long)250);
@@ -161,6 +174,10 @@ namespace MGRawInputLib {
         static void update() {
             while (run_thread) {
                 start_tick = DateTime.Now.Ticks;
+                bool active = false;
+                if (parent != null) 
+                    if (parent.IsActive)
+                        active = parent.IsActive;
 
                 //gamepad_one_state = GamePad.GetState(PlayerIndex.One);
                 //gamepad_two_state = GamePad.GetState(PlayerIndex.Two);
@@ -169,7 +186,7 @@ namespace MGRawInputLib {
 
                 if (_input_method == input_method.RawInput) {
 
-                    cursor_pos = Externs.get_cursor_pos_relative_to_window();
+                    cursor_pos = Externs.get_cursor_pos_relative_to_window(parent.Window);
                     cursor_pos_actual = Externs.get_cursor_pos();
 
                     ri_keyboard_state = RawInputKeyboard.GetState();
@@ -198,6 +215,7 @@ namespace MGRawInputLib {
                             }
                         }
                     }
+
                     RawInputMouse.reset_scroll_delta();
                 }
 
@@ -239,7 +257,7 @@ namespace MGRawInputLib {
                         pre_lock_mouse_pos = mouse_state.Position;
                     }
                 }
-                if (lock_mouse && parent.IsActive) {
+                if (lock_mouse && active) {
                     reset_mouse(parent.Window.ClientBounds.Size);
                     if (poll_method == input_method.RawInput) {
                         var wpos = Externs.get_window_pos();
@@ -253,7 +271,7 @@ namespace MGRawInputLib {
                     }
                 }
                 if (run_thread) {
-                    if ((parent != null && !parent.IsActive && was_active && lock_mouse) || (!lock_mouse && _was_locked)) {
+                    if ((parent != null && !active && was_active && lock_mouse) || (!lock_mouse && _was_locked)) {
                         parent.IsMouseVisible = true;
 
                         if (_input_method == input_method.RawInput) {
@@ -266,7 +284,7 @@ namespace MGRawInputLib {
 
                 Window.update();                
 
-                was_active = parent.IsActive;
+                was_active = active;
                 _was_locked = lock_mouse;
                 //FPS stuff here
                 _fps_timer += time_span_ticks / 10000.0;
@@ -302,7 +320,7 @@ namespace MGRawInputLib {
                     //Thread.Sleep(one_tick);
                 }
                 start_tick = DateTime.Now.Ticks;
-            }
+            }             
         }
 
         static void reset_mouse(Point resolution) {

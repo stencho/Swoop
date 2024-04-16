@@ -64,15 +64,16 @@ namespace SwoopLib {
             set {
                 if (_size != value) {
                     _size = value;
-                    resize_rt();
+                    needs_resize = true;
                 }
             }
         }
-
+        bool needs_resize = false;
         void resize_rt() {
             if (render_target != null) render_target.Dispose();
             render_target = new RenderTarget2D(Drawing.graphics_device, _size.X, _size.Y,
-                false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);            
+                false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
+            needs_resize = false;
         }
 
         public UIElementManager(XYPair pos, XYPair size) {
@@ -195,6 +196,9 @@ namespace SwoopLib {
         }
 
         public void draw() {
+            if (needs_resize)
+                resize_rt();
+
             Drawing.graphics_device.SetRenderTarget(render_target);
             Drawing.graphics_device.Clear(Color.Transparent);
 

@@ -1603,6 +1603,7 @@ namespace MGRawInputLib {
 
             public static bool enable { get; set; } = false;
 
+            internal delegate nint wnd_proc_func(nint hWnd, uint msg, nint wParam, nint lParam);
             static wnd_proc_func wp = RawInput.wnd_proc;
             internal static IntPtr create_rawinput_message_loop() {
 
@@ -1628,16 +1629,26 @@ namespace MGRawInputLib {
                 }
 
 
-                var hwnd = CreateWindowEx(0, cls.lpszClassName, "MGRI", 0, 0,0,1,1, HWND_MESSAGE, IntPtr.Zero, HI, IntPtr.Zero);
+                message_window_handle = CreateWindowEx(0, cls.lpszClassName, "MGRI", 0, 0,0,1,1, HWND_MESSAGE, IntPtr.Zero, HI, IntPtr.Zero);
 
-                if (hwnd == IntPtr.Zero) {
+                if (message_window_handle == IntPtr.Zero) {
                     var e = GetLastError();
                     Debug.WriteLine($"ERROR CREATING WINDOW : {e} : {new Win32Exception(e).Message}");
                 }
-                message_window_handle = hwnd;
 
                 RawInput.register_raw_input(true);
-                return hwnd;
+                return message_window_handle;
+            }
+
+            internal static void destroy_rawinput_message_loop() {
+                if (message_window_handle == nint.Zero) return;
+
+                DestroyWindow(message_window_handle);
+                message_window_handle = nint.Zero;
+
+                Marshal.FreeHGlobal(Marshal.GetFunctionPointerForDelegate(wp));
+
+                GC.Collect();
             }
 
             static void register_raw_input(bool legacy) {
@@ -1658,7 +1669,6 @@ namespace MGRawInputLib {
                 }
             }
 
-            internal delegate nint wnd_proc_func(nint hWnd, uint msg, nint wParam, nint lParam);
 
             static RAWINPUT data;
             internal static nint wnd_proc(nint hWnd, uint msg, nint wParam, nint lParam) {
@@ -1772,12 +1782,13 @@ namespace MGRawInputLib {
         [DllImport("user32.dll")] static extern IntPtr CreateWindowEx(uint dwExStyle,
         [MarshalAs(UnmanagedType.LPStr)] string lpClassName, [MarshalAs(UnmanagedType.LPStr)] string lpWindowName, 
         uint dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
+        [DllImport("user32.dll")] static extern bool DestroyWindow(nint hWnd);
         [DllImport("user32.dll")] static extern nint DefWindowProc(nint hWnd, uint uMsg, nint wParam, nint lParam);
 
 
-        [DllImport("user32.dll", SetLastError = true)] public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+        [DllImport("user32.dll")] public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
         [DllImport("user32.dll")] public static extern int GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
-        [DllImport("user32.dll", SetLastError = true)] public static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr hWndChildAfter, string className, string windowTitle);
+        [DllImport("user32.dll")] public static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr hWndChildAfter, string className, string windowTitle);
         [DllImport("user32.dll")] public static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
         [DllImport("user32.dll")][return: MarshalAs(UnmanagedType.Bool)] static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
         [DllImport("user32.dll")] static extern bool GetCursorPos(out System.Drawing.Point lpPoint);
@@ -1875,9 +1886,17 @@ namespace MGRawInputLib {
         public static void set_cursor_pos(Microsoft.Xna.Framework.Point pos) {
             SetCursorPos(pos.X, pos.Y);
         }
-        public static Microsoft.Xna.Framework.Point get_cursor_pos_relative_to_window() {
+
+        public static Microsoft.Xna.Framework.Point get_client_area_offset(Microsoft.Xna.Framework.GameWindow window) {
+            Microsoft.Xna.Framework.Point p = get_window_pos();
+            Microsoft.Xna.Framework.Point w = window.ClientBounds.Location;
+
+            return new Microsoft.Xna.Framework.Point(w.X - p.X, w.Y - p.Y);
+        }
+
+        public static Microsoft.Xna.Framework.Point get_cursor_pos_relative_to_window(Microsoft.Xna.Framework.GameWindow window) {
             Microsoft.Xna.Framework.Point p = get_cursor_pos();
-            Microsoft.Xna.Framework.Point w = get_window_pos();
+            Microsoft.Xna.Framework.Point w = window.ClientBounds.Location;
 
             return new Microsoft.Xna.Framework.Point(p.X - w.X, p.Y - w.Y);
         }

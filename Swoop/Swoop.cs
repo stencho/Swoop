@@ -70,6 +70,9 @@ namespace SwoopLib {
 
             window.AllowUserResizing = true;
             window.ClientSizeChanged += Window_ClientSizeChanged;
+
+            MGRawInputLib.Window.init(window);
+
         }        
 
         public static void Load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, GameWindow window, bool default_window_UI = true) {
@@ -78,6 +81,21 @@ namespace SwoopLib {
             SDF.load(content);
             GraphicsDevice.DiscardColor = Color.Transparent;
             UI = new UIElementManager(XYPair.Zero, resolution);
+
+            Window.resize_start = (Point size) => {
+                enable_draw = false;
+                if (resize_start != null) resize_start(size.ToXYPair());
+            };
+
+            Window.resize_end = (Point size) => {
+                Swoop._resolution = parent.Window.ClientBounds.Size.ToXYPair();
+
+                change_resolution(Swoop._resolution);
+
+                Swoop.enable_draw = true;
+
+                if (resize_end != null) resize_end(Swoop._resolution);
+            };
 
             if (default_window_UI)
                 build_default_UI();            
@@ -116,13 +134,8 @@ namespace SwoopLib {
             UI.add_element(new ResizeHandle("resize_handle", _resolution - (XYPair.One * 15), XYPair.One * 15));
 
 
-            Window.resize_start = (Point size) => {
-                enable_draw = false;
-                if (resize_start != null) resize_start(size.ToXYPair());
-            };
-
             Window.resize_end = (Point size) => {
-                Swoop._resolution = size.ToXYPair();
+                Swoop._resolution = parent.Window.ClientBounds.Size.ToXYPair();
 
                 change_resolution(_resolution);
 
@@ -130,21 +143,20 @@ namespace SwoopLib {
                 UI.elements["minimize_button"].position = _resolution.X_only - ((text_length.X_only + (XYPair.UnitX * 9f)) * 2);
                 UI.elements["title_bar"].size = new XYPair((int)(_resolution.X - (UI.elements["exit_button"].width * 2)) + 3, UI.elements["title_bar"].size.Y);
 
-                UI.elements["resize_handle"].position = size.ToXYPair() - (XYPair.One * 15);
+                UI.elements["resize_handle"].position = Swoop._resolution - (XYPair.One * 15);
 
                 Swoop.enable_draw = true;
 
-                if (resize_end != null) resize_end(size.ToXYPair());
+                if (resize_end != null) resize_end(Swoop._resolution);
             };
 
         }
         private static void Window_ClientSizeChanged(object? sender, EventArgs e) {
-            var s = game_window.ClientBounds.sizeToXYPair();
-            if (resize_end != null) resize_end(s);
-
-            _resolution = s;
-
-            change_resolution(_resolution);
+            if (!Window.resizing_window) {
+                var s = game_window.ClientBounds.sizeToXYPair();
+                _resolution = s;
+                if (Window.resize_end != null) Window.resize_end(s.ToPoint());
+            }
         }
 
         public static void Update(GameTime gt) {
@@ -176,8 +188,7 @@ namespace SwoopLib {
         }
 
         public static void Draw() {
-            if (enable_draw) {
-                
+            if (enable_draw) {                
                 UI.draw();
 
             } else {

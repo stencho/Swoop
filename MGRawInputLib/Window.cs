@@ -11,6 +11,11 @@ namespace MGRawInputLib {
 
         public static Rectangle window_rect = Rectangle.Empty;
 
+        static GameWindow parent_window;
+        public static void init(GameWindow parent_game_window) {
+            parent_window = parent_game_window;
+        }
+
         public static void update() {
             window_rect = Externs.get_window_rect();
             var cp = Externs.get_cursor_pos();
@@ -42,8 +47,8 @@ namespace MGRawInputLib {
             }
             set {
                 if (_rz_wnd == false && value == true) {
-                    relative_mouse = Externs.get_cursor_pos() - Externs.get_window_pos();
-                    start_size = Externs.get_window_rect().Size;
+                    relative_mouse = Input.cursor_pos;
+                    start_size = Externs.get_window_rect().Size - Externs.get_client_area_offset(parent_window);
 
                     if (resize_start != null) resize_start(Externs.get_window_rect().Size);
                 }
