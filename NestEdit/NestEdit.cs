@@ -62,11 +62,9 @@ namespace NestEdit {
         }
 
         protected void build_UI() {
-            UI.add_element(new TextEditor("main_text_box", "test", XYPair.Zero, resolution));
-            UI.elements["main_text_box"].can_be_focused = false;
             
             Swoop.resize_end = (XYPair size) => {
-                resolution = size;
+                resolution = Swoop.resolution;
 
                 output_rt.Dispose();
                 output_rt = new RenderTarget2D(GraphicsDevice, resolution.X, resolution.Y, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
@@ -76,8 +74,6 @@ namespace NestEdit {
                 graphics.ApplyChanges();
 
                 AutoRenderTarget.Manager.refresh_all();
-
-                UI.elements["main_text_box"].size = size;
             };
 
         }
@@ -88,11 +84,6 @@ namespace NestEdit {
             Swoop.Update(gameTime);
 
             string title_text = $"{UIExterns.get_window_title()}";
-            //string FPS_text = $"{Input.frame_rate} Hz poll/{fps.frame_rate} FPS draw";
-            //string focus_info = $"{(UIElementManager.focused_element != null ? UIElementManager.focused_element.name : "")}";            
-
-            //((TitleBar)UI.elements["title_bar"]).left_text = title_text;
-            //((TitleBar)UI.elements["title_bar"]).right_text = FPS_text + " | " +  Input.poll_method;
 
             if (Swoop.input_handler.is_pressed(Keys.Escape)) {
                 if (capture_demo_screenshot_on_exit) {
@@ -108,7 +99,7 @@ namespace NestEdit {
         }
 
         protected override void Draw(GameTime gameTime) {
-            if (!Swoop.enable_draw) {
+            if (!Swoop.enable_draw ) {
                 GraphicsDevice.SetRenderTarget(null);
                 GraphicsDevice.Clear(Swoop.UI_background_color);
                 //swoop.DrawBackground();
