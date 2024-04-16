@@ -235,12 +235,11 @@ namespace SwoopLib {
         public bool glyph_exists(string str, out int row_index) {
             int r = 0;
             for (int i = 0; i < glyph_rows.Count; i++) {
-                foreach (string g in glyph_rows[i].glyphs.Keys) {
-                    if (str == g) {
-                        row_index = r;
-                        return true;
-                    }
+                if (glyph_rows[i].glyphs.ContainsKey(str)) {
+                    row_index = r;
+                    return true;
                 }
+
                 r++;
             }
             row_index = -1;
@@ -427,6 +426,9 @@ namespace SwoopLib {
             return new XYPair(highest_x, current_y + _line_height);
         }
 
+        static Rectangle rect_draw = new Rectangle();
+        static Rectangle rect_source = new Rectangle();
+
         public void draw_string(string s, XYPair position, Color color, float scale = 1.0f) {
             if (String.IsNullOrEmpty(s)) return;
             int index = 0;
@@ -493,13 +495,21 @@ namespace SwoopLib {
                     current_str = current_str.TrimEnd();
 
                 int r = 0;
-                if (glyph_exists(current_str, out r)) { 
+                if (glyph_exists(current_str, out r)) {
 
-                    if (current_char != ' ')
-                        Drawing.sb.Draw(char_map_texture,
-                            new Rectangle((position + (XYPair.UnitX * current_x) + (XYPair.UnitY * current_y)).ToPoint(), (glyph_rows[r].glyphs[current_str].size * scale).ToPoint()),
-                            new Rectangle(glyph_rows[r].glyphs[current_str].position.X, glyph_rows[r].glyphs[current_str].position.Y, glyph_rows[r].glyphs[current_str].size.X, glyph_rows[r].glyphs[current_str].size.Y),
-                            color);
+                    if (current_char != ' ') {
+                        rect_draw.X = position.X + current_x;
+                        rect_draw.Y = position.Y + current_y;
+
+                        rect_draw.Size = (glyph_rows[r].glyphs[current_str].size * scale).ToPoint();
+                        
+                        rect_source.X = glyph_rows[r].glyphs[current_str].position.X;
+                        rect_source.Y = glyph_rows[r].glyphs[current_str].position.Y;
+                        rect_source.Width = glyph_rows[r].glyphs[current_str].size.X;
+                        rect_source.Height = glyph_rows[r].glyphs[current_str].size.Y;
+
+                        Drawing.sb.Draw(char_map_texture, rect_draw, rect_source, color);
+                    }
                    // Drawing.image(char_map_texture,
                    //         position + (XYPair.UnitX * current_x) + (XYPair.UnitY * current_y),
                    //         glyph_rows[r].glyphs[current_str].size * scale,
