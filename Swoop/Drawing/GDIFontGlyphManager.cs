@@ -96,6 +96,7 @@ namespace SwoopLib {
         public void alter_line_height(int alter_by) => line_height_alteration = alter_by;
         int line_height_alteration = 0;
         public int line_height => _line_height + line_height_alteration;
+        public XYPair line_height_2d => new XYPair(0, line_height);
         int _line_height = 0;
         float space_size = 0f;
         float average_character_width = 0f;

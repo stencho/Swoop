@@ -218,7 +218,7 @@ namespace SwoopLib {
 
 
                 validate_cursor();
-                store_cursor_X();
+                //store_cursor_X();
 
             } else {
 
@@ -263,7 +263,7 @@ namespace SwoopLib {
                 cursor_pos.Y += c - 1;
 
                 validate_cursor();
-                store_cursor_X();
+                //store_cursor_X();
 
             }
         }
@@ -289,19 +289,23 @@ namespace SwoopLib {
         }
         
         void backspace() {
-            delete_text_at_cursor(-1);            
+            delete_text_at_cursor(-1);
+            store_cursor_X();
         }
         void backspace_word() {
             delete_text_at_cursor(-find_word_size_left_of_cursor());
+            store_cursor_X();
         }
 
         void delete() {
             delete_text_at_cursor(1);
+            store_cursor_X();
         }
         void delete_word() {
             var ws = find_word_size_right_of_cursor();
             Debug.WriteLine(ws);
             delete_text_at_cursor(ws);
+            store_cursor_X();
         }
 
         void delete_selected_text() {
@@ -375,6 +379,7 @@ namespace SwoopLib {
             }
 
             validate_cursor();
+            store_cursor_X();
         }
 
         public void delete_text(int line, int start, int count, bool auto_remove_lines = true) {
@@ -544,7 +549,7 @@ namespace SwoopLib {
 
         void duplicate_line() {
             lines.Insert(current_line_index, new TextLine(this, current_line_text));
-            cursor_pos.Y++;
+            cursor_pos.Y++;            
         }
 
         //Cursor
@@ -598,8 +603,12 @@ namespace SwoopLib {
 
         void store_cursor_X() => cursor_pos_stored_X = cursor_pos.X;
 
-        void cursor_up() { 
-            cursor_pos.Y--;           
+        void cursor_up() {
+            if (cursor_pos.Y == 0) {
+                cursor_pos.X = 0; cursor_pos_stored_X = 0;
+            } else {
+                cursor_pos.Y--;
+            }
 
             validate_cursor();
             //return;
@@ -659,8 +668,6 @@ namespace SwoopLib {
 
             if (input_handler.shift)
                 end_selection();
-
-            store_cursor_X();
         }
         void cursor_home_file() {
             if (!input_handler.shift) clear_selection();
@@ -673,8 +680,6 @@ namespace SwoopLib {
 
             if (input_handler.shift)
                 end_selection();
-
-            store_cursor_X();
         }
 
         void cursor_end_line() {
@@ -688,8 +693,6 @@ namespace SwoopLib {
 
             if (input_handler.shift)
                 end_selection();
-
-            store_cursor_X();
         }
         void cursor_end_file() {
             if (!input_handler.shift) clear_selection();
@@ -702,8 +705,6 @@ namespace SwoopLib {
 
             if (input_handler.shift)
                 end_selection();
-
-            store_cursor_X();
         }
         
         bool separator_char_switch(char c) {            
@@ -792,12 +793,12 @@ namespace SwoopLib {
                 case Keys.PageDown: break;
 
                 case Keys.Home:
-                    if (!input_handler.ctrl) cursor_home_line();
-                    else cursor_home_file();
+                    if (!input_handler.ctrl) { cursor_home_line(); store_cursor_X(); }
+                    else { cursor_home_file(); store_cursor_X(); }
                     return;
                 case Keys.End:
-                    if (!input_handler.ctrl) cursor_end_line();
-                    else cursor_end_file();
+                    if (!input_handler.ctrl) { cursor_end_line(); store_cursor_X(); }
+                    else { cursor_end_file(); store_cursor_X(); }
                     return;
 
                 case Keys.Up:
@@ -931,8 +932,7 @@ namespace SwoopLib {
 
                 case Keys.NumPad0:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text("0");
-                        else insert_mode = !insert_mode;
+                        insert_text("0");
                     } else {
                         if (!input_handler.shift) insert_mode = !insert_mode;
                         else paste();
@@ -941,18 +941,16 @@ namespace SwoopLib {
 
                 case Keys.NumPad1:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text("1");
-                        else cursor_end_line();
+                       insert_text("1");
                     } else {
-                        if (!input_handler.shift) cursor_end_line();
-                        else cursor_end_line(); //also select
+                        if (!input_handler.ctrl) { cursor_end_line(); store_cursor_X(); } 
+                        else { cursor_end_file(); store_cursor_X(); }
                     }
                     return;
 
                 case Keys.NumPad2:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text("2");
-                        else cursor_down();
+                        insert_text("2");
                     } else {
                         if (!input_handler.shift) cursor_down();
                         else cursor_down(); //also select
@@ -961,8 +959,7 @@ namespace SwoopLib {
 
                 case Keys.NumPad3:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text("3");
-                        else page_down();
+                        insert_text("3");
                     } else {
                         if (!input_handler.shift) page_down();
                         else page_down(); //also select
@@ -971,8 +968,7 @@ namespace SwoopLib {
 
                 case Keys.NumPad4:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text("4");
-                        else cursor_left();
+                        insert_text("4");
                     } else {
                         if (!input_handler.shift) cursor_left();
                         else cursor_left(); //also select
@@ -981,8 +977,7 @@ namespace SwoopLib {
 
                 case Keys.NumPad5:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text("5");
-                        else return;
+                        insert_text("5");
                     } else {
                         return;
                     }
@@ -990,8 +985,7 @@ namespace SwoopLib {
 
                 case Keys.NumPad6:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text("6");
-                        else cursor_right();
+                        insert_text("6");
                     } else {
                         if (!input_handler.shift) cursor_right();
                         else cursor_right(); //also select
@@ -1000,18 +994,16 @@ namespace SwoopLib {
 
                 case Keys.NumPad7:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text("7");
-                        else cursor_home_line();
+                        insert_text("7");                        
                     } else {
-                        if (!input_handler.shift) cursor_home_line();
-                        else cursor_home_line(); //also select
+                        cursor_home_line(); 
+                        store_cursor_X(); 
                     }
                     return;
 
                 case Keys.NumPad8:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text("8");
-                        else cursor_up();
+                        insert_text("8");
                     } else {
                         if (!input_handler.shift) cursor_up();
                         else cursor_up(); //also select
@@ -1020,8 +1012,7 @@ namespace SwoopLib {
 
                 case Keys.NumPad9:
                     if (Input.num_lock) {
-                        if (!input_handler.shift) insert_text("9");
-                        else page_up();
+                        insert_text("9");
                     } else {
                         if (!input_handler.shift) page_up();
                         else page_up(); //also select

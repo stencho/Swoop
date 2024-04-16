@@ -81,15 +81,12 @@ namespace SwoopLib.UIElements {
     public class TextEditor : UIElement {
         string status_text = string.Empty;
 
-        public bool line_count = true;
         public bool word_wrap = false;
 
         XYPair stored_view_offset = XYPair.Zero;
         XYPair view_offset = XYPair.One * 10;
-        XYPair view_size => size - (XYPair.UnitX * line_count_width);
+        XYPair view_size => size;
         XYPair view_margin => (XYPair.UnitX * single_character_size * 2) + single_character_size.Y_only;
-
-        XYPair line_count_width => line_count ? Drawing.measure_string_profont_xy(text_manager.line_count.ToString() + " ").X_only : XYPair.Zero;
 
         TextInputManager text_manager;
         XYPair single_character_size;
@@ -100,7 +97,7 @@ namespace SwoopLib.UIElements {
         public TextEditor(string name, string text, XYPair position, XYPair size) : base(name, position, size) {
             enable_render_target = true;
             text_manager = new TextInputManager(text);
-            single_character_size = Drawing.measure_string_profont_xy("a");
+            single_character_size = Drawing.measure_string_profont_xy("A");
             //can_be_focused = false;
             
             text_manager.external_input_handler = handle_input;
@@ -158,10 +155,6 @@ namespace SwoopLib.UIElements {
         }
 
         void handle_input(InputHandler input_handler) {            
-            if (input_handler.just_pressed(Keys.L) && input_handler.ctrl && focused) {
-                line_count = !line_count;
-                input_handler.handle_key(Keys.L);
-            }
             
         }
 
@@ -197,15 +190,15 @@ namespace SwoopLib.UIElements {
         internal override void draw_rt() {
             Drawing.fill_rect(XYPair.Zero, size, Swoop.UI_background_color);
             Drawing.fill_rect_dither(XYPair.Zero, 
-                (size.Y_only + (XYPair.UnitY * 25)) + (XYPair.UnitX * (line_count_width.X-1)), 
+                (size.Y_only + (XYPair.UnitY * 25)), 
                 Swoop.UI_background_color, Swoop.UI_disabled_color);
 
             if (text_manager.has_selection() && text_manager.select_shape == TextInputManager.selection_shape.BLOCK) {
                 var select_min_max = text_manager.get_actual_selection_min_max();
 
                 Drawing.fill_rect_dither(
-                    view_offset + (single_character_size * select_min_max.min) + line_count_width + XYPair.Down,
-                    view_offset + (single_character_size * (select_min_max.max + XYPair.Down)) + line_count_width + (XYPair.One * 3),
+                    view_offset + (single_character_size * select_min_max.min) + XYPair.Down,
+                    view_offset + (single_character_size * (select_min_max.max + XYPair.Down)) + (XYPair.One * 3),
                     Swoop.UI_background_color, Swoop.UI_disabled_color);
             }
 
@@ -224,10 +217,14 @@ namespace SwoopLib.UIElements {
 
             var single_line_select = top_line == bottom_line;
 
+
             if ((text_manager.has_selection() && text_manager.select_shape == TextInputManager.selection_shape.LINEAR) && single_line_select) {
+                var min = Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[top_line].text, sel.min.X);
+                var max = Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[top_line].text, sel.max.X);
+
                 Drawing.fill_rect_dither(
-                    -view_offset + (single_character_size * sel.min) + line_count_width + XYPair.Down,
-                    -view_offset + (single_character_size * (sel.max + XYPair.Down)) + line_count_width + (XYPair.One * 3),
+                    -view_offset + (XYPair.UnitX * min) + (top_line * Drawing.font_manager_profont.line_height_2d) + (XYPair.One * 2),
+                    -view_offset + (XYPair.UnitX * max) + (top_line * Drawing.font_manager_profont.line_height_2d) + single_character_size.Y_only + (XYPair.One * 2),
                     Swoop.UI_background_color, Swoop.UI_disabled_color);
             }
 
@@ -249,56 +246,56 @@ namespace SwoopLib.UIElements {
                 bool empty_line = (text_manager.lines[i].length == 0);
 
                 if ((text_manager.has_selection() && text_manager.select_shape == TextInputManager.selection_shape.LINEAR) && !single_line_select) {
+
                     if (i == top_line) {
+                        var min = Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[top_line].text, top_line_x);
+                        var max = Drawing.font_manager_profont.measure_string(text_manager.lines[i].text).X;
+
                         empty_line = text_manager.lines[i].length == top_line_x;
+
                         Drawing.fill_rect_dither(
-                            -view_offset + (single_character_size * ((XYPair.UnitY * top_line) + (XYPair.UnitX * top_line_x)))
-                            + line_count_width + (XYPair.Down * 2),
-
-                            -view_offset + (single_character_size * ((XYPair.UnitY * top_line) + (XYPair.UnitX * (top_line_x + (text_manager.lines[top_line].text.Length - top_line_x)))))
-                            + ((single_character_size / 2) * (XYPair.UnitX * (empty_line ? 1 : 0)))
-                            + (XYPair.Down * 3) + line_count_width + single_character_size.Y_only,
-
+                            -view_offset + (top_line * Drawing.font_manager_profont.line_height_2d) + (XYPair.UnitX * min) + (XYPair.One * 2),
+                            -view_offset + ((top_line+1) * Drawing.font_manager_profont.line_height_2d) + (XYPair.UnitX * max) + (XYPair.One * 2),
                             Swoop.UI_background_color, Swoop.UI_disabled_color);
-                    } else if (i > top_line && i < bottom_line) {
-                        Drawing.fill_rect_dither(
-                            -view_offset + (single_character_size * (XYPair.UnitY * i))
-                            + line_count_width + (XYPair.Down * 2),
 
-                            -view_offset + (single_character_size * ((XYPair.UnitX * text_manager.lines[i].text.Length) + (XYPair.UnitY * i)))
-                            + ((single_character_size / 2) * (XYPair.UnitX * (empty_line ? 1 : 0)))
-                            + (XYPair.Down * 3) + line_count_width + single_character_size.Y_only,
+                    } else if (i > top_line && i < bottom_line) {
+                        var max = Drawing.font_manager_profont.measure_string(text_manager.lines[i].text).X;
+
+                        Drawing.fill_rect_dither(
+                            -view_offset + (i * Drawing.font_manager_profont.line_height_2d) + (XYPair.One * 2),
+                            -view_offset + ((i+1) * Drawing.font_manager_profont.line_height_2d) + (XYPair.UnitX * max) + (XYPair.One * 2),
 
                             Swoop.UI_background_color, Swoop.UI_disabled_color);
                     } else if (i == bottom_line) {
-                        Drawing.fill_rect_dither(
-                            -view_offset + (single_character_size * (XYPair.UnitY * bottom_line))
-                            + line_count_width + (XYPair.Down * 2),
 
-                            -view_offset + (single_character_size * ((XYPair.UnitY * bottom_line) + (XYPair.UnitX * bottom_line_x)))
-                            + ((single_character_size / 2) * (XYPair.UnitX * (empty_line ? 1 : 0)))
-                            + (XYPair.Down * 3) + line_count_width + single_character_size.Y_only,
+                        var max = Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[bottom_line].text, bottom_line_x);
+
+                        Drawing.fill_rect_dither(
+                            -view_offset + (bottom_line * Drawing.font_manager_profont.line_height_2d) + (XYPair.One * 2),
+                            -view_offset + ((bottom_line + 1) * Drawing.font_manager_profont.line_height_2d) + (XYPair.UnitX * max) + (XYPair.One * 2) + (XYPair.Down * 2),
+
 
                             Swoop.UI_background_color, Swoop.UI_disabled_color);
+                        
                     }
                 }
 
                 //Draw main text
                 if (!word_wrap) {
-                    Drawing.text(tl.text, -view_offset + (XYPair.Down * ctop) + (XYPair.One * 2f) + line_count_width, Swoop.get_color(this));
+                    Drawing.text(tl.text, -view_offset + (XYPair.Down * ctop) + (XYPair.One * 2f), Swoop.get_color(this));
                 } else {
                     var l = tl.text.Length * single_character_size.X;
-                    var max_width = size.X - line_count_width.X;
+                    var max_width = size.X;
 
-                    Drawing.text(tl.text, -view_offset + (XYPair.Down * ctop) + (XYPair.One * 2f) + line_count_width, Swoop.get_color(this));
+                    Drawing.text(tl.text, -view_offset + (XYPair.Down * ctop) + (XYPair.One * 2f), Swoop.get_color(this));
                     if (l > max_width) {
                         ctop += (int)((float)(l / max_width) * single_character_size.Y);
 
-                        Drawing.text(tl.text, -view_offset + (XYPair.Down * ctop) + (XYPair.One * 2f) + line_count_width, Swoop.get_color(this));
+                        Drawing.text(tl.text, -view_offset + (XYPair.Down * ctop) + (XYPair.One * 2f), Swoop.get_color(this));
                     }
                 }
 
-                var line_min = new XYPair(0, ctop) + (XYPair.One * 2) + (XYPair.UnitX * line_count_width);
+                var line_min = new XYPair(0, ctop) + (XYPair.One * 2);
                 var line_max = line_min + tl.size_px;
 
                 //debug
@@ -312,20 +309,20 @@ namespace SwoopLib.UIElements {
             if (focused) {
                 if (cursor_mode == cursor_display_mode.BOX) {
                     Drawing.rect(
-                        -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + line_count_width + (XYPair.One + XYPair.Down),
-                        -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + line_count_width + (XYPair.One * 3) + single_character_size,
+                        -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + (XYPair.One + XYPair.Down),
+                        -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + (XYPair.One * 3) + single_character_size,
                         Swoop.get_color(this), 1f);
 
                 } else if (cursor_mode == cursor_display_mode.LINE) {
                     Drawing.line(
-                        -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + line_count_width + (XYPair.One * 2),
-                        -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + line_count_width + (XYPair.One * 2) + single_character_size.Y_only,
+                        -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + (XYPair.One * 2),
+                        -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + (XYPair.One * 2) + single_character_size.Y_only,
                         Swoop.get_color(this), 1f);
                 }
             } else {
                 Drawing.line(
-                    -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + line_count_width + (XYPair.One * 2),
-                    -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + line_count_width + (XYPair.One * 2) + single_character_size.Y_only,
+                    -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + (XYPair.One * 2),
+                    -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + (XYPair.One * 2) + single_character_size.Y_only,
                     Swoop.UI_disabled_color, 1f);
             }
 
@@ -345,37 +342,7 @@ namespace SwoopLib.UIElements {
 
             var ds = Drawing.measure_string_profont_xy(status_text);
             Drawing.text(status_text, size - (ds + (XYPair.One * 3)), Swoop.UI_disabled_color);
-
-
-            //line counter
-            if (line_count) {
-                Drawing.fill_rect(
-                    XYPair.Zero,
-                    (size.Y_only + (XYPair.UnitY * 25)) + (XYPair.UnitX * (line_count_width.X - 3)),
-                    Swoop.UI_background_color);
-
-                Drawing.fill_rect_dither(
-                    XYPair.Zero,
-                    (size.Y_only + (XYPair.UnitY * 25)) + (XYPair.UnitX * (line_count_width.X - 3)),
-                    Swoop.UI_background_color, Swoop.UI_disabled_color);
-
-                start_line = view_offset.Y / Drawing.font_manager_profont.line_height;
-                start_line -= 1;
-
-                if (start_line < 0) start_line = 0;
-                    
-                count = view_size.Y / Drawing.font_manager_profont.line_height;
-                count += 1;
-
-                ctop = start_line * Drawing.font_manager_profont.line_height;
-
-                for (int i = start_line; i < start_line+count; i++) {
-                    if (i >= text_manager.line_count) break;
-
-                    Drawing.text((i + 1).ToString(), -view_offset.Y_only + (XYPair.Down * ctop) + (XYPair.Down * 2) + (XYPair.Right * 1), Swoop.UI_highlight_color);
-                    ctop += Drawing.font_manager_profont.line_height;
-                }
-            }
+            
         }
 
         
