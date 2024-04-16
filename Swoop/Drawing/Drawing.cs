@@ -429,7 +429,8 @@ namespace SwoopLib
         public static void text(string text, Vector2 position, Color color) {
             begin();
             position.Ceiling(); //this prevents half-pixel positioning which helps keep text crisp and artifact-free
-            font_manager_profont.draw_string(text, position.ToXYPair(), color);//sb.DrawString(fnt_profont, text, position, color);
+            font_manager_profont.draw_string(text, position.ToXYPair(), color);
+            //sb.DrawString(fnt_profont, text, position, color);
         }
         public static void text_vertical(string text, Vector2 position, Color color) {
             begin();
