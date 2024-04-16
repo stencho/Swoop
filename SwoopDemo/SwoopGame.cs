@@ -440,9 +440,6 @@ namespace SwoopDemo {
                 "\n" +
                 "\nthat said, you could probably still edit a small file with this" +
                 "\n" +
-                "\n" +
-                "\n- CTRL + L to toggle line count" +
-                "\n" +
                 "\ntodo:" +
                 "\nmouse support at all" +
                 "\nscroll bars" +
