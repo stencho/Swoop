@@ -229,9 +229,6 @@ namespace SwoopLib {
         internal void draw_glyph_to_canvas(string characters, XYPair pos) {
             graphics.DrawString(characters, gdi_font, text_brush, pos.ToPointF());
         }
-        internal void copy_glyph_to_texture(XYPair size, XYPair char_map_pos) {
-            //oh boy
-        }
 
         public bool glyph_exists(string str, out int row_index) {
             int r = 0;
