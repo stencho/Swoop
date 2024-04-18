@@ -100,7 +100,7 @@ namespace MGRawInputLib {
         static long _frame_count = 0;
 
         public static int fps_update_frequency_ms { get; set; } = 1000;
-        public static int poll_hz { get; private set; } = 120;
+        public static int poll_hz { get; private set; } = 250;
         static bool limit_thread_rate = true;
         static bool use_sleep = true;
         static double thread_ms => (1000.0 / (double)poll_hz);
@@ -169,8 +169,8 @@ namespace MGRawInputLib {
             run_thread = false;
         }
 
-        static TimeSpan one_tick = new TimeSpan((long)250);
         static TimeSpan sleep_ts;
+
         static void update() {
             while (run_thread) {
                 start_tick = DateTime.Now.Ticks;
