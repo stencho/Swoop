@@ -31,6 +31,12 @@ namespace SwoopLib {
         public static void minimize_window() {
             ShowWindow(actual_window_handle, 6);
         }
+        public static void maximize_window() {
+            ShowWindow(actual_window_handle, 3);
+        }
+        public static void restore_window() {
+            ShowWindow(actual_window_handle, 9);
+        }
 
         public static bool in_foreground() { 
             return (GetForegroundWindow() == actual_window_handle);

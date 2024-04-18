@@ -130,7 +130,10 @@ namespace SwoopLib {
                 }
             }
         }
+
         internal RenderTarget2D draw_target;
+
+        internal int disabled_at_index = -1;
 
         public UIElement(string name, XYPair position, XYPair size) {
             this.name = name;

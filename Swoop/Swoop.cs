@@ -38,15 +38,39 @@ namespace SwoopLib {
         static XYPair _resolution;
         public static XYPair resolution => _resolution;
         public static RenderTarget2D render_target_output => UI.render_target;
-        
+
+        public static AutoRenderTarget render_target_overlay;
+
 
         public static bool fill_background { get; set; } = true;
         public static bool draw_UI_border { get; set; } = true;
         public static bool enable_draw { get; set; } = true;
         public static bool show_logo { get; set; } = true;
 
+        internal static bool default_UI = false;
+        internal static bool maximized = false;
+        internal static XYPair restore_resolution;
+        public static void maximize() {
+            maximized = true;
+            restore_resolution = resolution;
+            UIExterns.maximize_window();
+
+            if (default_UI) {
+                UI.disable("resize_handle");
+            }
+        }
+        public static void restore() {
+            maximized = false;
+            UIExterns.restore_window();
+
+            if (default_UI) {
+                UI.enable("resize_handle");
+            }
+        }
+
         public static Action<XYPair>? resize_start;
         public static Action<XYPair>? resize_end;
+        public static Action<XYPair> resolution_changed;
 
         static Game parent = null;
         static GameWindow game_window;
@@ -72,7 +96,6 @@ namespace SwoopLib {
             window.ClientSizeChanged += Window_ClientSizeChanged;
 
             MGRawInputLib.Window.init(window);
-
         }        
 
         public static void Load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, GameWindow window, bool default_window_UI = true) {
@@ -81,6 +104,8 @@ namespace SwoopLib {
             SDF.load(content);
             GraphicsDevice.DiscardColor = Color.Transparent;
             UI = new UIElementManager(XYPair.Zero, resolution);
+
+            render_target_overlay = new AutoRenderTarget(resolution, true);
 
             Window.resize_start = (Point size) => {
                 enable_draw = false;
@@ -97,11 +122,10 @@ namespace SwoopLib {
                 if (resize_end != null) resize_end(Swoop._resolution);
             };
 
+            default_UI = default_window_UI;
             if (default_window_UI)
                 build_default_UI();            
         }
-        
-
 
         public static void build_default_UI() {
             var text_length = Drawing.measure_string_profont_xy("x") ;
@@ -111,8 +135,14 @@ namespace SwoopLib {
             UI.elements["exit_button"].ignore_dialog = true;
             UI.elements["exit_button"].can_be_focused = false;
 
+            UI.add_element(new Button("maximize_button", "^",
+                    _resolution.X_only - UI.elements["exit_button"].size.X_only - text_length.X_only - (Vector2.UnitX * 10f) + XYPair.UnitX,
+                    UI.elements["exit_button"].size));
+            UI.elements["maximize_button"].ignore_dialog = true;
+            UI.elements["maximize_button"].can_be_focused = false;
+
             UI.add_element(new Button("minimize_button", "_",
-                    _resolution.X_only - ((text_length.X_only + (Vector2.UnitX * 9f)) * 2),
+                    _resolution.X_only - UI.elements["exit_button"].size.X_only - UI.elements["maximize_button"].size.X_only - text_length.X_only - (Vector2.UnitX * 10f) + (XYPair.UnitX*2),
                     UI.elements["exit_button"].size));
             UI.elements["minimize_button"].ignore_dialog = true;
             UI.elements["minimize_button"].can_be_focused = false;
@@ -122,26 +152,34 @@ namespace SwoopLib {
                 parent.Exit();
             };
 
+            ((Button)UI.elements["maximize_button"]).click_action = () => {
+                if (!maximized) {
+                    maximize();
+                } else {
+                    restore();
+                }
+            };
+
             ((Button)UI.elements["minimize_button"]).click_action = () => {
                 UIExterns.minimize_window();
             };
 
             UI.add_element(new TitleBar("title_bar",
-                XYPair.Zero, (int)(_resolution.X - (UI.elements["exit_button"].width * 2)) + 3));
+                XYPair.Zero, UI.elements["minimize_button"].position.X + 1));
             UI.elements["title_bar"].ignore_dialog = true;
 
-
             UI.add_element(new ResizeHandle("resize_handle", _resolution - (XYPair.One * 15), XYPair.One * 15));
-
 
             Window.resize_end = (Point size) => {
                 Swoop._resolution = parent.Window.ClientBounds.Size.ToXYPair();
 
                 change_resolution(_resolution);
 
-                UI.elements["exit_button"].position = _resolution.X_only - text_length.X_only - (XYPair.UnitX * 10f);
-                UI.elements["minimize_button"].position = _resolution.X_only - ((text_length.X_only + (XYPair.UnitX * 9f)) * 2);
-                UI.elements["title_bar"].size = new XYPair((int)(_resolution.X - (UI.elements["exit_button"].width * 2)) + 3, UI.elements["title_bar"].size.Y);
+                UI.elements["exit_button"].position = _resolution.X_only - UI.elements["exit_button"].size.X_only;
+                UI.elements["maximize_button"].position = _resolution.X_only - UI.elements["exit_button"].size.X_only - UI.elements["minimize_button"].size.X_only + XYPair.UnitX;
+                UI.elements["minimize_button"].position = _resolution.X_only - UI.elements["exit_button"].size.X_only - UI.elements["minimize_button"].size.X_only - UI.elements["maximize_button"].size.X_only + (XYPair.UnitX*2);
+
+                UI.elements["title_bar"].size = new XYPair(UI.elements["minimize_button"].X + 1, UI.elements["title_bar"].size.Y);
 
                 UI.elements["resize_handle"].position = Swoop._resolution - (XYPair.One * 15);
 
@@ -168,6 +206,14 @@ namespace SwoopLib {
 
             input_handler.update();
 
+            if (default_UI) {
+                UI.send_to_front("title_bar");
+                UI.send_to_front("minimize_button");
+                UI.send_to_front("maximize_button");
+                UI.send_to_front("exit_button");
+                UI.send_to_front("resize_handle");
+            }
+
             if (enable_draw || Window.resizing_window)
                 UI.update();            
         }
@@ -193,7 +239,11 @@ namespace SwoopLib {
 
             } else {
                 Drawing.graphics_device.SetRenderTarget(UI.render_target);
-                Drawing.graphics_device.Clear(Color.Transparent);                
+                Drawing.graphics_device.Clear(Color.Transparent);
+            }
+
+            if (Swoop.draw_UI_border && !maximized) {
+                Drawing.rect(XYPair.Zero, resolution, Swoop.UI_color, 2f);
             }
         }
 
@@ -202,9 +252,11 @@ namespace SwoopLib {
         }
 
         public static void change_resolution(XYPair resolution) {
-            Swoop._resolution = resolution;
-            UI.size = Swoop._resolution;
+            _resolution = resolution;
+            UI.size = _resolution;
             GC.Collect();
+            render_target_overlay.size = _resolution;
+            if (resolution_changed != null) resolution_changed(resolution); 
         }
     }
 }

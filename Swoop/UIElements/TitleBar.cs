@@ -25,7 +25,9 @@ namespace SwoopLib.UIElements
         }
 
         internal override void update() {
-            Window.moving_window = clicking;
+            if (!Swoop.maximized) {
+                Window.moving_window = clicking;
+            }
         }
 
         internal override void draw() {

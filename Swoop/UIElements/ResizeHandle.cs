@@ -19,11 +19,12 @@ namespace SwoopLib.UIElements {
         }
 
         internal override void update() {
-            Window.resizing_window = clicking;
+            if (!Swoop.maximized)
+                Window.resizing_window = clicking;
         }
 
         internal override void draw() {
-            Drawing.rect(position, position + size, Swoop.get_color(this), 1f);
+            Drawing.fill_rect_outline(position, position + size, Swoop.UI_background_color, Swoop.get_color(this), 1f);
             var mid = position + (size * 0.5f);
             var qs = size * 0.25f;
             Drawing.tri(

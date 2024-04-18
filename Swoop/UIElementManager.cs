@@ -46,16 +46,59 @@ namespace SwoopLib {
 
         }
 
-        public static void update_UI_input() {}
+        public static void update_UI_input() { }
 
 
         //PER INSTANCE
         public Dictionary<string, UIElement> elements = new Dictionary<string, UIElement>();
-        
+        public List<string> element_order = new List<string>();
+        IEnumerable<string> element_order_inverse_for_draw => element_order.Reverse<string>();
+
+        public void send_to_front(string element_name) {
+            lock (element_order) {
+                if (element_order.Contains(element_name) && elements.ContainsKey(element_name)) {
+                    element_order.Remove(element_name);
+                    element_order.Insert(0, element_name);
+                }
+            }
+        }
+
+        public void send_to_back(string element_name) {
+            lock (element_order) {
+                if (element_order.Contains(element_name) && elements.ContainsKey(element_name)) {
+                    element_order.Remove(element_name);
+                    element_order.Add(element_name);
+                }
+            }
+        }
+
+        public void disable(string element_name) {
+            lock (element_order) {
+                if (element_order.Contains(element_name) && elements.ContainsKey(element_name)) {
+                    elements[element_name].disabled_at_index = element_order.IndexOf(element_name);
+                    element_order.Remove(element_name);
+                }
+            }
+        }
+        public void enable(string element_name) {
+            lock (element_order) {
+                if (!element_order.Contains(element_name) && elements.ContainsKey(element_name)) {
+                    if (elements[element_name].disabled_at_index <= element_order.Count) {
+                        if (elements[element_name].disabled_at_index == -1)
+                            elements[element_name].disabled_at_index = 0;
+
+                        element_order.Insert(elements[element_name].disabled_at_index, element_name);
+                        elements[element_name].disabled_at_index = -1;
+                    }
+                }
+            }
+        }
+
         internal int index = 0;
 
         public string dialog_element = "";
         public bool in_dialog => !string.IsNullOrEmpty(dialog_element);
+        public bool draw_border = false;
 
         public XYPair position;
         XYPair _size;
@@ -94,18 +137,21 @@ namespace SwoopLib {
             element.parent = this;
 
             elements.Add(element.name, element);
+            lock (element_order) element_order.Insert(0, element.name);
 
             elements[element.name].added();
         }
         public void add_elements(params UIElement[] elements) {
             foreach (var element in elements) {
                 add_element(element);
+                lock (element_order) element_order.Insert(0, element.name);
             }
         }
 
         public void remove_element(string name) {
             if (dialog_element == name) dialog_element = null;
             elements.Remove(name);
+            lock (element_order) element_order.Remove(name);
         }
 
         bool mouse_down_prev = false;
@@ -114,6 +160,9 @@ namespace SwoopLib {
             bool mouse_over_hit = false;
             bool mouse_down = Input.is_pressed(MouseButtons.Left);
 
+           // lock (element_order) {
+                List<string> order = new List<string>(element_order);
+            //}
             if (in_dialog) {
                 if (elements[dialog_element].click_update(position, size, mouse_over_hit)) {
                     if (elements[dialog_element].can_be_focused) {
@@ -124,7 +173,8 @@ namespace SwoopLib {
 
                 elements[dialog_element].update();
 
-                foreach (string k in elements.Keys.Reverse()) {
+                foreach (string k in order) {
+                    if (!elements.ContainsKey(k)) continue;
                     if (k == dialog_element) continue;
                     if (elements[k].ignore_dialog) {
                         if (elements[k].click_update(position, size, mouse_over_hit)) {
@@ -138,11 +188,11 @@ namespace SwoopLib {
 
                         elements[k].update();
                     }
+
                 }
-
             } else {
-                foreach (string k in elements.Keys.Reverse()) {
-
+                foreach (string k in order) {
+                    if (!elements.ContainsKey(k)) continue;
                     if (elements[k].click_update(position, size, mouse_over_hit)) {
                         if (elements[k].can_be_focused) {
                             focus_element(this, k);
@@ -153,15 +203,18 @@ namespace SwoopLib {
                     if (elements[k].mouse_over) mouse_over_hit = true;
 
                     elements[k].update();
+
                 }
             }
 
-            foreach (string k in elements.Keys.Reverse()) {
+            foreach (string k in order) {
+                if (!elements.ContainsKey(k)) continue;
                 if (elements[k].can_be_focused && elements[k].focused) {
                     elements[k].handle_focused_input();
                 }
             }
 
+            
             if (mouse_down && !mouse_down_prev && !click_hit && UIExterns.in_foreground()) {
                 //focused_element = null; 
             }
@@ -169,9 +222,10 @@ namespace SwoopLib {
             mouse_down_prev = mouse_down;
         }
 
+    
 
         public void sub_draw(RenderTarget2D return_target) {
-            foreach (string k in elements.Keys) {
+            foreach (string k in element_order_inverse_for_draw) {
                 if (elements[k].enable_render_target) {
                     Drawing.end();
                     Drawing.graphics_device.SetRenderTarget(elements[k].draw_target);
@@ -180,7 +234,7 @@ namespace SwoopLib {
                 }
             }
             Drawing.graphics_device.SetRenderTarget(return_target);
-            foreach (string k in elements.Keys) {
+            foreach (string k in element_order_inverse_for_draw) {
                 Drawing.end();
                 elements[k].draw();
             }
@@ -199,10 +253,12 @@ namespace SwoopLib {
             if (needs_resize)
                 resize_rt();
 
+            var inverse_keys = element_order_inverse_for_draw;
+
             Drawing.graphics_device.SetRenderTarget(render_target);
             Drawing.graphics_device.Clear(Color.Transparent);
 
-            foreach (string k in elements.Keys) {
+            foreach (string k in inverse_keys) {
                 if (in_dialog && k == dialog_element) continue;
                 if (elements[k].enable_render_target) {
                     Drawing.end();
@@ -223,7 +279,7 @@ namespace SwoopLib {
             Drawing.end();
 
             Drawing.graphics_device.SetRenderTarget(render_target);
-            foreach (string k in elements.Keys) {
+            foreach (string k in inverse_keys) {
                 if (k == dialog_element) continue;
                 if (elements[k].ignore_dialog) continue;
                 Drawing.end();
@@ -235,7 +291,7 @@ namespace SwoopLib {
             if (in_dialog)
                 Drawing.fill_rect(position, position + size, Color.FromNonPremultiplied(0, 0, 0, 128));
 
-            foreach (string k in elements.Keys) {
+            foreach (string k in inverse_keys) {
                 if (k == dialog_element) continue;
                 if (!elements[k].ignore_dialog) continue;
                 Drawing.end();
@@ -248,7 +304,7 @@ namespace SwoopLib {
                 elements[dialog_element].draw();
             }
             
-            if (Swoop.draw_UI_border) {
+            if (draw_border) {
                 Drawing.rect(Vector2.Zero, render_target.Bounds.Size.ToVector2(), Swoop.UI_color, 2f);
             }
         }
