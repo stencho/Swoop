@@ -85,6 +85,10 @@ namespace SwoopLib {
 
         static Effect screen_pos_effect;
 
+        /// <summary>
+        /// called automatically when the RT is registered to either FG or BG drawing in the manager
+        /// draw = (XYPair position, XYPair size) => { }
+        /// </summary>
         public Action<XYPair, XYPair> draw;
 
         public RenderTarget2D render_target;
@@ -117,11 +121,14 @@ namespace SwoopLib {
             needs_resize = true;
         }
 
-        void resize_render_targets () {
+        void resize_render_targets() {
             render_target = new RenderTarget2D(Drawing.graphics_device, size.X, size.Y, false, SurfaceFormat.Vector4, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
-            screen_pos_rt = new RenderTarget2D(Drawing.graphics_device, size.X, size.Y, false, SurfaceFormat.Vector2, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
+            
+            if (screen_aware) {  
+                screen_pos_rt = new RenderTarget2D(Drawing.graphics_device, size.X, size.Y, false, SurfaceFormat.Vector2, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
+                draw_screen_pos_map();
+            }
 
-            if (screen_aware) draw_screen_pos_map();
             needs_resize = false;
         }
 
