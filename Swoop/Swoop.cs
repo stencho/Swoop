@@ -57,6 +57,7 @@ namespace SwoopLib {
 
             if (default_UI) {
                 UI.disable("resize_handle");
+                ((Button)UI.elements["maximize_button"]).change_text("v");
             }
         }
         public static void restore() {
@@ -65,6 +66,7 @@ namespace SwoopLib {
 
             if (default_UI) {
                 UI.enable("resize_handle");
+                ((Button)UI.elements["maximize_button"]).change_text("^");
             }
         }
 
@@ -106,6 +108,7 @@ namespace SwoopLib {
             UI = new UIElementManager(XYPair.Zero, resolution);
 
             render_target_overlay = new AutoRenderTarget(resolution, true);
+            AutoRenderTarget.Manager.register_foreground_draw(render_target_overlay);
 
             Window.resize_start = (Point size) => {
                 enable_draw = false;
@@ -234,17 +237,26 @@ namespace SwoopLib {
         }
 
         public static void Draw() {
+            //update any ManagedEffects which are registered for updates
+            ManagedEffect.Manager.do_updates();
+
+            //draw the UI
             if (enable_draw) {                
                 UI.draw();
-
+            //or don't
             } else {
                 Drawing.graphics_device.SetRenderTarget(UI.render_target);
                 Drawing.graphics_device.Clear(Color.Transparent);
             }
 
+            //draw UI border
             if (Swoop.draw_UI_border && !maximized) {
                 Drawing.rect(XYPair.Zero, resolution, Swoop.UI_color, 2f);
             }
+
+            //draw each of the bg/fg AutoRenderTargets
+            AutoRenderTarget.Manager.draw_rts();
+
         }
 
         public static void End() {

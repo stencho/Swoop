@@ -102,19 +102,14 @@ namespace NestEdit {
             if (!Swoop.enable_draw ) {
                 GraphicsDevice.SetRenderTarget(null);
                 GraphicsDevice.Clear(Swoop.UI_background_color);
+
                 //swoop.DrawBackground();
                 base.Draw(gameTime);
                 return;
             }
 
-            //update any ManagedEffects which are registered for updates
-            ManagedEffect.Manager.do_updates();
-
             //draw the UI
             Swoop.Draw();
-
-            //draw each of the bg/fg AutoRenderTargets
-            AutoRenderTarget.Manager.draw_rts();
 
             GraphicsDevice.SetRenderTarget(output_rt);
             GraphicsDevice.Clear(Color.Transparent);

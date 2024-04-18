@@ -523,22 +523,14 @@ namespace SwoopDemo {
                 return;
             }
 
-
-            //update any ManagedEffects which are registered for updates
-            ManagedEffect.Manager.do_updates();
-
             //draw the UI
             Swoop.Draw();
-
-            //draw each of the bg/fg AutoRenderTargets
-            AutoRenderTarget.Manager.draw_rts();
 
             //Draw the UI to an output RT
             //this is not required, but it makes screenshots easier
             GraphicsDevice.SetRenderTarget(output_rt);
             GraphicsDevice.Clear(Color.Transparent);
             Swoop.DrawBackground();
-
 
             font_manager_impact.draw_string("SPRITE FONT RENDERER", (XYPair.UnitX * 10) + (XYPair.UnitY * 440), Swoop.UI_highlight_color);
             font_manager_badaboom.draw_map_debug_layer((XYPair.UnitX * 10) + (XYPair.UnitY * 480), font_manager_badaboom.char_map_size, Content);
