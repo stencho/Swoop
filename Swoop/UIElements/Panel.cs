@@ -10,6 +10,7 @@ namespace SwoopLib.UIElements {
     public class Panel : UIElement {
 
         public Action<UIElementManager> build_action;
+        public Action<Panel> draw_action;
 
         public Panel(string name, XYPair position, XYPair size, Action<Panel, UIElementManager>? build_action) : base(name, position, size) {
             enable_render_target = true;
@@ -33,6 +34,9 @@ namespace SwoopLib.UIElements {
         internal override void draw_rt() {
             if (!visible) return;
             Drawing.fill_rect(XYPair.Zero, size.X, size.Y, Swoop.UI_background_color);
+            
+            if (draw_action != null) draw_action(this);
+
             sub_elements.sub_draw(draw_target);
             Drawing.rect(XYPair.One, size, Swoop.get_color(this), 1f);
         }

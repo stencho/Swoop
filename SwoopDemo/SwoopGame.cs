@@ -247,8 +247,13 @@ namespace SwoopDemo {
                     sub_elements.add_element(new Label("behind_label",
                         "<- that button should always be behind this panel\n     (and only the visible portion should be clickable)",
                         XYPair.One * 2f + (XYPair.UnitY * 55)));
-                })
+                    
+                })                
             );
+
+            ((Panel)UI.elements["test_panel"]).draw_action = (Panel panel) => {
+                font_manager_assets.draw_string("", (XYPair.UnitX * 200) + (XYPair.UnitY * 280), Color.White, 1f);
+            };
 
             UI.add_element(new Label("panel_label", "panel", UI.elements["test_panel"].position + XYPair.Up * 15));
 
@@ -543,7 +548,7 @@ namespace SwoopDemo {
             Drawing.sb.DrawString(Drawing.fnt_profont,"[ProFontWindows]", ((XYPair.UnitX * 10) + (XYPair.UnitY * 621)).ToVector2(), Swoop.UI_color);
             font_manager_emoji.draw_string("🤔 hmmm...\nI like the top one 👍", (XYPair.UnitX * 110) + (XYPair.UnitY * 605), Swoop.UI_color);
             font_manager_badaboom.draw_string_shadow("Bazinga!", (XYPair.UnitX * 10) + (XYPair.UnitY * 480) + (XYPair.UnitY * 65), Color.Red, Color.Black, XYPair.One * 2, 2f);
-            font_manager_assets.draw_string("       ", (XYPair.UnitX * 200) + (XYPair.UnitY * 480) + (XYPair.UnitY * 65), Color.White, 1f);            
+            font_manager_assets.draw_string("      ", (XYPair.UnitX * 200) + (XYPair.UnitY * 480) + (XYPair.UnitY * 65), Color.White, 1f);            
             font_manager_print.draw_string_rainbow("wet socks...", (XYPair.UnitX * 260) + (XYPair.UnitY * 480) + (XYPair.UnitY * 95), 1f, XYPair.One * 2, Swoop.UI_highlight_color, Color.Magenta, Color.LawnGreen, Color.Blue);
             font_manager_bebop.draw_string("SEE YOU SPACE COWBOY...", resolution - (font_manager_bebop.measure_string("SEE YOU SPACE COWBOY...") + (XYPair.UnitX * 20)), Swoop.UI_color, 1f);
 
