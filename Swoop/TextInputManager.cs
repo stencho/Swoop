@@ -633,20 +633,39 @@ namespace SwoopLib {
 
             validate_cursor();
         }
-        void cursor_left() { 
-            cursor_pos.X--;            
+        void cursor_left() {
+            if (cursor_pos.X == 0) {
+                cursor_pos.Y--;
+                cursor_pos.X = current_line_text_length;
+            } else
+                cursor_pos.X--;            
+
             validate_cursor();
         }
         void cursor_left(int c) {
             cursor_pos.X-=c;
+            
+            if (cursor_pos.X < 0) {
+                cursor_pos.Y--;
+                cursor_pos.X = current_line_text_length;
+            }
+
             validate_cursor();
         }
-        void cursor_right() { 
-            cursor_pos.X++;
+        void cursor_right() {
+            if (cursor_pos.X == current_line_text_length) {
+                cursor_pos.Y++;
+                cursor_pos.X = 0;
+            } else 
+                cursor_pos.X++;
             validate_cursor();
         }
         void cursor_right(int c) {
             cursor_pos.X+=c;
+            if (cursor_pos.X > current_line_text_length) {
+                cursor_pos.Y++;
+                cursor_pos.X = 0;
+            }
             validate_cursor();
         }
 
