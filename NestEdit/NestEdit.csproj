@@ -21,16 +21,18 @@
     <EmbeddedResource Include="Icon.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\MonoGame\MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj" />
-    <ProjectReference Include="..\MGRawInputLib\MGRawInputLib.csproj" />
-    <ProjectReference Include="..\Swoop\SwoopLib.csproj" />
+      <ProjectReference Include="..\MGRawInputLib\MGRawInputLib.csproj" />
+      <ProjectReference Include="..\Swoop\SwoopLib.csproj" />
   </ItemGroup>
-
+  <ItemGroup>
+      <Reference Include="MonoGame.Framework">
+          <HintPath>..\..\MonoGame\Artifacts\MonoGame.Framework\DesktopGL\Debug\MonoGame.Framework.dll</HintPath>
+      </Reference>
+  </ItemGroup>	
   <ItemGroup>
   	<Using Remove="System.Drawing" />
 	  <Using Remove="System.Windows.Forms" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="NAudio.Asio" Version="2.2.1" />
   </ItemGroup>

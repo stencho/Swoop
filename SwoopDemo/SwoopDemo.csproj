@@ -24,15 +24,15 @@
     <ProjectReference Include="..\MGRawInputLib\MGRawInputLib.csproj" />
     <ProjectReference Include="..\Swoop\SwoopLib.csproj" />
   </ItemGroup>
-  <ItemGroup>
-  	<Using Remove="System.Drawing" />
-	  <Using Remove="System.Windows.Forms" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="MonoGame.Framework">
-      <HintPath>..\..\MonoGame\Artifacts\MonoGame.Framework\DesktopGL\Debug\MonoGame.Framework.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+	<ItemGroup>
+		<Using Remove="System.Drawing" />
+		<Using Remove="System.Windows.Forms" />
+	</ItemGroup>
+	<ItemGroup>
+		<Reference Include="MonoGame.Framework">
+			<HintPath>..\..\MonoGame\Artifacts\MonoGame.Framework\DesktopGL\Debug\MonoGame.Framework.dll</HintPath>
+		</Reference>
+	</ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
     <Message Text="Restoring dotnet tools" Importance="High" />
     <Exec Command="dotnet tool restore" />
