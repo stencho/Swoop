@@ -64,7 +64,7 @@ namespace SwoopLib.UIElements {
                     Swoop.UI_background_color);
             }
 
-            Drawing.text(text_manager.lines[0].text, (XYPair.One * 1) + (XYPair.UnitY * 2) - (XYPair.UnitX * view_offset), Swoop.get_color(this));
+            Drawing.text(text_manager.lines[0].text, (XYPair.One * 1) + (XYPair.UnitY * 2) - (XYPair.UnitX * view_offset), Swoop.UI_color);
 
             Drawing.line(
                     (XYPair.UnitX*2) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.current_line_text, text_manager.cursor)) - (XYPair.UnitX * view_offset) + (XYPair.UnitY * 2),
@@ -81,12 +81,12 @@ namespace SwoopLib.UIElements {
     public class TextEditor : UIElement {
         string status_text = string.Empty;
 
-        public bool word_wrap = false;
+        public bool word_wrap = true;
 
         XYPair stored_view_offset = XYPair.Zero;
         XYPair view_offset = XYPair.One * 10;
         XYPair view_size => size;
-        XYPair view_margin => (XYPair.UnitX * single_character_size * 2) + single_character_size.Y_only;
+        XYPair view_margin => (XYPair.UnitX * single_character_size * 2) + Drawing.font_manager_profont.line_height_2d;
 
         TextInputManager text_manager;
         XYPair single_character_size;
@@ -105,9 +105,9 @@ namespace SwoopLib.UIElements {
 
         void scroll_view_to_cursor() {
             if (!check_if_cursor_in_view()) {
-                var cursor_top = 
-                    (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) +
-                    (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X));
+                var cursor_top = character_pos_to_pixel(text_manager.cursor_pos);
+                //(XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) +
+                //(XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X));
                 var cursor_bottom = cursor_top + (XYPair.UnitY * Drawing.font_manager_profont.line_height);
 
                 //up
@@ -145,10 +145,11 @@ namespace SwoopLib.UIElements {
             }
             var minmax = text_manager.get_actual_selection_min_max();
 
+            var cursor_top = character_pos_to_pixel(text_manager.cursor_pos);
             string selection_text = 
                 text_manager.has_selection() ? 
                 $"[selection start {text_manager.selection_start.ToXString()} end {text_manager.selection_end.ToXString()} size {(minmax.max-minmax.min).ToXString()}]\n" : "\n";
-            status_text = $"{selection_text} [pos {text_manager.cursor_pos.ToXString()} size {text_manager.longest_line_text_length}x{text_manager.line_count}]";
+            status_text = $"{selection_text} [pos {text_manager.cursor_pos.ToXString()} [{cursor_top.ToXString()}] vo {(view_offset + view_margin).ToXString()}->{(view_offset + view_size - view_margin).ToXString()} size {text_manager.longest_line_text_length}x{text_manager.line_count}]";
 
             //TODO MAKE THIS ONLY HAPPEN WHEN MOVING THE CURSOR MANUALLY            
             scroll_view_to_cursor();
@@ -171,13 +172,11 @@ namespace SwoopLib.UIElements {
         }
 
         bool check_if_cursor_in_view() {
-            var cursor_px = 
-                    (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) +
-                    (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X));
+            var cursor_px = character_pos_to_pixel(text_manager.cursor_pos);
 
             if (AABB(
                 cursor_px, 
-                cursor_px + single_character_size, 
+                cursor_px + Drawing.font_manager_profont.line_height_2d + (XYPair.UnitX), 
                 view_offset + view_margin, 
                 view_offset + view_size - view_margin)) {
                 return true;
@@ -186,6 +185,192 @@ namespace SwoopLib.UIElements {
             return false;
         }
 
+        
+        internal (int start, int end) find_lines_in_view() {
+            int ctop = 0;
+            (int start, int end) output = (-1,-1);
+
+            if (!word_wrap) {
+                //return (XYPair.UnitY * (Drawing.font_manager_profont.line_height * char_pos.Y)) +
+                // (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[char_pos.Y].text, char_pos.X));
+                return (0, 0);
+            } else {
+                for (int i = 0; i < text_manager.line_count; i++) {
+                    if (i >= text_manager.line_count) break;
+                    TextLine tl = text_manager.lines[i];
+
+                    var line_width = Drawing.font_manager_profont.measure_string(tl.text).X;
+                    var max_width = size.X;
+
+                    float c = (float)line_width / max_width;
+
+                    if (c > 1) {
+                        string chunk = "";
+                        int chunk_start = 0;
+                        int chunk_end = 0;
+                        int chunk_width = 0;
+                        int chunk_index = 0;
+                        int move_back = 0;
+                        bool moved_back = false;
+
+                        for (; chunk_end <= tl.text.Length; ++chunk_end) {
+                            moved_back = false;
+                            move_back = 0;
+
+                            chunk = tl.text.Substring(chunk_start, chunk_end - chunk_start);
+                            chunk_width = 4 + Drawing.font_manager_profont.measure_string(chunk).X;
+
+                            if (chunk_width > max_width) {
+                                chunk_end--;
+                                chunk = tl.text.Substring(chunk_start, chunk_end - chunk_start);
+
+                                if (chunk.Contains(' ')) {
+                                    if (chunk.EndsWith(' ')) {
+                                        move_back++;
+                                        chunk = tl.text.Substring(chunk_start, chunk_end - move_back - chunk_start);
+                                    }
+
+                                    while (!chunk.EndsWith(' ') && chunk_end - move_back > chunk_start) {
+                                        move_back++;
+                                        chunk = tl.text.Substring(chunk_start, chunk_end - move_back - chunk_start);
+                                    }
+
+                                    moved_back = move_back > 0;
+                                    chunk_end -= move_back;
+                                }
+                            }
+
+                            if (chunk_width > max_width || chunk_end >= tl.text.Length || moved_back) {
+                                chunk = tl.text.Substring(chunk_start, chunk_end - chunk_start);
+
+                                if (output.start != -1 && output.end == -1 && ctop >= view_offset.Y + view_size.Y + view_margin.Y) {
+                                    output.end = i;
+                                    break;
+                                }
+                                if (ctop >= view_offset.Y - view_margin.Y && output.start == -1) {
+                                    output.start = i;
+                                }
+
+                                ctop += Drawing.font_manager_profont.line_height;
+                                chunk_start = chunk_end;
+                                chunk_index++;
+                            }
+                        }
+
+                        if (output.end > -1)
+                            break;
+
+                    } else {
+                        if (output.start != -1 && output.end == -1 && ctop >= view_offset.Y + view_size.Y + view_margin.Y) {
+                            output.end = i;
+                            break;
+                        }
+                        if (ctop >= view_offset.Y - view_margin.Y && output.start == -1) {
+                            output.start = i;
+                        }
+
+
+                        ctop += Drawing.font_manager_profont.line_height;
+                    }
+                }
+            }
+
+            if (output.end == -1) {
+                output.end = text_manager.line_count;
+            }
+
+            return output;
+
+        }
+        
+
+        internal XYPair character_pos_to_pixel(XYPair char_pos) {
+            int ctop = 0;
+
+            if (!word_wrap) {
+                return (XYPair.UnitY * (Drawing.font_manager_profont.line_height * char_pos.Y)) +
+                    (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[char_pos.Y].text, char_pos.X));
+
+            } else {
+                for (int i = 0; i < text_manager.line_count; i++) {
+                    if (i >= text_manager.line_count) break;
+                    bool on_line = i == char_pos.Y;
+
+                    TextLine tl = text_manager.lines[i];
+
+                    var line_width = Drawing.font_manager_profont.measure_string(tl.text).X;
+                    var max_width = size.X;
+
+                    float c = (float)line_width / max_width;
+
+                    if (c > 1) {
+                        string chunk = "";
+                        int chunk_start = 0;
+                        int chunk_end = 0;
+                        int chunk_width = 0;
+                        int chunk_index = 0;
+                        int move_back = 0;
+                        bool moved_back = false;
+
+
+                        for (; chunk_end <= tl.text.Length; ++chunk_end) {
+                            moved_back = false;
+                            move_back = 0;
+
+                            chunk = tl.text.Substring(chunk_start, chunk_end - chunk_start);
+                            chunk_width = 4 + Drawing.font_manager_profont.measure_string(chunk).X;
+
+                            if (chunk_width > max_width) {
+                                chunk_end--;
+                                chunk = tl.text.Substring(chunk_start, chunk_end - chunk_start);
+
+                                if (chunk.Contains(' ')) {
+                                    if (chunk.EndsWith(' ')) {
+                                        move_back++;
+                                        chunk = tl.text.Substring(chunk_start, chunk_end - move_back - chunk_start);
+                                    }
+
+                                    while (!chunk.EndsWith(' ') && chunk_end - move_back > chunk_start) {
+                                        move_back++;
+                                        chunk = tl.text.Substring(chunk_start, chunk_end - move_back - chunk_start);
+                                    }
+
+                                    moved_back = move_back > 0;
+                                    chunk_end -= move_back;
+                                }
+                            }
+
+                            if (chunk_width > max_width || chunk_end >= tl.text.Length || moved_back) {
+                                chunk = tl.text.Substring(chunk_start, chunk_end - chunk_start);
+
+                                if (on_line) {
+                                    if ((char_pos.X > chunk_start && char_pos.X < chunk_end)
+                                        || (!moved_back && (char_pos.X == chunk_start || char_pos.X == chunk_end))
+                                        || (moved_back && char_pos.X == chunk_start)
+                                        ) {
+                                        return (XYPair.UnitY * ctop) +
+                                            (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(chunk, char_pos.X - chunk_start));
+                                    }
+                                }
+
+                                ctop += Drawing.font_manager_profont.line_height;
+                                chunk_start = chunk_end;                                    
+                                chunk_index++;
+                            }
+                        }
+
+
+                    } else {
+                        if (on_line) {
+                            return (XYPair.UnitY * ctop) +
+                                (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[char_pos.Y].text, char_pos.X));
+                        }
+                        ctop += Drawing.font_manager_profont.line_height;
+                    }
+                }
+            }
+            return XYPair.Zero;
+        }
 
         internal override void draw_rt() {
             Drawing.fill_rect(XYPair.Zero, size, Swoop.UI_background_color);
@@ -228,16 +413,23 @@ namespace SwoopLib.UIElements {
                     Swoop.UI_background_color, Swoop.UI_disabled_color);
             }
 
+            
             int start_line = view_offset.Y / Drawing.font_manager_profont.line_height;
             int count = view_size.Y / Drawing.font_manager_profont.line_height;
-            count += 1;
 
-            ctop = start_line * Drawing.font_manager_profont.line_height;
+            var lv = find_lines_in_view();
+
+            start_line = lv.start;
+            count = lv.end - lv.start;
+
+            //count += 1;
+            
+            //ctop = start_line * Drawing.font_manager_profont.line_height;
 
             int drawing_lines = 0;
 
             //draw each TextLine
-            for (int i = start_line; i < start_line + count; i++) {
+            for (int i = 0; i < text_manager.line_count; i++) {
                 if (i >= text_manager.line_count) break;
 
                 drawing_lines++;
@@ -245,86 +437,179 @@ namespace SwoopLib.UIElements {
                 bool cursor_on_line = i == text_manager.cursor_pos.Y;
                 bool empty_line = (text_manager.lines[i].length == 0);
 
-                if ((text_manager.has_selection() && text_manager.select_shape == TextInputManager.selection_shape.LINEAR) && !single_line_select) {
-
-                    if (i == top_line) {
-                        var min = Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[top_line].text, top_line_x);
-                        var max = Drawing.font_manager_profont.measure_string(text_manager.lines[i].text).X;
-
-                        empty_line = text_manager.lines[i].length == top_line_x;
-
-                        Drawing.fill_rect_dither(
-                            -view_offset + (top_line * Drawing.font_manager_profont.line_height_2d) + (XYPair.UnitX * min) + (XYPair.One * 2),
-                            -view_offset + ((top_line+1) * Drawing.font_manager_profont.line_height_2d) + (XYPair.UnitX * max) + (XYPair.One * 2),
-                            Swoop.UI_background_color, Swoop.UI_disabled_color);
-
-                    } else if (i > top_line && i < bottom_line) {
-                        var max = Drawing.font_manager_profont.measure_string(text_manager.lines[i].text).X;
-
-                        Drawing.fill_rect_dither(
-                            -view_offset + (i * Drawing.font_manager_profont.line_height_2d) + (XYPair.One * 2),
-                            -view_offset + ((i+1) * Drawing.font_manager_profont.line_height_2d) + (XYPair.UnitX * max) + (XYPair.One * 2),
-
-                            Swoop.UI_background_color, Swoop.UI_disabled_color);
-                    } else if (i == bottom_line) {
-
-                        var max = Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[bottom_line].text, bottom_line_x);
-
-                        Drawing.fill_rect_dither(
-                            -view_offset + (bottom_line * Drawing.font_manager_profont.line_height_2d) + (XYPair.One * 2),
-                            -view_offset + ((bottom_line + 1) * Drawing.font_manager_profont.line_height_2d) + (XYPair.UnitX * max) + (XYPair.One * 2) + (XYPair.Down * 2),
-
-
-                            Swoop.UI_background_color, Swoop.UI_disabled_color);
-                        
-                    }
-                }
 
                 //Draw main text
                 if (!word_wrap) {
-                    Drawing.text(tl.text, -view_offset + (XYPair.Down * ctop) + (XYPair.One * 2f), Swoop.get_color(this));
+                    //draw selection background
+                    if ((text_manager.has_selection() && text_manager.select_shape == TextInputManager.selection_shape.LINEAR) && !single_line_select) {
+
+                        if (i == top_line) {
+                            var min = Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[top_line].text, top_line_x);
+                            var max = Drawing.font_manager_profont.measure_string(text_manager.lines[i].text).X;
+
+                            empty_line = text_manager.lines[i].length == top_line_x;
+
+                            Drawing.fill_rect_dither(
+                                -view_offset + (top_line * Drawing.font_manager_profont.line_height_2d) + (XYPair.UnitX * min) + (XYPair.One * 2),
+                                -view_offset + ((top_line + 1) * Drawing.font_manager_profont.line_height_2d) + (XYPair.UnitX * max) + (XYPair.One * 2),
+                                Swoop.UI_background_color, Swoop.UI_disabled_color);
+
+                        } else if (i > top_line && i < bottom_line) {
+                            var max = Drawing.font_manager_profont.measure_string(text_manager.lines[i].text).X;
+
+                            Drawing.fill_rect_dither(
+                                -view_offset + (i * Drawing.font_manager_profont.line_height_2d) + (XYPair.One * 2),
+                                -view_offset + ((i + 1) * Drawing.font_manager_profont.line_height_2d) + (XYPair.UnitX * max) + (XYPair.One * 2),
+
+                                Swoop.UI_background_color, Swoop.UI_disabled_color);
+                        } else if (i == bottom_line) {
+
+                            var max = Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[bottom_line].text, bottom_line_x);
+
+                            Drawing.fill_rect_dither(
+                                -view_offset + (bottom_line * Drawing.font_manager_profont.line_height_2d) + (XYPair.One * 2),
+                                -view_offset + ((bottom_line + 1) * Drawing.font_manager_profont.line_height_2d) + (XYPair.UnitX * max) + (XYPair.One * 2) + (XYPair.Down * 2),
+
+
+                                Swoop.UI_background_color, Swoop.UI_disabled_color);
+
+                        }
+                    }
+
+                    if (i >= lv.start && i <= lv.end) {
+                        Drawing.text(tl.text, -view_offset + (XYPair.Down * ctop) + (XYPair.One * 2f), Swoop.UI_color);
+                    }
+                    //Draw cursor
+                    if (cursor_on_line) {
+                        Drawing.line(
+                            -view_offset + (XYPair.UnitY * ctop) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + (XYPair.One * 2),
+
+                            -view_offset + (XYPair.UnitY * ctop) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + (XYPair.One * 2) + single_character_size.Y_only,
+                            Swoop.get_color(this), 1f);
+
+                    }
+
+                    //top of line counter
+                    ctop += Drawing.font_manager_profont.line_height;
+
                 } else {
+                    var cursor_x = text_manager.cursor_pos.X;                    
+                    var line_width = Drawing.font_manager_profont.measure_string(tl.text).X;
+                    var max_width = size.X;
+
+                    float c = (float)line_width / max_width;
+
+                    
+
+                    if (c > 1) {
+                        string chunk = "";
+                        int chunk_start = 0;
+                        int chunk_end = 0;
+                        int chunk_width = 0;
+                        int chunk_index = 0;
+                        int move_back = 0;
+                        bool moved_back = false;
+
+
+                        for (; chunk_end <= tl.text.Length; ++chunk_end) {
+                            moved_back = false;
+                            move_back = 0;
+                            chunk = tl.text.Substring(chunk_start, chunk_end - chunk_start);
+                            chunk_width = 4 + Drawing.font_manager_profont.measure_string(chunk).X;
+
+                            if (chunk_width > max_width) {
+                                chunk_end--;
+                                chunk = tl.text.Substring(chunk_start, chunk_end - chunk_start);
+
+                                if (chunk.Contains(' ')) {
+                                    if (chunk.EndsWith(' ')) {
+                                        move_back++;
+                                        chunk = tl.text.Substring(chunk_start, chunk_end - move_back - chunk_start);
+                                    }
+
+                                    while (!chunk.EndsWith(' ') && chunk_end - move_back > chunk_start) {
+                                        move_back++;
+                                        chunk = tl.text.Substring(chunk_start, chunk_end - move_back - chunk_start);
+                                    }
+
+                                    moved_back = move_back > 0;
+                                    chunk_end -= move_back;
+                                }
+                            }
+                            
+                            if (chunk_width > max_width || chunk_end >= tl.text.Length || moved_back) {
+                                chunk = tl.text.Substring(chunk_start, chunk_end - chunk_start);
+
+                                if (cursor_on_line
+                                    && ( (cursor_x > chunk_start && cursor_x < chunk_end) 
+                                    || (!moved_back && (cursor_x == chunk_start || cursor_x == chunk_end))
+                                    || (moved_back && cursor_x == chunk_start)
+                                    )) {
+                                    int selection_pos = Drawing.font_manager_profont.find_x_position_in_string(chunk, text_manager.cursor_pos.X - chunk_start);
+                                    Drawing.line(
+                                        -view_offset + (XYPair.UnitY * ctop) + (XYPair.UnitX * selection_pos) + (XYPair.UnitX * 1) + (XYPair.One * 1),
+                                        -view_offset + (XYPair.UnitY * ctop) + (XYPair.UnitX * selection_pos) + (XYPair.UnitX * 1) + (XYPair.One * 1) + single_character_size.Y_only,
+                                        Swoop.get_color(this), 1f);                                    
+                                }
+
+                                if (i >= lv.start && i <= lv.end) {
+                                    Drawing.text(chunk, -view_offset + (XYPair.Down * ctop) + (XYPair.One * 1f), Swoop.UI_color);
+                                }
+                                ctop += Drawing.font_manager_profont.line_height;
+
+                                chunk_start = chunk_end;
+                                chunk_index++;
+                            }
+                        }
+
+
+                    } else {
+
+                        if (cursor_on_line) {
+                            int selection_pos = Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X);
+                            Drawing.line(
+                                -view_offset + (XYPair.UnitY * ctop) + (XYPair.UnitX * selection_pos) + (XYPair.UnitX * 1) + (XYPair.One * 1),
+                                -view_offset + (XYPair.UnitY * ctop) + (XYPair.UnitX * selection_pos) + (XYPair.UnitX * 1) + (XYPair.One * 1) + single_character_size.Y_only,
+                                Swoop.get_color(this), 1f);
+                        }
+
+                        if (i >= lv.start && i <= lv.end) {
+                            Drawing.text(tl.text, -view_offset + (XYPair.Down * ctop) + (XYPair.One * 1f), Swoop.UI_color);
+                        }
+
+                        ctop += Drawing.font_manager_profont.line_height;
+                    }
+                    /*
+                    if (cursor_on_line) {
+                        Drawing.line(
+                            -view_offset + (XYPair.UnitY * ctop) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + (XYPair.One * 2),
+
+                            -view_offset + (XYPair.UnitY * ctop) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + (XYPair.One * 2) + single_character_size.Y_only,
+                            Swoop.get_color(this), 1f);
+                    }
+                    
                     var l = tl.text.Length * single_character_size.X;
                     var max_width = size.X;
 
-                    Drawing.text(tl.text, -view_offset + (XYPair.Down * ctop) + (XYPair.One * 2f), Swoop.get_color(this));
-                    if (l > max_width) {
-                        ctop += (int)((float)(l / max_width) * single_character_size.Y);
+                    */
+                    if (line_width > max_width) {
 
-                        Drawing.text(tl.text, -view_offset + (XYPair.Down * ctop) + (XYPair.One * 2f), Swoop.get_color(this));
+                        //Drawing.text(tl.text, -view_offset + (XYPair.Down * ctop) + (XYPair.One * 2f), Swoop.get_color(this));
                     }
                 }
 
                 var line_min = new XYPair(0, ctop) + (XYPair.One * 2);
                 var line_max = line_min + tl.size_px;
 
+               // ctop += Drawing.font_manager_profont.line_height;
+
+
                 //debug
                 //Drawing.rect(-view_offset + line_min, -view_offset + line_max, i == text_manager.longest_line_index ? Color.Green : Color.Red, 1f);
-                
-                //top of line counter
-                ctop += Drawing.font_manager_profont.line_height;
+
             }
 
-            //Draw cursor
-            if (focused) {
-                if (cursor_mode == cursor_display_mode.BOX) {
-                    Drawing.rect(
-                        -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + (XYPair.One + XYPair.Down),
-                        -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + (XYPair.One * 3) + single_character_size,
-                        Swoop.get_color(this), 1f);
-
-                } else if (cursor_mode == cursor_display_mode.LINE) {
-                    Drawing.line(
-                        -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + (XYPair.One * 2),
-                        -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + (XYPair.One * 2) + single_character_size.Y_only,
-                        Swoop.get_color(this), 1f);
-                }
-            } else {
-                Drawing.line(
-                    -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + (XYPair.One * 2),
-                    -view_offset + (XYPair.UnitY * (Drawing.font_manager_profont.line_height * text_manager.cursor_pos.Y)) + (XYPair.UnitX * Drawing.font_manager_profont.find_x_position_in_string(text_manager.lines[text_manager.cursor_pos.Y].text, text_manager.cursor_pos.X)) + (XYPair.One * 2) + single_character_size.Y_only,
-                    Swoop.UI_disabled_color, 1f);
-            }
+            Drawing.fill_circle(-view_offset + character_pos_to_pixel(text_manager.cursor_pos), 4f, Color.Red);
 
             //debug
             /*            

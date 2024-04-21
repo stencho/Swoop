@@ -567,7 +567,7 @@ namespace SwoopLib {
         internal void validate_cursor() {
             if (lines.Count == 0) lines.Add(new TextLine(this));
 
-            if (current_line_index < 0) cursor_pos.Y = 0;
+            if (cursor_pos.Y < 0) cursor_pos.Y = 0;
             if (current_line_index >= line_count) cursor_pos.Y = line_count - 1;
 
             if (cursor_pos.X > current_line.length) {
@@ -605,13 +605,13 @@ namespace SwoopLib {
 
         void cursor_up() {
             if (cursor_pos.Y == 0) {
-                cursor_pos.X = 0; cursor_pos_stored_X = 0;
+                cursor_pos.X = 0; cursor_pos_stored_X = 0; store_cursor_X();
             } else {
                 cursor_pos.Y--;
             }
 
             validate_cursor();
-            //return;
+
             if (current_line_text_length > cursor_pos_stored_X)
                 cursor_pos.X = cursor_pos_stored_X;
             else {
@@ -622,13 +622,20 @@ namespace SwoopLib {
         }
         void cursor_down() { 
             cursor_pos.Y++;
-
+            bool hit_bottom = (cursor_pos.Y > line_count - 1);
+            
             validate_cursor();
-           //return;
+
             if (current_line_text_length > cursor_pos_stored_X)
                 cursor_pos.X = cursor_pos_stored_X;
             else {
                 cursor_pos.X = current_line_text_length;
+            }
+
+            if (hit_bottom) {
+                cursor_pos.Y = line_count - 1;
+                cursor_pos.X = current_line_text_length;
+                //store_cursor_X();
             }
 
             validate_cursor();
@@ -636,7 +643,8 @@ namespace SwoopLib {
         void cursor_left() {
             if (cursor_pos.X == 0) {
                 cursor_pos.Y--;
-                cursor_pos.X = current_line_text_length;
+                if (cursor_pos.Y < 0) cursor_pos.Y = 0;
+                else cursor_pos.X = current_line_text_length;
             } else
                 cursor_pos.X--;            
 
@@ -647,15 +655,19 @@ namespace SwoopLib {
             
             if (cursor_pos.X < 0) {
                 cursor_pos.Y--;
-                cursor_pos.X = current_line_text_length;
+                if (cursor_pos.Y < 0) cursor_pos.Y = 0;
+                else cursor_pos.X = current_line_text_length;
             }
 
             validate_cursor();
         }
         void cursor_right() {
+            validate_cursor();
+
             if (cursor_pos.X == current_line_text_length) {
                 cursor_pos.Y++;
-                cursor_pos.X = 0;
+                if (cursor_pos.Y > line_count - 1) cursor_pos.Y = line_count - 1;
+                else cursor_pos.X = 0;
             } else 
                 cursor_pos.X++;
             validate_cursor();
@@ -664,7 +676,8 @@ namespace SwoopLib {
             cursor_pos.X+=c;
             if (cursor_pos.X > current_line_text_length) {
                 cursor_pos.Y++;
-                cursor_pos.X = 0;
+                if (cursor_pos.Y > line_count-1) cursor_pos.Y = line_count-1;
+                else cursor_pos.X = 0;
             }
             validate_cursor();
         }

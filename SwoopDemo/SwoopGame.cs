@@ -434,21 +434,11 @@ namespace SwoopDemo {
                 "\nand this line is extra long for testing scrolling and word wrap" +
                 "\nthis line is similarly excellently long for the testing of the word wrap and scrolling and it needs to be at least three lines maybe even four lines long" +
                 "\n" +
-                "\nI don't really know why I thought that this" +
-                "\nwas a good idea but it did let me implement" +
-                "\na fairly robust system for editing text" +        
-                "\n" +
-                "\nthe TextBox above actually uses the same system" +
-                "\n" +
-                "\nit is still missing a ton of features though, " +
-                "\nword wrap still needs to be implemented because this is a nuisance" +
-                "\n" +
-                "\nthat said, you could probably still edit a small file with this" +
+                "\nI don't really know why I thought that this was a good idea but it did let me implement a fairly robust system for editing text, the TextBox above uses the same system" +
                 "\n" +
                 "\ntodo:" +
                 "\nmouse support at all" +
                 "\nscroll bars" +
-                "\nword wrap" +
                 "\n" +
                 "\n" +
                 "\n" +
