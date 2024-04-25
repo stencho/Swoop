@@ -100,7 +100,7 @@ namespace MGRawInputLib {
         static long _frame_count = 0;
 
         public static int fps_update_frequency_ms { get; set; } = 1000;
-        public static int poll_hz { get; private set; } = 250;
+        public static int poll_hz { get; private set; } = 500;
         static bool limit_thread_rate = true;
         static bool use_sleep = true;
         static double thread_ms => (1000.0 / (double)poll_hz);
@@ -156,25 +156,34 @@ namespace MGRawInputLib {
 
             Externs.RawInput.create_rawinput_message_loop();
 
+            control_update_thread.IsBackground = true;
             control_update_thread.Start();
+
             parent.Exiting += Parent_Exiting;
             parent.Disposed += Parent_Disposed;
         }
 
         private static void Parent_Disposed(object? sender, EventArgs e) {
             run_thread = false;
+            //Externs.timeEndPeriod(3);
         }
 
         private static void Parent_Exiting(object? sender, EventArgs e) {
             run_thread = false;
+            //Externs.timeEndPeriod(1);
         }
 
         static TimeSpan sleep_ts;
+        static Stopwatch stopwatch = new Stopwatch();
 
         static void update() {
+            stopwatch.Start();
+            Debug.Print(Stopwatch.IsHighResolution.ToString() + " " + Stopwatch.Frequency);
+            Externs.timeBeginPeriod(5);
             while (run_thread) {
-                start_tick = DateTime.Now.Ticks;
+                //start_tick = current_tick;
                 bool active = false;
+
                 if (parent != null) 
                     if (parent.IsActive)
                         active = parent.IsActive;
@@ -270,57 +279,70 @@ namespace MGRawInputLib {
                         Mouse.SetPosition(parent.Window.ClientBounds.Size.X / 2, parent.Window.ClientBounds.Size.Y / 2);
                     }
                 }
-                if (run_thread) {
-                    if ((parent != null && !active && was_active && lock_mouse) || (!lock_mouse && _was_locked)) {
-                        parent.IsMouseVisible = true;
 
-                        if (_input_method == input_method.RawInput) {
-                            Externs.set_cursor_pos(pre_lock_mouse_pos);
-                        } else {
-                            Mouse.SetPosition(pre_lock_mouse_pos.X, pre_lock_mouse_pos.Y);
-                        }
+                if ((parent != null && !active && was_active && lock_mouse) || (!lock_mouse && _was_locked)) {
+                    parent.IsMouseVisible = true;
+
+                    if (_input_method == input_method.RawInput) {
+                        Externs.set_cursor_pos(pre_lock_mouse_pos);
+                    } else {
+                        Mouse.SetPosition(pre_lock_mouse_pos.X, pre_lock_mouse_pos.Y);
                     }
                 }
+                
 
                 Window.update();                
 
                 was_active = active;
                 _was_locked = lock_mouse;
+
+                if (limit_thread_rate) {
+                    if (use_sleep) {                            
+                        //while (true) {
+                        current_tick = stopwatch.ElapsedTicks;
+                        time_span_ticks = (current_tick - start_tick);
+                        sleep_ts = new TimeSpan((long)(thread_ms * 10000.0) - time_span_ticks);
+
+                        if (sleep_ts.Ticks > 0)
+                            Thread.Sleep(sleep_ts);
+
+                        //current_tick = DateTime.Now.Ticks;
+                        //break;
+                        //if (time_span_ticks / 10000.0 >= thread_ms) break;
+                        //}
+
+                    } else {
+                        while (true) {
+                            current_tick = stopwatch.ElapsedTicks;
+                            time_span_ticks = (current_tick - start_tick);
+
+                            if (time_span_ticks / 10000.0 >= thread_ms) break;
+                        }
+                        start_tick = current_tick;
+                    }
+                }
+
+                current_tick = stopwatch.ElapsedTicks;
+                time_span_ticks = (current_tick - start_tick);
                 //FPS stuff here
+
+                //if (time_span_ticks / 10000.0 < fps_update_frequency_ms)
                 _fps_timer += time_span_ticks / 10000.0;
+
                 _frame_count++;
 
                 if (_fps_timer >= fps_update_frequency_ms) {
-                    _frame_rate = (int)(_frame_count * (1000.0 / fps_update_frequency_ms));
+                    _frame_rate = (int)(_frame_count * (1000.0 / (double)_fps_timer));
                     _frame_count = 0;
                     _fps_timer -= fps_update_frequency_ms;
+                    //_fps_timer = 0;
                 }
-                
-                if (limit_thread_rate) {
-                    if (use_sleep) {
-                        while (run_thread) {
-                            sleep_ts = new TimeSpan((long)(thread_ms - ((DateTime.Now.Ticks - start_tick) / 10000.0)) * 10000);
-                            if (sleep_ts.TotalMilliseconds > 0)
-                                Thread.Sleep(sleep_ts);
-                            current_tick = DateTime.Now.Ticks;
-                            time_span_ticks = (current_tick - start_tick);
-                            if (time_span_ticks / 10000.0 >= thread_ms) break;
-                        }
-                    } else {
-                        while (run_thread) {
-                            current_tick = DateTime.Now.Ticks;
-                            time_span_ticks = (current_tick - start_tick);
 
-                            if (time_span_ticks / 10000.0 >= thread_ms) break;
-                        }
-                    }
-                } else {
-                    current_tick = DateTime.Now.Ticks;
-                    time_span_ticks = (current_tick - start_tick);
-                    //Thread.Sleep(one_tick);
-                }
-                start_tick = DateTime.Now.Ticks;
-            }             
+                start_tick = stopwatch.ElapsedTicks;
+
+                //start_tick = current_tick;
+            }
+            Externs.timeEndPeriod(5);
         }
 
         static void reset_mouse(Point resolution) {

@@ -1637,6 +1637,7 @@ namespace MGRawInputLib {
                 }
 
                 RawInput.register_raw_input(true);
+
                 return message_window_handle;
             }
 
@@ -1671,16 +1672,14 @@ namespace MGRawInputLib {
 
 
             static RAWINPUT data;
+            static int rawinput_data_size = 0;
             internal static nint wnd_proc(nint hWnd, uint msg, nint wParam, nint lParam) {
                 if (!enable) goto ret;
                 if (msg == (uint)WM.INPUT) {
-                    int size=0;
                     unsafe {
+                        if (rawinput_data_size == 0) rawinput_data_size = sizeof(RAWINPUT); 
 
-                        GetRawInputData(lParam, RawInputCommand.Input, out _, ref size, sizeof(RawInputHeader));
-                        //data = new RAWINPUT();
-
-                        if (GetRawInputData(lParam, RawInputCommand.Input, out data, ref size, sizeof(RawInputHeader)) == -1) {
+                        if (GetRawInputData(lParam, RawInputCommand.Input, out data, ref rawinput_data_size, sizeof(RawInputHeader)) == -1) {                            
                             Input.RAWINPUT_DEBUG_STRING = new Win32Exception(GetLastError()).Message;
                         } else {
                             Input.RAWINPUT_DEBUG_STRING = formatted_input(data);
@@ -1690,8 +1689,6 @@ namespace MGRawInputLib {
                                 RawInputMouse.update_rawinput(data.Data.Mouse);
                         }
                     }
-                    //Debug.WriteLine($"well guys we did it {wParam} {lParam}");
-                    //
                 }
 
                 ret:
@@ -1807,7 +1804,9 @@ namespace MGRawInputLib {
         [DllImport("user32.dll")] static extern nint GetClipboardData(uint format);
         [DllImport("user32.dll")] static extern unsafe nint SetClipboardData(uint format, void* data);
 
-
+        [DllImport("winmm.dll")] public static extern uint timeBeginPeriod(uint uMilliseconds);
+        [DllImport("winmm.dll", SetLastError = true)] public static extern uint timeEndPeriod(uint uMilliseconds);
+        
         static bool OpenClipboard() { return OpenClipboard(nint.Zero); }
 
         public enum ClipboardDataType : uint {
@@ -1852,9 +1851,8 @@ namespace MGRawInputLib {
             return cdh != nint.Zero;
         }
 
-        public static bool window_under_cursor() {
-            System.Drawing.Point cp = get_cursor_pos_ms();            
-            return WindowFromPoint(cp) == actual_window_handle;
+        public static bool window_under_cursor() {     
+            return WindowFromPoint(get_cursor_pos_ms()) == actual_window_handle;
         }
 
         public static Microsoft.Xna.Framework.Rectangle get_window_rect() {
