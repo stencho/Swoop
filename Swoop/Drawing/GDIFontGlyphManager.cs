@@ -124,22 +124,14 @@ namespace SwoopLib {
             this.font_size = font_size;
             this.kerning_scale = kerning_scale;
 
-            init();
-            if (default_glyphs || monospace) {
-                add_glyphs_to_texture(32, 126);
-                monospace_width = (int)Math.Ceiling(find_widest_character());
-            }
+            init(default_glyphs, false);
         }
 
         public FontManager(string font_family, float font_size, bool default_glyphs = true) {
             this.font_family = font_family;
             this.font_size = font_size;
 
-            init();
-            if (default_glyphs || monospace) {
-                add_glyphs_to_texture(32, 126);
-                monospace_width = (int)Math.Ceiling(find_widest_character());
-            }
+            init(default_glyphs, false);
         }
         public FontManager(string font_family, float font_size, System.Drawing.FontStyle font_style, float kerning_scale, bool default_glyphs = true) {
             this.font_family = font_family;
@@ -147,34 +139,18 @@ namespace SwoopLib {
             this.kerning_scale = kerning_scale;
             this.font_style = font_style;
 
-            init();
-            if (default_glyphs || monospace) {
-                add_glyphs_to_texture(32, 126);
-                monospace_width = (int)Math.Ceiling(find_widest_character());
-            }
+            init(default_glyphs, false);
         }
 
         public FontManager(string font_family, float font_size, System.Drawing.FontStyle font_style, bool default_glyphs = true) {
             this.font_family = font_family;
             this.font_size = font_size;
             this.font_style = font_style;
-            init();
-            if (default_glyphs || monospace) {
-                add_glyphs_to_texture(32, 126);
-                monospace_width = (int)Math.Ceiling(find_widest_character());
-            }
+
+            init(default_glyphs, false);
         }
 
-
-        public FontManager(bool default_glyphs = true) {
-            init();
-            if (default_glyphs || monospace) {
-                add_glyphs_to_texture(32, 126);
-                monospace_width = (int)Math.Ceiling(find_widest_character());
-            }
-        }
-
-        void init() {
+        void init(bool default_glyphs, bool monospace) {
             gdi_font = new System.Drawing.Font(font_family, font_size, font_style);
 
             char_map_texture = new RenderTarget2D(Drawing.graphics_device, char_map_size.X, char_map_size.Y, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
@@ -186,7 +162,13 @@ namespace SwoopLib {
             if (glyph_draw_shader == null)
                 glyph_draw_shader = new DrawGlyph(Swoop.content);
 
-            //add default glyphs
+            if (default_glyphs) {
+                add_glyphs_to_texture(32, 126);
+            }
+
+            if (monospace) {
+                monospace_width = (int)Math.Ceiling(find_widest_character());
+            }
         }
 
         internal float find_widest_character() {
