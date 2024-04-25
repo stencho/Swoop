@@ -23,7 +23,8 @@ namespace SwoopLib {
 
         public int pixels_start;
         public int pixels_end;
-        public int glyph_width;
+
+        public int glyph_actual_width;
 
         public bool needs_adding;
 
@@ -32,55 +33,6 @@ namespace SwoopLib {
             this.position = position;
             this.size = size;
             needs_adding = true;
-        }
-    }
-
-    public class GlyphRow {        
-        public XYPair size = XYPair.Zero;
-        public int row_top = 0;
-        public float widest_char = float.MinValue;
-
-        string row = "";
-        public bool needs_adding;
-
-        public Dictionary<string, GlyphInfo> glyphs = new Dictionary<string, GlyphInfo>();
-
-        public GlyphRow(int row_top) {
-            this.row_top = row_top;
-        }
-
-        /// <summary>
-        /// Returns true if the glyph was able to fit at the end of the row
-        /// </summary>
-        /// <param name="character"></param>
-        /// <param name="font"></param>
-        /// <param name="graphics"></param>
-        /// <returns></returns>
-        public bool add_glyph(string character, FontManager parent) {            
-            var char_size = parent.graphics.MeasureString(character.ToString(), parent.gdi_font);
-            if (glyphs.ContainsKey(character)) return true;
-
-            //glyph won't fit on X
-            if (size.X + (int)char_size.Width > parent.char_map_size.X) return false;            
-                      
-            if (char_size.Height > size.Y) {
-                size.Y = (int)char_size.Height;
-            }
-            var pos = size.X_only + (XYPair.UnitY * row_top);
-
-            if (char_size.Width > widest_char) widest_char = char_size.Width;
-            
-            glyphs.Add(character, new GlyphInfo(character, pos, char_size.ToXYPair()));
-
-            parent.clear_canvas();
-            parent.draw_glyph_to_canvas(character, XYPair.Zero);
-
-            parent.copy_glyph_to_texture_and_trim_sides(parent, character, ref parent.char_map_texture, pos);
-
-            size.X += (int)glyphs[character].glyph_width;
-            needs_adding = true;
-
-            return true;
         }
 
     }
@@ -107,7 +59,11 @@ namespace SwoopLib {
         bool monospace = false;
         int monospace_width = 16;
 
-        public List<GlyphRow> glyph_rows = new List<GlyphRow>();
+        Dictionary<string, GlyphInfo> glyphs = new Dictionary<string, GlyphInfo>();
+
+        string last_added_glyph = "";
+
+        public bool glyph_exists(string str) => glyphs.ContainsKey(str);
 
         public readonly XYPair char_map_size = new XYPair(512, 512);
         public RenderTarget2D char_map_texture;
@@ -167,37 +123,70 @@ namespace SwoopLib {
             }
 
             if (monospace) {
+                this.monospace = true;
                 monospace_width = (int)Math.Ceiling(find_widest_character());
             }
+        }
+
+        public float widest_char = float.MinValue;
+
+        public void add_glyph(string character, FontManager parent) {
+            if (glyph_exists(character)) return;
+            var char_size = parent.graphics.MeasureString(character.ToString(), parent.gdi_font);
+
+            if (char_size.Height > _line_height) { _line_height = (int)char_size.Height; }
+            if (char_size.Width > widest_char) widest_char = char_size.Width;
+
+            GlyphInfo prev_glyph;
+            XYPair position = XYPair.Zero;
+
+            if (last_added_glyph != "") {
+                prev_glyph = glyphs[last_added_glyph];
+                position = prev_glyph.position + (XYPair.UnitX * prev_glyph.glyph_actual_width);
+
+                //glyph won't fit on X
+                if (position.X + (int)char_size.Width > parent.char_map_size.X) {
+                    position.Y += _line_height;
+                    position.X = 0;
+                }
+            }
+
+
+            glyphs.Add(character, new GlyphInfo(character, position, char_size.ToXYPair()));
+
+            parent.clear_canvas();
+            parent.draw_glyph_to_canvas(character, XYPair.Zero);
+
+            parent.copy_glyph_to_texture_and_trim_sides(parent, character, ref parent.char_map_texture, position);
+
+            last_added_glyph = character;
         }
 
         internal float find_widest_character() {
             float w = float.MinValue;
             
-            foreach (GlyphRow row in glyph_rows) {
-                if (row.widest_char > w) w = row.widest_char;
+            foreach (GlyphInfo glyph in glyphs.Values) {
+                if (glyph.glyph_actual_width > w) w = widest_char;
             }
 
             return w;
         }
+
         internal float find_average_width() {
             int count = 0;
             float w = 0f;
 
-            foreach (GlyphRow row in glyph_rows) {
-                foreach(string k in row.glyphs.Keys) {
-                    w += row.glyphs[k].glyph_width;
-                    count++;
-                }
+            foreach(string k in glyphs.Keys) {
+                w += glyphs[k].glyph_actual_width;
+                count++;                
             }
 
             return w / (float)count;
         }
 
         public void alter_glyph_width(string glyph, int alter_by) {
-            int ri = -1;
-            if (glyph_exists(glyph, out ri)) {
-                glyph_rows[ri].glyphs[glyph].glyph_width += alter_by;
+            if (glyph_exists(glyph)) {
+                glyphs[glyph].glyph_actual_width += alter_by;
             }
         }
 
@@ -212,84 +201,49 @@ namespace SwoopLib {
             graphics.DrawString(characters, gdi_font, text_brush, pos.ToPointF());
         }
 
-        public bool glyph_exists(string str, out int row_index) {
-            int r = 0;
-            for (int i = 0; i < glyph_rows.Count; i++) {
-                if (glyph_rows[i].glyphs.ContainsKey(str)) {
-                    row_index = r;
-                    return true;
-                }
-
-                r++;
-            }
-            row_index = -1;
-            return false;
-        }
 
         public void add_glyphs_to_texture(int start_value, int end_value) {
             for (int i = start_value; i <= end_value; i++) {
-                if (glyph_rows.Count == 0) {
-                    glyph_rows.Add(new GlyphRow(0));
-                }
+                add_glyph(((char)i).ToString(), this);
 
-                //glyph didn't fit at end of row
-                if (!glyph_rows[^1].add_glyph(((char)i).ToString(), this)) {
-                    glyph_rows.Add(new GlyphRow(glyph_rows[^1].row_top + glyph_rows[^1].size.Y));
-                    glyph_rows[^1].add_glyph(((char)i).ToString(), this);
-                }
+                if (_line_height < glyphs[((char)i).ToString()].size.Y) _line_height = glyphs[((char)i).ToString()].size.Y;
             }
+
             average_character_width = find_average_width();
             space_size = average_character_width / 2f;
-            if (_line_height < glyph_rows[^1].size.Y) _line_height = glyph_rows[^1].size.Y;
         }
 
 
         public void add_glyphs_to_texture(string characters) {
             foreach (char character in characters) {
-                if (glyph_rows.Count == 0) {
-                    glyph_rows.Add(new GlyphRow(0));
-                }
-
-                //glyph didn't fit at end of row
-                if (!glyph_rows[^1].add_glyph(character.ToString(), this)) {
-                    glyph_rows.Add(new GlyphRow(glyph_rows[^1].row_top + glyph_rows[^1].size.Y));
-                    glyph_rows[^1].add_glyph(character.ToString(), this);
-                }
+                add_glyph(character.ToString(), this);
+                if (_line_height < glyphs[character.ToString()].size.Y) _line_height = glyphs[character.ToString()].size.Y;
             }
             average_character_width = find_average_width();
             space_size = average_character_width / 2f;
-            if (_line_height < glyph_rows[^1].size.Y) _line_height = glyph_rows[^1].size.Y;
         }
 
         public void add_unicode_glyph_to_texture(string s) {
-            if (glyph_rows.Count == 0) {
-                glyph_rows.Add(new GlyphRow(0));
-            }
+            add_glyph(s, this);
 
-            //glyph didn't fit at end of row
-            if (!glyph_rows[^1].add_glyph(s, this)) {
-                glyph_rows.Add(new GlyphRow(glyph_rows[^1].row_top + glyph_rows[^1].size.Y));
+            if (_line_height < glyphs[s].size.Y) _line_height = glyphs[s].size.Y;
 
-                glyph_rows[^1].add_glyph(s, this);
-            }
             average_character_width = find_average_width();
             space_size = average_character_width / 2f;
-            if (_line_height < glyph_rows[^1].size.Y) _line_height = glyph_rows[^1].size.Y;
         }
 
 
         public void draw_glyph(char character, XYPair position) {
-            foreach (GlyphRow row in glyph_rows) {
-                if (row.glyphs.ContainsKey(character.ToString())) {
-                    var g = row.glyphs[character.ToString()];
+            if (glyph_exists(character.ToString())) {
+                var g = glyphs[character.ToString()];
 
-                    glyph_draw_shader.configure_shader(this, g);
-                    Drawing.begin(glyph_draw_shader.effect);
+                glyph_draw_shader.configure_shader(this, g);
+                Drawing.begin(glyph_draw_shader.effect);
 
-                    Drawing.image(char_map_texture, position, g.size, g.position, g.size);
-                    return;
-                }
+                Drawing.image(char_map_texture, position, g.size, g.position, g.size);
+                return;
             }
+            
             Drawing.end();
         }
 
@@ -364,9 +318,9 @@ namespace SwoopLib {
                     current_str = current_str.TrimEnd();
 
                 int r = 0;
-                if (glyph_exists(current_str, out r)) {
+                if (glyph_exists(current_str)) {
                     if (!monospace) {
-                        current_x += (int)(((glyph_rows[r].glyphs[current_str].glyph_width + (((font_size / 10f) * kerning_scale))) * (scale)));
+                        current_x += (int)(((glyphs[current_str].glyph_actual_width + (((font_size / 10f) * kerning_scale))) * (scale)));
                     } else {
                         current_x += monospace_width;
                     }
@@ -475,29 +429,24 @@ namespace SwoopLib {
                     current_str = current_str.TrimEnd();
 
                 int r = 0;
-                if (glyph_exists(current_str, out r)) {
+                if (glyph_exists(current_str)) {
 
                     if (current_char != ' ') {
                         rect_draw.X = position.X + current_x;
                         rect_draw.Y = position.Y + current_y;
 
-                        rect_draw.Size = (glyph_rows[r].glyphs[current_str].size * scale).ToPoint();
+                        rect_draw.Size = (glyphs[current_str].size * scale).ToPoint();
                         
-                        rect_source.X = glyph_rows[r].glyphs[current_str].position.X;
-                        rect_source.Y = glyph_rows[r].glyphs[current_str].position.Y;
-                        rect_source.Width = glyph_rows[r].glyphs[current_str].size.X;
-                        rect_source.Height = glyph_rows[r].glyphs[current_str].size.Y;
+                        rect_source.X = glyphs[current_str].position.X;
+                        rect_source.Y = glyphs[current_str].position.Y;
+                        rect_source.Width = glyphs[current_str].size.X;
+                        rect_source.Height = glyphs[current_str].size.Y;
 
                         Drawing.sb.Draw(char_map_texture, rect_draw, rect_source, color);
                     }
-                   // Drawing.image(char_map_texture,
-                   //         position + (XYPair.UnitX * current_x) + (XYPair.UnitY * current_y),
-                   //         glyph_rows[r].glyphs[current_str].size * scale,
-                   //         glyph_rows[r].glyphs[current_str].position, glyph_rows[r].glyphs[current_str].size,
-                   //         color);
 
                     if (!monospace) {
-                        current_x += (int)(((glyph_rows[r].glyphs[current_str].glyph_width + (((font_size / 10f) * kerning_scale))) * (scale)));
+                        current_x += (int)(((glyphs[current_str].glyph_actual_width + (((font_size / 10f) * kerning_scale))) * (scale)));
                     } else {
                         current_x += monospace_width;
                     }
@@ -605,15 +554,8 @@ namespace SwoopLib {
                 GC.Collect();
             }
         }
-        public void copy_glyph_to_texture_and_trim_sides(FontManager parent, string character, ref RenderTarget2D texture_2d, XYPair position_on_texture) {
-            //find row
-            int row_index = 0;
 
-            foreach (var row in glyph_rows) {
-                if (row.glyphs.ContainsKey(character))
-                    break;               
-                row_index++;
-            }
+        public void copy_glyph_to_texture_and_trim_sides(FontManager parent, string character, ref RenderTarget2D texture_2d, XYPair position_on_texture) { 
 
             int i = 0;
             unsafe {
@@ -623,7 +565,7 @@ namespace SwoopLib {
                 int last_pixel = int.MinValue;
 
                 System.Drawing.Imaging.BitmapData data = parent.current_glyph_bmp.bitmap.LockBits(
-                    new System.Drawing.Rectangle(0, 0, glyph_rows[row_index].glyphs[character].size.X, glyph_rows[row_index].glyphs[character].size.Y),
+                    new System.Drawing.Rectangle(0, 0, glyphs[character].size.X, glyphs[character].size.Y),
 
                     System.Drawing.Imaging.ImageLockMode.ReadWrite,
                     System.Drawing.Imaging.PixelFormat.Format32bppArgb);
@@ -651,12 +593,12 @@ namespace SwoopLib {
 
                 if (first_pixel == int.MaxValue || last_pixel == int.MinValue) goto end;
 
-                glyph_rows[row_index].glyphs[character].pixels_start = first_pixel;
-                glyph_rows[row_index].glyphs[character].pixels_end = last_pixel;
-                glyph_rows[row_index].glyphs[character].glyph_width = (last_pixel - first_pixel) + 1;
-                glyph_rows[row_index].glyphs[character].size.X = glyph_rows[row_index].glyphs[character].glyph_width;
+                glyphs[character].pixels_start = first_pixel;
+                glyphs[character].pixels_end = last_pixel;
+                glyphs[character].glyph_actual_width = (last_pixel - first_pixel) + 1;
+                glyphs[character].size.X = glyphs[character].glyph_actual_width;
 
-                Color[] cdata = new Color[glyph_rows[row_index].glyphs[character].glyph_width * glyph_rows[row_index].glyphs[character].size.Y];                
+                Color[] cdata = new Color[glyphs[character].glyph_actual_width * glyphs[character].size.Y];                
 
                 add_index = 0;
                 for (i = 0; i < parent.glyph_canvas_size.X * parent.glyph_canvas_size.Y; i++) {
@@ -664,9 +606,9 @@ namespace SwoopLib {
                     var x = i % parent.glyph_canvas_size.X;
                     var y = Math.Floor((double)(i / parent.glyph_canvas_size.X));
 
-                    if (x >= glyph_rows[row_index].glyphs[character].pixels_start && 
-                        x < glyph_rows[row_index].glyphs[character].pixels_start + glyph_rows[row_index].glyphs[character].glyph_width &&
-                        y >= 0 && y < glyph_rows[row_index].glyphs[character].size.Y) {
+                    if (x >= glyphs[character].pixels_start && 
+                        x < glyphs[character].pixels_start + glyphs[character].glyph_actual_width &&
+                        y >= 0 && y < glyphs[character].size.Y) {
 
                         cdata[add_index].A = (byte)(*(ptr + (i)) >> 24);
                         cdata[add_index].R = (byte)(*(ptr + (i)) >> 16);
@@ -679,7 +621,7 @@ namespace SwoopLib {
                 }
 
                 lock (texture_2d) texture_2d.SetData(0, 0,
-                    new Rectangle(position_on_texture.X, position_on_texture.Y, glyph_rows[row_index].glyphs[character].glyph_width, glyph_rows[row_index].glyphs[character].size.Y),
+                    new Rectangle(position_on_texture.X, position_on_texture.Y, glyphs[character].glyph_actual_width, glyphs[character].size.Y),
                     cdata, 0, cdata.Length);
                 end:
                 parent.current_glyph_bmp.bitmap.UnlockBits(data);
