@@ -28,7 +28,7 @@ namespace SwoopLib {
         public static UIElementManager? focused_manager => managers[focused_manager_index];
 
         static string focused_element_name = "";
-        public static UIElement? focfused_element => !string.IsNullOrWhiteSpace(focused_element_name) ? focused_manager?.elements[focused_element_name] : null;
+        public static UIElement? focused_element => !string.IsNullOrWhiteSpace(focused_element_name) ? focused_manager?.elements[focused_element_name] : null;
 
         static bool interacting_with_focused_element = false;
 
