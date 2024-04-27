@@ -521,6 +521,10 @@ namespace SwoopLib.UIElements {
 
                         stored_index = -1;
                     }
+                } else {
+                    if (!clicking && was_clicking) {
+                        stored_index = -1;
+                    }
                 }
             } else {
                 if (!clicking && was_clicking) {
