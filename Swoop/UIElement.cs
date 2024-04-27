@@ -77,7 +77,8 @@ namespace SwoopLib {
         public XYPair size { get { return _size; } set {
                 _size = value;
                 resize_finish();
-            } }
+            } 
+        }
 
         public float X => position.X;
         public float Y => position.Y;

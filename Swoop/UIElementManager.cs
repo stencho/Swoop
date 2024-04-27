@@ -32,13 +32,17 @@ namespace SwoopLib {
 
         static bool interacting_with_focused_element = false;
 
+        //public static bool allow_element_defocus { get; set; } = true;
+
         public static void focus_element(UIElementManager manager, string element_name) {
             if (manager.elements.ContainsKey(element_name)) {
                 focused_manager_index = manager.index;
                 focused_element_name = element_name;
 
             } else {
-                throw new Exception("Invalid element name");
+                //focused_manager_index = manager.index;
+                //if (allow_element_defocus) focused_element_name = "";
+                /*else*/ throw new Exception("Invalid element name");
             }
         }
 
@@ -160,9 +164,8 @@ namespace SwoopLib {
             bool mouse_over_hit = false;
             bool mouse_down = Input.is_pressed(MouseButtons.Left);
 
-           // lock (element_order) {
-                List<string> order = new List<string>(element_order);
-            //}
+            List<string> order = new List<string>(element_order);
+            
             if (in_dialog) {
                 if (elements[dialog_element].click_update(position, size, mouse_over_hit)) {
                     if (elements[dialog_element].can_be_focused) {
@@ -216,7 +219,8 @@ namespace SwoopLib {
 
             
             if (mouse_down && !mouse_down_prev && !click_hit && UIExterns.in_foreground()) {
-                //focused_element = null; 
+                //close menus and defocus elements if that is wanted
+                //if (allow_element_defocus) focused_element_name = ""; 
             }
 
             mouse_down_prev = mouse_down;
