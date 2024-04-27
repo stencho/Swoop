@@ -31,15 +31,15 @@ namespace SwoopLib.UIElements
         }
 
         internal override void draw() {
-            Drawing.fill_rect_outline(position + XYPair.One, position + size, Swoop.UI_background_color, Swoop.get_color(this), 1f);
+            Drawing.fill_rect_outline(position + XYPair.One, position + size, Swoop.foreground_flip_color, Swoop.UI_color_base, 1f);
 
             if (!string.IsNullOrEmpty(left_text))
-                Drawing.text(left_text, position + (XYPair.Down * 2) + (XYPair.Right * 3), Swoop.get_color(this));
+                Drawing.text(left_text, position + (XYPair.Down * 2) + (XYPair.Right * 3), Swoop.background_flip_color);
             if (!string.IsNullOrEmpty(right_text)) {
                 float right_text_width = Drawing.measure_string_profont(right_text).X;
                 Drawing.text(right_text,
                     position + (XYPair.UnitY * 2) + (XYPair.UnitX * size.X) - (XYPair.UnitX * (right_text_width + 3f))
-                    , Swoop.get_color(this));
+                    , Swoop.background_flip_color);
             }
         }
         internal override void draw_rt() { }

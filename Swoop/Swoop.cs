@@ -19,15 +19,28 @@ namespace SwoopLib {
             if (element.focused) return UI_highlight_color;
             else return UI_color;
         }
+
         public static Color get_color_inverse(UIElement element) {
             if (!element.focused) return UI_highlight_color;
             else return UI_color;
         }
 
-        public static Color UI_color = Color.White;
+        public static Color foreground_flip_color => (UIExterns.in_foreground() ? UI_color : UI_background_color);
+        public static Color background_flip_color => (UIExterns.in_foreground() ? UI_background_color : UI_color);
+
+
         public static Color UI_highlight_color = Color.FromNonPremultiplied(235, 140, 195, 255);
         public static Color UI_background_color = Color.FromNonPremultiplied(25, 25, 25, 255);
         public static Color UI_disabled_color = Color.FromNonPremultiplied(90, 90, 90, 255);
+
+        static Color _UI_color = Color.White;
+        public static Color UI_color {
+            get { return UIExterns.in_foreground() || !UI_color_is_disabled_when_inactive ? _UI_color : UI_disabled_color; } 
+            set { _UI_color = value; } 
+        }
+        public static Color UI_color_base => _UI_color;
+
+        public static bool UI_color_is_disabled_when_inactive { get; set; } = false;
 
         public static ContentManager content;
 
@@ -39,8 +52,7 @@ namespace SwoopLib {
         public static XYPair resolution => _resolution;
         public static RenderTarget2D render_target_output => UI.render_target;
 
-        public static AutoRenderTarget render_target_overlay;
-
+        static AutoRenderTarget render_target_overlay;
 
         public static bool fill_background { get; set; } = true;
         public static bool draw_UI_border { get; set; } = true;
@@ -145,7 +157,7 @@ namespace SwoopLib {
             UI.elements["maximize_button"].can_be_focused = false;
 
             UI.add_element(new Button("minimize_button", "_",
-                    _resolution.X_only - UI.elements["exit_button"].size.X_only - UI.elements["maximize_button"].size.X_only - text_length.X_only - (Vector2.UnitX * 10f) + (XYPair.UnitX*2),
+                    _resolution.X_only - UI.elements["exit_button"].size.X_only - UI.elements["maximize_button"].size.X_only - text_length.X_only - (Vector2.UnitX * 8f),
                     UI.elements["exit_button"].size));
             UI.elements["minimize_button"].ignore_dialog = true;
             UI.elements["minimize_button"].can_be_focused = false;
