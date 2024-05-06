@@ -47,8 +47,9 @@ namespace SwoopLib {
                     Drawing.end();
                     Drawing.graphics_device.SetRenderTarget(target.render_target);
                     Drawing.graphics_device.Clear(Color.Transparent);
+
                     if (target.draw != null && target.render_target != null) {
-                        target.draw(target.position, target.size);
+                        target.draw.invoke_all(target.position, target.size);
                     }
                 }
             }
@@ -86,10 +87,10 @@ namespace SwoopLib {
         static Effect screen_pos_effect;
 
         /// <summary>
-        /// called automatically when the RT is registered to either FG or BG drawing in the manager
+        /// called automatically each frame, automatically, by the Manager class
         /// draw = (XYPair position, XYPair size) => { }
         /// </summary>
-        public Action<XYPair, XYPair> draw;
+        public MultiAction<XYPair, XYPair> draw = new MultiAction<XYPair, XYPair>();
 
         public RenderTarget2D render_target;
         public RenderTarget2D screen_pos_rt;

@@ -16,7 +16,6 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Microsoft.VisualBasic.Devices;
 using System.Diagnostics;
-
 namespace SwoopDemo {
     public class SwoopGame : Game {
         GraphicsDeviceManager graphics;
@@ -66,6 +65,10 @@ namespace SwoopDemo {
             fps = new FPSCounter();
             this.Disposed += SwoopGame_Disposed;
             base.Initialize();
+        }
+
+        void print_test(string input, int number) {
+            Debug.Print(input + " " + number);
         }
 
         protected override void LoadContent() {
@@ -167,7 +170,7 @@ namespace SwoopDemo {
             draw_shader.set_param("screen_pos_texture", render_target_fg.screen_pos_rt);
             draw_shader.set_param("screen_texture", Swoop.render_target_output);
 
-            render_target_bg.draw = (XYPair position, XYPair size) => {
+            render_target_bg.draw.register_action("test_draw_plane", (XYPair position, XYPair size) => {
                 Drawing.image(render_target_bg.screen_pos_rt, XYPair.Zero, render_target_bg.size);
 
                 Drawing.graphics_device.RasterizerState = RasterizerState.CullNone;
@@ -180,9 +183,9 @@ namespace SwoopDemo {
 
                 Drawing.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
                 Drawing.graphics_device.DepthStencilState = DepthStencilState.Default;
-            };
+            });
 
-            render_target_fg.draw = (XYPair position, XYPair size) => {
+            render_target_fg.draw.register_action("test_tint", (XYPair position, XYPair size) => {
 
                 Drawing.end();
 
@@ -197,7 +200,7 @@ namespace SwoopDemo {
 
                 Drawing.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
                 Drawing.graphics_device.DepthStencilState = DepthStencilState.Default;
-            };
+            });
 
             ((Button)UI.elements["exit_button"]).click_action = () => {
                 if (capture_demo_screenshot_on_exit) {

@@ -97,10 +97,11 @@ namespace SwoopLib.UIElements {
             this.parent = parent;
             if (_custom_draw) {                
                 rt = new AutoRenderTarget(size);
-                rt.draw = draw_action;
+                rt.draw.register_action("draw", draw_action);
             } else {
                 rt = new AutoRenderTarget(size);
-                rt.draw = draw_text;
+                rt.draw.register_action("draw", draw_text);
+                //rt.draw = draw_text;
             }
         }
 
