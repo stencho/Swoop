@@ -25,8 +25,8 @@ namespace SwoopLib {
             public static KeepOnScreenMode keep_on_screen_mode = KeepOnScreenMode.Flip;
 
             public static void update() {
-
                 current_tooltip = null;
+
                 if (UIElementManager.manager_under_mouse != null && UIElementManager.manager_under_mouse.element_under_mouse != null) {
                     if (UIElementManager.manager_under_mouse.element_under_mouse.tooltip != null)
                         current_tooltip = UIElementManager.manager_under_mouse.element_under_mouse.tooltip;
@@ -37,15 +37,13 @@ namespace SwoopLib {
                 } else {
                     Swoop.render_target_overlay.draw.unregister_action("tooltip");
                 }
+
                 if (delay_show) {
                     delay_timer += Swoop.game_time.ElapsedGameTime.TotalMilliseconds;
                     if (tooltip_changed) delay_timer = 0;
                 }
 
                 previous_tooltip = current_tooltip;
-            }
-
-            public static void draw() {
             }
         }
 
