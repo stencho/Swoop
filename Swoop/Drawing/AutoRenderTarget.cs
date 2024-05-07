@@ -87,7 +87,7 @@ namespace SwoopLib {
         static Effect screen_pos_effect;
 
         /// <summary>
-        /// called automatically each frame, automatically, by the Manager class
+        /// called each frame, automatically, by the Manager class
         /// draw = (XYPair position, XYPair size) => { }
         /// </summary>
         public MultiAction<XYPair, XYPair> draw = new MultiAction<XYPair, XYPair>();
