@@ -53,13 +53,16 @@ namespace SwoopLib {
         }
 
         public static UIElementManager? manager_under_mouse => get_mouse_manager();
+        public static int manager_under_mouse_index = -1;
 
         static UIElementManager? get_mouse_manager() {
-            for (int i = 0; i < managers.Count; i++) {
+            for (int i = managers.Count-1; i >= 0; --i) {
                 if (managers[i].element_under_mouse != null) {
+                    manager_under_mouse_index = i;
                     return managers[i];
                 }
             }
+            manager_under_mouse_index = -1;
             return null;
         }
 
@@ -75,21 +78,21 @@ namespace SwoopLib {
 
         public void anchor_to_side(string element_name, Anchor.AnchorTo anchor_side) {
             if (elements.ContainsKey(element_name)) {
-                if (elements[element_name].anchor_position != null) Anchor.Manager.remove(elements[element_name].anchor_position);
-                elements[element_name].anchor_position = new Anchor(elements[element_name], anchor_side);
+                if (elements[element_name].anchor_global != null) Anchor.Manager.remove(elements[element_name].anchor_global);
+                elements[element_name].anchor_global = new Anchor(elements[element_name], anchor_side);
 
             }
         }
         public void remove_side_anchor(string element_name) {
             if (elements.ContainsKey(element_name)) {
-                if (elements[element_name].anchor_position != null) Anchor.Manager.remove(elements[element_name].anchor_position);
-                elements[element_name].anchor_position = null;
+                if (elements[element_name].anchor_global != null) Anchor.Manager.remove(elements[element_name].anchor_global);
+                elements[element_name].anchor_global = null;
             }
         }
 
-        public void anchor_local(string element_name, UIElement.anchor_point anchor_point) {
+        public void anchor_local(string element_name, UIElement.AnchorPoint anchor_point) {
             if (elements.ContainsKey(element_name)) {
-                elements[element_name].anchor = anchor_point;
+                elements[element_name].anchor_local = anchor_point;
             }
         }
 

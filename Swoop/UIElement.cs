@@ -12,7 +12,7 @@ using SwoopLib.Collision;
 namespace SwoopLib {
     public abstract class UIElement {
 
-        public enum anchor_point : byte {
+        public enum AnchorPoint : byte {
             TOP = 1 << 0,
             BOTTOM = 1 << 1,
             LEFT = 1 << 2,
@@ -24,38 +24,38 @@ namespace SwoopLib {
             CENTER = 0
         };
 
-        public anchor_point anchor = anchor_point.TOP_LEFT;
+        public AnchorPoint anchor_local = AnchorPoint.TOP_LEFT;
 
         internal XYPair anchor_offset() {
             XYPair o = XYPair.Zero;
-            switch (anchor) {
-                case anchor_point.TOP:
+            switch (anchor_local) {
+                case AnchorPoint.TOP:
                     o.X -= size.X / 2;
                     break;
-                case anchor_point.BOTTOM:
+                case AnchorPoint.BOTTOM:
                     o.X -= size.X / 2;
                     o.Y -= size.Y;
                     break;
-                case anchor_point.LEFT:
+                case AnchorPoint.LEFT:
                     o.Y -= size.Y / 2;
                     break;
-                case anchor_point.RIGHT:
+                case AnchorPoint.RIGHT:
                     o.X -= size.X;
                     o.Y -= size.Y / 2;
                     break;
-                case anchor_point.TOP_LEFT:
+                case AnchorPoint.TOP_LEFT:
                     break;
-                case anchor_point.TOP_RIGHT:
+                case AnchorPoint.TOP_RIGHT:
                     o.X -= size.X;
                     break;
-                case anchor_point.BOTTOM_LEFT:
+                case AnchorPoint.BOTTOM_LEFT:
                     o.Y -= size.Y;
                     break;
-                case anchor_point.BOTTOM_RIGHT:
+                case AnchorPoint.BOTTOM_RIGHT:
                     o.X -= size.X;
                     o.Y -= size.Y;
                     break;
-                case anchor_point.CENTER:
+                case AnchorPoint.CENTER:
                     o.X -= size.X / 2;
                     o.Y -= size.Y / 2;
                     break;
@@ -111,7 +111,7 @@ namespace SwoopLib {
         public bool visible { get; set; } = true;
         public bool click_through { get; set; } = false;
 
-        public Anchor? anchor_position { get; set; } = null;
+        public Anchor? anchor_global { get; set; } = null;
         public Tooltip? tooltip { get; set; } = null;
         public void set_tooltip_text(string text) {
             if (tooltip != null) tooltip.text = text;

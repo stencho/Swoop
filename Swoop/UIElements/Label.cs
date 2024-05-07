@@ -36,13 +36,13 @@ namespace SwoopLib.UIElements {
             can_be_focused = false;
         }
 
-        public Label(string name, string text, XYPair position, XYPair size, anchor_point anchor)
+        public Label(string name, string text, XYPair position, XYPair size, AnchorPoint anchor)
             : base(name, position, size) {
             auto_size = false;
             this.text = text;
             this.position = position;
             this.size = size;
-            this.anchor = anchor;
+            this.anchor_local = anchor;
             can_be_focused = false;
         }
 
@@ -55,13 +55,13 @@ namespace SwoopLib.UIElements {
             can_be_focused = false;
         }
 
-        public Label(string name, string text, XYPair position, anchor_point anchor)
+        public Label(string name, string text, XYPair position, AnchorPoint anchor)
             : base(name, position, XYPair.Zero) {
             auto_size = true;
             this.text = text;
             this.position = position;
             this.size = Drawing.measure_string_profont_xy(text);
-            this.anchor = anchor;
+            this.anchor_local = anchor;
             can_be_focused = false;
         }
 
