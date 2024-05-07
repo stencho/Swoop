@@ -49,7 +49,7 @@ namespace SwoopLib.UIElements {
 
         internal override void draw() {
             //debug hitbox
-            Drawing.rect(position, position + size, Swoop.get_color(this), 1f);
+            Drawing.fill_rect_outline(position, position + size, Swoop.UI_background_color, Swoop.get_color(this), 1f);
 
             //title
             Drawing.text(title, position + (XYPair.UnitY * margin) + (XYPair.UnitX * ((size.X / 2) - (title_size.X / 2))), Swoop.get_color(this));
