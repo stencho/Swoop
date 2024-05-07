@@ -40,6 +40,7 @@ namespace SwoopLib
         static Effects.InvertingText color_flip_effect;
 
         public static FontManager font_manager_profont;
+        public static FontManager font_manager_profont_big;
 
         public static void load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, XYPair resolution) {
             sb = new SpriteBatch(gd);
@@ -77,6 +78,9 @@ namespace SwoopLib
             //
             font_manager_profont = new FontManager("ProFontWindows", 9f, 1f);
             font_manager_profont.alter_line_height(-2);
+
+            font_manager_profont_big = new FontManager("ProFontWindows", 11f, 1f);
+            font_manager_profont_big.alter_line_height(-2);
 
             fnt_profont = content.Load<SpriteFont>("profont");
         }

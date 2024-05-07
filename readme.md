@@ -13,7 +13,6 @@ Looks better than it works. This readme is, more or less, a public TODO and a se
 - [ ] Drop-down List (ComboBox) 
 - [ ] Numeric Up/Down
 - [ ] OptionSlider (Progress-bar-esque multi-choice selection bar)
-- [ ] Tooltip + full-screen top-layer AutoRT + registration system
 
 **(THE LIST)**
 - [x] Button
@@ -22,7 +21,7 @@ Looks better than it works. This readme is, more or less, a public TODO and a se
 - [ ] Cursor replacement + switching system
 - [x] DialogBox
 - [ ] EPA
-- [ ] GDI+ based runtime spritefont generator and renderer *(still needs monospacing and newlines)*
+- [ ] GDI+ based runtime spritefont generator and renderer *(still needs monospacing)*
 - [x] GDI+ canvas
 - [x] Label
 - [x] ListBox *(still needs mouse support for scrolling + actions for events)*
@@ -40,6 +39,7 @@ Looks better than it works. This readme is, more or less, a public TODO and a se
 - [x] TextBox and a multi-line TextEditor *(both still need mouse support, editor still needs scrolling and word wrap at minimum)*
 - [x] Title Bar (with window dragging)
 - [x] Toggle Button
+- [x] Tooltips + registration system
 - [ ] UI Editor Mode
 - [ ] - Add/Delete elements
 - [ ] - Reposition/resize elements (different elements should be able to specify which axes they allow resizing on)

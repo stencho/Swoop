@@ -112,6 +112,13 @@ namespace SwoopLib {
         public bool click_through { get; set; } = false;
 
         public Anchor? anchor_position { get; set; } = null;
+        public Tooltip? tooltip { get; set; } = null;
+        public void set_tooltip_text(string text) {
+            if (tooltip != null) tooltip.text = text;
+        }
+        public void set_tooltip_title(string title) {
+            if (tooltip != null) tooltip.title = title;            
+        }
 
         public XYPair mouse_relative => Swoop.input_handler.mouse_position.ToXYPair() - this.position;
 

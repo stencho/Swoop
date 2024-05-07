@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using MGRawInputLib;
@@ -42,7 +43,8 @@ namespace SwoopLib {
             } else {
                 //focused_manager_index = manager.index;
                 //if (allow_element_defocus) focused_element_name = "";
-                /*else*/ throw new Exception("Invalid element name");
+                /*else*/
+                throw new Exception("Invalid element name");
             }
         }
 
@@ -50,7 +52,20 @@ namespace SwoopLib {
 
         }
 
-        public static void update_UI_input() { }
+        public static UIElementManager? manager_under_mouse => get_mouse_manager();
+
+        static UIElementManager? get_mouse_manager() {
+            for (int i = 0; i < managers.Count; i++) {
+                if (managers[i].element_under_mouse != null) {
+                    return managers[i];
+                }
+            }
+            return null;
+        }
+
+        public static void update_UI_input() { 
+            
+        }
 
 
         //PER INSTANCE
@@ -58,17 +73,45 @@ namespace SwoopLib {
         public List<string> element_order = new List<string>();
         IEnumerable<string> element_order_inverse_for_draw => element_order.Reverse<string>();
 
-        public void add_anchor(string element_name, Anchor.AnchorTo anchor_side) {
+        public void anchor_to_side(string element_name, Anchor.AnchorTo anchor_side) {
             if (elements.ContainsKey(element_name)) {
                 if (elements[element_name].anchor_position != null) Anchor.Manager.remove(elements[element_name].anchor_position);
                 elements[element_name].anchor_position = new Anchor(elements[element_name], anchor_side);
 
             }
         }
-        public void remove_anchor(string element_name) {
+        public void remove_side_anchor(string element_name) {
             if (elements.ContainsKey(element_name)) {
                 if (elements[element_name].anchor_position != null) Anchor.Manager.remove(elements[element_name].anchor_position);
                 elements[element_name].anchor_position = null;
+            }
+        }
+
+        public void anchor_local(string element_name, UIElement.anchor_point anchor_point) {
+            if (elements.ContainsKey(element_name)) {
+                elements[element_name].anchor = anchor_point;
+            }
+        }
+
+
+        public void register_tooltip(string element_name, Tooltip tooltip) {
+            if (elements.ContainsKey(element_name)) {
+                elements[element_name].tooltip = tooltip;
+            }
+        }
+        public void register_tooltip(string element_name, string tooltip_text) {
+            if (elements.ContainsKey(element_name)) {
+                elements[element_name].tooltip = new Tooltip(tooltip_text);
+            }
+        }
+        public void register_tooltip(string element_name, string tooltip_title, string tooltip_text) {
+            if (elements.ContainsKey(element_name)) {
+                elements[element_name].tooltip = new Tooltip(tooltip_title, tooltip_text);
+            }
+        }
+        public void unregister_tooltip(string element_name) {
+            if (elements.ContainsKey(element_name)) {
+                elements[element_name].tooltip = null;
             }
         }
 
@@ -117,6 +160,8 @@ namespace SwoopLib {
         public string dialog_element = "";
         public bool in_dialog => !string.IsNullOrEmpty(dialog_element);
         public bool draw_border = false;
+
+        
 
         public XYPair position;
         XYPair _size;
@@ -174,12 +219,16 @@ namespace SwoopLib {
         }
 
         bool mouse_down_prev = false;
+
+        public UIElement? element_under_mouse;
+
         public void update() {
             bool click_hit = false;
             bool mouse_over_hit = false;
             bool mouse_down = Input.is_pressed(MouseButtons.Left);
 
             List<string> order = new List<string>(element_order);
+            element_under_mouse = null;
             
             if (in_dialog) {
                 if (elements[dialog_element].click_update(position, size, mouse_over_hit)) {
@@ -202,7 +251,7 @@ namespace SwoopLib {
                             }
                         }
 
-                        if (elements[k].mouse_over) mouse_over_hit = true;
+                        if (elements[k].mouse_over) { mouse_over_hit = true; element_under_mouse = elements[k]; }
 
                         elements[k].update();
                     }
@@ -218,7 +267,7 @@ namespace SwoopLib {
                         }
                     }
 
-                    if (elements[k].mouse_over) mouse_over_hit = true;
+                    if (elements[k].mouse_over) { mouse_over_hit = true; element_under_mouse = elements[k]; }
 
                     elements[k].update();
 

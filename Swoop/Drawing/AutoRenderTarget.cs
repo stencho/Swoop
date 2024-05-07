@@ -49,7 +49,7 @@ namespace SwoopLib {
                     Drawing.graphics_device.Clear(Color.Transparent);
 
                     if (target.draw != null && target.render_target != null) {
-                        target.draw.invoke_all(target.position, target.size);
+                        target.draw.invoke_all();
                     }
                 }
             }
@@ -64,7 +64,7 @@ namespace SwoopLib {
 
                 if (targets.Count == 0) return;
                 foreach (AutoRenderTarget target in targets) {
-                    if (target != null && target.draw != null && target.render_target != null&& target.draw_to_screen_early) {
+                    if (target != null && target.draw != null && target.render_target != null && target.draw_to_screen_early) {
                         //target.draw_screen_pos_map();
                         Drawing.image(target.render_target, target.position, target.size);                        
                     }
@@ -90,7 +90,7 @@ namespace SwoopLib {
         /// called each frame, automatically, by the Manager class
         /// draw = (XYPair position, XYPair size) => { }
         /// </summary>
-        public MultiAction<XYPair, XYPair> draw = new MultiAction<XYPair, XYPair>();
+        public MultiAction draw = new MultiAction();
 
         public RenderTarget2D render_target;
         public RenderTarget2D screen_pos_rt;

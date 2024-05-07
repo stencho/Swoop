@@ -28,7 +28,7 @@ namespace SwoopLib.UIElements {
         bool _custom_draw = false;
         public bool custom_draw => _custom_draw;
 
-        Action<XYPair, XYPair> draw_action;
+        Action draw_action;
 
         string _text = "";
         public string text {
@@ -60,7 +60,7 @@ namespace SwoopLib.UIElements {
             parent.size_minus_scroll_bar.X_only :
             text_size.Y_only + parent.size_minus_scroll_bar.X_only;
 
-        void draw_text(XYPair position, XYPair size) {
+        void draw_text() {
             if (is_stored_click) {
                 Drawing.text_shadow(text, XYPair.Zero + (XYPair.UnitX * left_margin),
                     Swoop.UI_background_color,
@@ -83,7 +83,7 @@ namespace SwoopLib.UIElements {
             init();
         }
         
-        public ListBoxItem(int height, Action<XYPair, XYPair> draw_action) {
+        public ListBoxItem(int height, Action draw_action) {
             this.draw_action = draw_action;
             _height = height;
             _custom_draw = true;

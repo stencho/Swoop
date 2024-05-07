@@ -57,7 +57,7 @@ namespace SwoopLib {
         public static XYPair resolution => _resolution;
         public static RenderTarget2D render_target_output => UI.render_target;
 
-        static AutoRenderTarget render_target_overlay;
+        public static AutoRenderTarget render_target_overlay;
 
         public static bool fill_background { get; set; } = true;
         public static bool draw_UI_border { get; set; } = true;
@@ -249,6 +249,7 @@ namespace SwoopLib {
             Window.is_active = parent.IsActive;
             
             UIElementManager.update_UI_input();
+            Tooltip.Manager.update();
 
             input_handler.update();
 

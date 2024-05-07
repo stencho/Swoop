@@ -20,7 +20,7 @@ namespace SwoopDemo {
     public class SwoopGame : Game {
         GraphicsDeviceManager graphics;
 
-        public static double target_fps = 60;
+        public static double target_fps = 240;
         FPSCounter fps;
 
         public static XYPair resolution = new XYPair(1050, 830);
@@ -170,7 +170,7 @@ namespace SwoopDemo {
             draw_shader.set_param("screen_pos_texture", render_target_fg.screen_pos_rt);
             draw_shader.set_param("screen_texture", Swoop.render_target_output);
 
-            render_target_bg.draw.register_action("test_draw_plane", (XYPair position, XYPair size) => {
+            render_target_bg.draw.register_action("test_draw_plane", () => {
                 Drawing.image(render_target_bg.screen_pos_rt, XYPair.Zero, render_target_bg.size);
 
                 Drawing.graphics_device.RasterizerState = RasterizerState.CullNone;
@@ -185,7 +185,7 @@ namespace SwoopDemo {
                 Drawing.graphics_device.DepthStencilState = DepthStencilState.Default;
             });
 
-            render_target_fg.draw.register_action("test_tint", (XYPair position, XYPair size) => {
+            render_target_fg.draw.register_action("test_tint", () => {
 
                 Drawing.end();
 
@@ -231,7 +231,7 @@ namespace SwoopDemo {
             UI.add_element(new Button("behind_button",
                 @"this button should be behind the test panel",
                 (resolution.Y_only - (XYPair.UnitY * 94)) + (XYPair.UnitX * 5)));
-
+            UI.register_tooltip("behind_button", "behind hehe");
             UI.add_element(new Panel("test_panel", (resolution.Y_only - (XYPair.UnitY * 150)) + (Vector2.UnitX * 30), new XYPair(400, 100),
                 (Panel panel, UIElementManager sub_elements) => {
                     sub_elements.add_element(new Button("long_button",
@@ -251,7 +251,7 @@ namespace SwoopDemo {
                         XYPair.One * 2f + (XYPair.UnitY * 55)));
 
                     sub_elements.add_element(new Label("anchor_label", "this label should be anchored to the bottom right", panel.size, UIElement.anchor_point.BOTTOM_RIGHT));
-                    sub_elements.add_anchor("anchor_label", Anchor.AnchorTo.Right | Anchor.AnchorTo.Bottom);
+                    sub_elements.anchor_to_side("anchor_label", Anchor.AnchorTo.Right | Anchor.AnchorTo.Bottom);
                     
                 })                
             );
@@ -400,8 +400,8 @@ namespace SwoopDemo {
             test_listbox.add_item(new ListBoxItem("test"));
             test_listbox.add_item(new ListBoxItem("a second test"));
             test_listbox.add_item(new ListBoxItem("a third test\nthis time it's multiline\nlol"));
-            test_listbox.add_item(new ListBoxItem(50, (XYPair position, XYPair size) => {
-                Drawing.fill_rect_dither(XYPair.Zero, size, Swoop.UI_background_color, Swoop.UI_color);
+            test_listbox.add_item(new ListBoxItem(50, () => {
+                Drawing.fill_rect_dither(XYPair.Zero, resolution, Swoop.UI_background_color, Swoop.UI_color);
                 Drawing.fill_rect(Vector2.One * 18, Vector2.One * 22 + Drawing.measure_string_profont_xy("BIG HEFTY CUSTOM DRAW"), Swoop.UI_background_color);
                 Drawing.text("BIG HEFTY CUSTOM DRAW", Vector2.One * 20, Color.Red);
             }));
@@ -426,6 +426,8 @@ namespace SwoopDemo {
             test_listbox.add_item(new ListBoxItem("here comes some random spam!"));
             UI.add_element(test_listbox);
             UI.add_element(test_listbox_add_button);
+            UI.register_tooltip("rng_add_button", new Tooltip("Add a new item to the listbox with\na randomized hexadecimal name"));
+
 
             UI.add_element(new TextBox("text_box", "this is a test textbox",
                 UI.elements["test_listbox"].position + UI.elements["test_listbox"].size.X_only + (XYPair.Right * 8),
@@ -464,12 +466,14 @@ namespace SwoopDemo {
                 UI.elements["test_listbox"].size * 0.75f * (XYPair.One + XYPair.Right)));
 
             UI.add_element(new OptionSlider("option_slider", 
-                UI.elements["text_editor"].bottom_xy + (XYPair.UnitY * 10) + (UI.elements["text_editor"].size.X_only / 6), 
+                resolution, 
                 UI.elements["text_editor"].size.X_only * 0.75f, 
                 "Option Slider", 
                 "No", "Low", "Medium", "High", "Ultra", "Yes"
                 ));
-
+            UI.anchor_local("option_slider", UIElement.anchor_point.BOTTOM_RIGHT);
+            UI.anchor_to_side("option_slider", Anchor.AnchorTo.Right | Anchor.AnchorTo.Bottom);
+            UI.register_tooltip("option_slider", new Tooltip("TITLE", "test of a tooltip lmoa\nhaha"));
         }
 
         static float progress_bar_test_value = 0.5f;
