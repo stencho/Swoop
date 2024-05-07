@@ -11,6 +11,7 @@ using SwoopLib.Collision;
 
 namespace SwoopLib {
     public abstract class UIElement {
+
         public enum anchor_point : byte {
             TOP = 1 << 0,
             BOTTOM = 1 << 1,
@@ -71,11 +72,12 @@ namespace SwoopLib {
 
         XYPair _position = XYPair.Zero;
         public XYPair position { get { return _position + anchor_offset(); } set { _position = value; } }
-        public XYPair position_actual => _position;
+        public XYPair position_actual { get { return _position; } set { _position = value; } }
 
         XYPair _size;
         public XYPair size { get { return _size; } set {
                 _size = value;
+                if (has_sub_elements) sub_elements.size = value;
                 resize_finish();
             } 
         }
@@ -108,6 +110,8 @@ namespace SwoopLib {
         public bool can_be_focused { get; set; } = true;
         public bool visible { get; set; } = true;
         public bool click_through { get; set; } = false;
+
+        public Anchor? anchor_position { get; set; } = null;
 
         public XYPair mouse_relative => Swoop.input_handler.mouse_position.ToXYPair() - this.position;
 

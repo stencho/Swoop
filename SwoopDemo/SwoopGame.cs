@@ -208,7 +208,6 @@ namespace SwoopDemo {
                     capture_demo_screenshot_on_exit = false;
                 }
                 Swoop.End();
-                this.Exit();
             };
 
 
@@ -250,6 +249,9 @@ namespace SwoopDemo {
                     sub_elements.add_element(new Label("behind_label",
                         "<- that button should always be behind this panel\n     (and only the visible portion should be clickable)",
                         XYPair.One * 2f + (XYPair.UnitY * 55)));
+
+                    sub_elements.add_element(new Label("anchor_label", "this label should be anchored to the bottom right", panel.size, UIElement.anchor_point.BOTTOM_RIGHT));
+                    sub_elements.add_anchor("anchor_label", Anchor.AnchorTo.Right | Anchor.AnchorTo.Bottom);
                     
                 })                
             );
@@ -467,8 +469,6 @@ namespace SwoopDemo {
                 "Option Slider", 
                 "No", "Low", "Medium", "High", "Ultra", "Yes"
                 ));
-
-            
 
         }
 

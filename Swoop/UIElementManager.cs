@@ -58,6 +58,20 @@ namespace SwoopLib {
         public List<string> element_order = new List<string>();
         IEnumerable<string> element_order_inverse_for_draw => element_order.Reverse<string>();
 
+        public void add_anchor(string element_name, Anchor.AnchorTo anchor_side) {
+            if (elements.ContainsKey(element_name)) {
+                if (elements[element_name].anchor_position != null) Anchor.Manager.remove(elements[element_name].anchor_position);
+                elements[element_name].anchor_position = new Anchor(elements[element_name], anchor_side);
+
+            }
+        }
+        public void remove_anchor(string element_name) {
+            if (elements.ContainsKey(element_name)) {
+                if (elements[element_name].anchor_position != null) Anchor.Manager.remove(elements[element_name].anchor_position);
+                elements[element_name].anchor_position = null;
+            }
+        }
+
         public void send_to_front(string element_name) {
             lock (element_order) {
                 if (element_order.Contains(element_name) && elements.ContainsKey(element_name)) {
@@ -110,6 +124,7 @@ namespace SwoopLib {
             get { return _size; }
             set {
                 if (_size != value) {
+                    Anchor.Manager.update_positions(this, _size, value);
                     _size = value;
                     needs_resize = true;
                 }
