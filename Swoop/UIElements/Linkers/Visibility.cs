@@ -19,7 +19,7 @@ namespace SwoopLib.UIElements.Linkers {
 
         public void toggle_off() {
             foreach (string key in linked_elements.Keys) {
-                linked_elements[key].visible = true;
+                linked_elements[key].visible = false;
             }
         }
     }
