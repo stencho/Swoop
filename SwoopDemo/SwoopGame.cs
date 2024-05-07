@@ -60,7 +60,7 @@ namespace SwoopDemo {
         }
 
         protected override void Initialize() {
-            Swoop.Initialize(this, graphics, Window, resolution);
+            Swoop.Initialize(this, graphics, Window, resolution, true, true);
 
             fps = new FPSCounter();
             this.Disposed += SwoopGame_Disposed;

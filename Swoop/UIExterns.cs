@@ -25,8 +25,48 @@ namespace SwoopLib {
 
         [DllImport("user32.dll", SetLastError = true)] public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
 
-        [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
-        [DllImport("user32.dll")] static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+        [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("kernel32.dll")] public static extern void SetLastError(uint dwErrCode);
+
+        [DllImport("user32.dll", SetLastError = true)] public static extern uint GetWindowLong(IntPtr hWnd, int nIndex);
+        [DllImport("user32.dll", SetLastError = true)] public static extern int SetWindowLong(IntPtr hWnd, int nIndex, uint dwNewLong);
+        [DllImport("dwmapi.dll")] public static extern void DwmIsCompositionEnabled(ref int enabledptr);
+        [DllImport("dwmapi.dll")] public static extern int DwmExtendFrameIntoClientArea(IntPtr hWnd, ref int[] pMarInset);
+        [DllImport("user32.dll", SetLastError = true)] public static extern bool SetLayeredWindowAttributes(IntPtr hwnd, uint crKey, byte bAlpha, uint dwFlags);
+
+        public const int GWL_EXSTYLE = -20;
+        public const int GWL_STYLE = -16;
+        public const int LWA_ALPHA = 0x00000002;
+        public const int WS_EX_LAYERED = 0x00080000;
+        //const int WS_EX_TOPMOST = 0x00000008;
+        public const int WS_EX_TRANSPARENT = 0x00000020;
+        public const int WS_EX_NOACTIVATE = 0x08000000;
+        public static IntPtr HWND_TOPMOST = (IntPtr)(-1);
+        public const int SWP_NOMOVE = 0x0002;
+        public const int SWP_NOSIZE = 0x0001;
+        public const int S_OK = 0x00000000;
+        [Flags] public enum WS : uint {
+            /// <summary>The window has a thin-line border.</summary>
+            BORDER = 0x800000,
+            /// <summary>The window has a title bar (includes the BORDER style).</summary>
+            CAPTION = 0xc00000,
+            /// <summary>The window has a border of a style typically used with dialog boxes. A window with this style cannot have a title bar.</summary>
+            DLGFRAME = 0x400000,
+            /// <summary>The window is initially maximized.</summary>
+            MAXIMIZE = 0x1000000,
+            /// <summary>The window has a maximize button. Cannot be combined with the EX_CONTEXTHELP style. The SYSMENU style must also be specified.</summary>
+            MAXIMIZEBOX = 0x10000,
+            /// <summary>The window is initially minimized.</summary>
+            MINIMIZE = 0x20000000,
+            /// <summary>The window has a minimize button. Cannot be combined with the EX_CONTEXTHELP style. The SYSMENU style must also be specified.</summary>
+            MINIMIZEBOX = 0x20000,
+            /// <summary>The window has a sizing border.</summary>
+            SIZEFRAME = 0x40000,
+            /// <summary>The window has a window menu on its title bar. The CAPTION style must also be specified.</summary>
+            SYSMENU = 0x80000
+        }
 
         public static void minimize_window() {
             ShowWindow(actual_window_handle, 6);

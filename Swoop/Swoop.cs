@@ -12,9 +12,12 @@ using SwoopLib.UIElements;
 using System.Runtime.CompilerServices;
 using SwoopLib.Effects;
 using System.Net.WebSockets;
+using System.Runtime.InteropServices;
+using System.ComponentModel;
 
 namespace SwoopLib {
     public static class Swoop {
+
         public static Color get_color(UIElement element) {
             if (element.focused) return UI_highlight_color;
             else return UI_color;
@@ -27,6 +30,8 @@ namespace SwoopLib {
 
         public static Color foreground_flip_color => (UIExterns.in_foreground() ? UI_color : UI_background_color);
         public static Color background_flip_color => (UIExterns.in_foreground() ? UI_background_color : UI_color);
+
+        public static Color foreground_flip_color_disabled => (UIExterns.in_foreground() ? UI_color : UI_disabled_color);
 
 
         public static Color UI_highlight_color = Color.FromNonPremultiplied(235, 140, 195, 255);
@@ -90,7 +95,8 @@ namespace SwoopLib {
         static GameWindow game_window;
         public static GameTime game_time;
 
-        public static void Initialize(Game parent, GraphicsDeviceManager gdm, GameWindow window, XYPair resolution, bool borderless = true) {
+
+        public static void Initialize(Game parent, GraphicsDeviceManager gdm, GameWindow window, XYPair resolution, bool borderless = true, bool transparent_window = false) {
             Swoop.parent = parent;
 
             Input.initialize(parent);
@@ -110,13 +116,34 @@ namespace SwoopLib {
             window.ClientSizeChanged += Window_ClientSizeChanged;
 
             MGRawInputLib.Window.init(window);
+
+            if (transparent_window && System.Environment.OSVersion.Version.Major >= 6) { //check for legacy OS
+                UIExterns.SetLastError(0);
+                //check if composition is enabled
+                int en = 0; UIExterns.DwmIsCompositionEnabled(ref en);
+
+                if (en > 0) {
+                    //set window ex style to transparent
+                    int ret = UIExterns.SetWindowLong(UIExterns.actual_window_handle, UIExterns.GWL_EXSTYLE, UIExterns.WS_EX_TRANSPARENT);
+                    if (ret == 0 && Marshal.GetLastWin32Error() != 0)
+                        throw new Win32Exception(Marshal.GetLastWin32Error());
+
+                    
+                    int[] margins = {  };
+                    if ((ret = UIExterns.DwmExtendFrameIntoClientArea(UIExterns.actual_window_handle, ref margins)) != UIExterns.S_OK)
+                        throw new Win32Exception(ret);
+                }
+            }
         }        
 
-        public static void Load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, GameWindow window, bool default_window_UI = true) {
+        public static void Load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, GameWindow window, bool default_window_UI = true, bool resizeable = false) {
             Swoop.content = content;
+
             Drawing.load(gd, gdm, content, resolution);
             SDF.load(content);
+
             GraphicsDevice.DiscardColor = Color.Transparent;
+
             UI = new UIElementManager(XYPair.Zero, resolution);
 
             render_target_overlay = new AutoRenderTarget(resolution, true);
@@ -136,13 +163,14 @@ namespace SwoopLib {
 
                 if (resize_end != null) resize_end(Swoop._resolution);
             };
+            
 
             default_UI = default_window_UI;
             if (default_window_UI)
-                build_default_UI();            
+                build_default_UI(resizeable);            
         }
 
-        public static void build_default_UI() {
+        public static void build_default_UI(bool resizeable) {
             var text_length = Drawing.measure_string_profont_xy("x") ;
 
             UI.add_element(new Button("exit_button", "x",
@@ -183,7 +211,9 @@ namespace SwoopLib {
                 XYPair.Zero, UI.elements["minimize_button"].position.X + 1));
             UI.elements["title_bar"].ignore_dialog = true;
 
-            UI.add_element(new ResizeHandle("resize_handle", _resolution - (XYPair.One * 15), XYPair.One * 15));
+            if (resizeable) {
+                UI.add_element(new ResizeHandle("resize_handle", _resolution - (XYPair.One * 15), XYPair.One * 15));
+            }
 
             Window.resize_end = (Point size) => {
                 Swoop._resolution = parent.Window.ClientBounds.Size.ToXYPair();
@@ -192,17 +222,18 @@ namespace SwoopLib {
 
                 UI.elements["exit_button"].position = _resolution.X_only - UI.elements["exit_button"].size.X_only;
                 UI.elements["maximize_button"].position = _resolution.X_only - UI.elements["exit_button"].size.X_only - UI.elements["minimize_button"].size.X_only + XYPair.UnitX;
-                UI.elements["minimize_button"].position = _resolution.X_only - UI.elements["exit_button"].size.X_only - UI.elements["minimize_button"].size.X_only - UI.elements["maximize_button"].size.X_only + (XYPair.UnitX*2);
+                UI.elements["minimize_button"].position = _resolution.X_only - UI.elements["exit_button"].size.X_only - UI.elements["minimize_button"].size.X_only - UI.elements["maximize_button"].size.X_only + (XYPair.UnitX * 2);
 
                 UI.elements["title_bar"].size = new XYPair(UI.elements["minimize_button"].X + 1, UI.elements["title_bar"].size.Y);
 
-                UI.elements["resize_handle"].position = Swoop._resolution - (XYPair.One * 15);
+                if (resizeable) {
+                    UI.elements["resize_handle"].position = Swoop._resolution - (XYPair.One * 15);
+                }
 
                 Swoop.enable_draw = true;
 
                 if (resize_end != null) resize_end(Swoop._resolution);
             };
-
         }
         private static void Window_ClientSizeChanged(object? sender, EventArgs e) {
             if (!Window.resizing_window) {
