@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.VisualBasic;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -40,6 +41,18 @@ namespace MGRawInputLib {
         public bool was_pressed(InputHandler input_handler) {
             if (bind_type == InputType.Key) return input_handler.was_pressed((Keys)trigger);
             else if (bind_type == InputType.MouseButton) return input_handler.was_pressed((MouseButtons)trigger);
+            else return false;
+        }
+
+        public bool just_pressed(InputHandler input_handler) {
+            if (bind_type == InputType.Key) return input_handler.just_pressed((Keys)trigger);
+            else if (bind_type == InputType.MouseButton) return input_handler.just_pressed((MouseButtons)trigger);
+            else return false;
+        }
+        
+        public bool just_released(InputHandler input_handler) {
+            if (bind_type == InputType.Key) return input_handler.just_released((Keys)trigger);
+            else if (bind_type == InputType.MouseButton) return input_handler.just_released((MouseButtons)trigger);
             else return false;
         }
 
@@ -103,6 +116,35 @@ namespace MGRawInputLib {
             return false;
         }
 
+        public static bool just_pressed(string bind, InputHandler input) {
+            if (binds.ContainsKey(bind))
+                return binds[bind].just_pressed(input) && binds[bind].enabled;
+
+            Debug.Print($"Bind does not exist {bind}");
+            return false;
+        }
+        public static bool just_released(string bind, InputHandler input) {
+            if (binds.ContainsKey(bind))
+                return binds[bind].just_released(input) && binds[bind].enabled;
+
+            Debug.Print($"Bind does not exist {bind}");
+            return false;
+        }
+
+        public static bool held(string bind, InputHandler input) {
+            if (binds.ContainsKey(bind))
+                return binds[bind].held(input) && binds[bind].enabled;
+
+            Debug.Print($"Bind does not exist {bind}");
+            return false;
+        }
+        public static double held_time(string bind, InputHandler input) {
+            if (binds.ContainsKey(bind))
+                return binds[bind].enabled ? binds[bind].held_time(input) : -1;
+
+            Debug.Print($"Bind does not exist {bind}");
+            return -1;
+        }
 
         public static string list_all_binds(InputHandler input_handler) { 
             if (pressed_inputs == null) return "";
