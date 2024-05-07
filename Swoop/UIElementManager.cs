@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -17,7 +18,7 @@ namespace SwoopLib {
         static List<UIElementManager> managers = new List<UIElementManager>();
 
         static void add_manager(UIElementManager manager) { managers.Add(manager); update_manager_indices(); }
-        static void remove_manager(UIElementManager manager) { managers.Remove(manager); update_manager_indices(); }
+        public static void remove_manager(UIElementManager manager) { managers.Remove(manager); update_manager_indices(); }
 
         static void update_manager_indices() {
             for (int i = 0; i < managers.Count; i++) {
@@ -217,8 +218,10 @@ namespace SwoopLib {
 
         public void remove_element(string name) {
             if (dialog_element == name) dialog_element = null;
-            elements.Remove(name);
+            if (elements[name].sub_elements != null) remove_manager(elements[name].sub_elements);
+            elements.Remove(name);            
             lock (element_order) element_order.Remove(name);
+            
         }
 
         bool mouse_down_prev = false;
