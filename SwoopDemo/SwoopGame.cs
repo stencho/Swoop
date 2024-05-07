@@ -214,7 +214,7 @@ namespace SwoopDemo {
             UI.add_element(new Label("toggle_label", "a toggle button:", (XYPair.UnitY * 25) + (XYPair.UnitX * 15)));
 
             UI.add_element(new ToggleButton("toggle_button", "Toggled On", "Toggled Off", (XYPair.UnitY * 31) + (XYPair.UnitX * 155)));
-            UI.elements["toggle_button"].anchor = UIElement.anchor_point.CENTER;
+            UI.elements["toggle_button"].anchor_local = UIElement.AnchorPoint.CENTER;
 
 
             UI.add_element(new Button("test_button",
@@ -250,7 +250,7 @@ namespace SwoopDemo {
                         "<- that button should always be behind this panel\n     (and only the visible portion should be clickable)",
                         XYPair.One * 2f + (XYPair.UnitY * 55)));
 
-                    sub_elements.add_element(new Label("anchor_label", "this label should be anchored to the bottom right", panel.size, UIElement.anchor_point.BOTTOM_RIGHT));
+                    sub_elements.add_element(new Label("anchor_label", "this label should be anchored to the bottom right", panel.size, UIElement.AnchorPoint.BOTTOM_RIGHT));
                     sub_elements.anchor_to_side("anchor_label", Anchor.AnchorTo.Right | Anchor.AnchorTo.Bottom);
                     
                 })                
@@ -270,7 +270,7 @@ namespace SwoopDemo {
                 "test dialog title text",
                 (Dialog td, UIElementManager sub_elements) => {
                     sub_elements.add_element(new Label("test_label", "this is a test label for testing\nall sorts of different text\n\nthis is a bit of extra text for testing\nabcdefghijklmnopqrstuvwxyz",
-                        td.size / 2, Label.anchor_point.CENTER));
+                        td.size / 2, Label.AnchorPoint.CENTER));
 
                     ((Label)sub_elements.elements["test_label"]).text_justification = Label.alignment.CENTER;
 
@@ -278,7 +278,7 @@ namespace SwoopDemo {
                     ((Label)sub_elements.elements["test_label_2"]).draw_outline = true;
 
                     sub_elements.add_element(new Button("close", "close", new XYPair(td.size.X / 2, td.size.Y - 25)));
-                    sub_elements.elements["close"].anchor = UIElement.anchor_point.CENTER;
+                    sub_elements.elements["close"].anchor_local = UIElement.AnchorPoint.CENTER;
                     ((Button)sub_elements.elements["close"]).click_action = () => {
                         UI.remove_element(td.name);
                         UIElementManager.focus_element(UI, "test_button");
@@ -465,15 +465,18 @@ namespace SwoopDemo {
                 UI.elements["test_listbox"].position + UI.elements["test_listbox"].size.X_only + (XYPair.Right * 8) + (XYPair.Down * 25),
                 UI.elements["test_listbox"].size * 0.75f * (XYPair.One + XYPair.Right)));
 
-            UI.add_element(new OptionSlider("option_slider", 
-                resolution, 
+            UI.add_element(new OptionSlider("option_slider",
+                UI.elements["text_editor"].bottom_xy + (XYPair.UnitY * 8f), 
                 UI.elements["text_editor"].size.X_only * 0.75f, 
                 "Option Slider", 
                 "No", "Low", "Medium", "High", "Ultra", "Yes"
                 ));
-            UI.anchor_local("option_slider", UIElement.anchor_point.BOTTOM_RIGHT);
-            UI.anchor_to_side("option_slider", Anchor.AnchorTo.Right | Anchor.AnchorTo.Bottom);
+            //UI.anchor_local("option_slider", UIElement.AnchorPoint.BOTTOM_RIGHT);
+            //UI.anchor_to_side("option_slider", Anchor.AnchorTo.Right | Anchor.AnchorTo.Bottom);
             UI.register_tooltip("option_slider", new Tooltip("TITLE", "test of a tooltip lmoa\nhaha"));
+
+            Binds.add("test", Keys.Back);
+            Binds.add("test_two", MouseButtons.Right);
         }
 
         static float progress_bar_test_value = 0.5f;
@@ -498,7 +501,9 @@ namespace SwoopDemo {
             string focus_info = $"{(UIElementManager.focused_element != null ? UIElementManager.focused_element.name : "")}";            
 
             ((TitleBar)UI.elements["title_bar"]).left_text = title_text;
-            ((TitleBar)UI.elements["title_bar"]).right_text = FPS_text + " | " +  Input.poll_method;
+            ((TitleBar)UI.elements["title_bar"]).right_text = 
+                (Swoop.mouse_over_element != null ? $"M{UIElementManager.manager_under_mouse_index} -> {Swoop.mouse_over_element.name} | " : "WORLD | ") +                 
+                FPS_text + " | " +  Input.poll_method;
 
             ((Label)UI.elements["ri_info_label"]).change_text(Swoop.input_handler.ri_info());
 

@@ -165,12 +165,12 @@ namespace SwoopLib {
             if (!Window.is_active) return;
             if (!captured) return;
 
-            foreach (Input.KeyTime key_time in input_handler.just_pressed_keys) {
+            foreach (Input.InputTime key_time in input_handler.just_pressed_inputs) {
                 if (!key_time.handled)
                     eval_key(key_time);
             }
 
-            foreach (Input.KeyTime key_time in input_handler.pressed_keys) {
+            foreach (Input.InputTime key_time in input_handler.pressed_inputs) {
                 if ((key_time.held && !key_time.handled) && (key_time.repeat()))
                     eval_key(key_time);
             }
@@ -815,7 +815,7 @@ namespace SwoopLib {
         }
 
         // haha, oh boy
-        void eval_key(Input.KeyTime key) {
+        void eval_key(Input.InputTime key) {
             switch (key.key) {
                 case Keys.None: return;
                 case Keys.Escape: return;

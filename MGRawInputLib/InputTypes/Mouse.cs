@@ -2,7 +2,7 @@
 using static MGRawInputLib.RawInputTypes;
 
 namespace MGRawInputLib {
-    public enum MouseButtons { Left, Right, Middle, X1, X2, ScrollUp, ScrollDown }
+    public enum MouseButtons { Left, Right, Middle, X1, X2, ScrollUp, ScrollDown, None }
 
     public static class RawInputMouse {
         static RawInputMouseState mouse_state = new RawInputMouseState();

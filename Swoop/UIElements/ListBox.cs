@@ -368,7 +368,7 @@ namespace SwoopLib.UIElements {
 
         internal override void handle_focused_input() {}
 
-        internal void check_keys(KeyTime key_time) {
+        internal void check_keys(InputTime key_time) {
             if (!Window.is_active) return;
             if (!focused) return;
 

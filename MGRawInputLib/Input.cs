@@ -13,17 +13,22 @@ namespace MGRawInputLib {
         public static double key_hold_time = 500;
         public static double repeat_rate = 50;
 
-        public static HashSet<KeyTime> pressed_keys = new HashSet<KeyTime>();
+        public static HashSet<InputTime> pressed_inputs = new HashSet<InputTime>();
 
+        public enum InputType {
+            Key, MouseButton
+        }
 
-        public class KeyTime {
-            Keys _key;
-            public Keys key => _key;
+        public class InputTime {
+            public InputType input_type = InputType.Key;
+            object _trigger;
+            public Keys key => input_type == InputType.Key ? (Keys)_trigger : Keys.None;
+            public MouseButtons mouse_button => input_type == InputType.MouseButton ? (MouseButtons)_trigger : MouseButtons.None;
 
             DateTime _pressed_time;
             public DateTime pressed_time => _pressed_time;
 
-            public TimeSpan time_since_press => DateTime.Now - _pressed_time;            
+            public TimeSpan time_since_press => DateTime.Now - _pressed_time;
             public bool held => time_since_press.TotalMilliseconds >= key_hold_time;
 
             public TimeSpan repeat_timer;
@@ -48,33 +53,66 @@ namespace MGRawInputLib {
                 return false;
             }
 
-            public KeyTime() {}
+            public override string ToString() {
+                if (input_type == InputType.Key) {
+                    return key.ToString();
+                } else if (input_type == InputType.MouseButton) {
+                    return mouse_button.ToString();
+                } else return "";
+            }
 
-            public KeyTime(Keys key, DateTime time) {
-                this._key = key;                
+            public string type_prefix() {
+                if (input_type == InputType.Key) {
+                    return "key_";
+                } else if (input_type == InputType.MouseButton) {
+                    return "mouse_";
+                } else return "";
+            }
+
+            public InputTime() {
+            }
+
+            public InputTime(Keys trigger, DateTime time) {
+                this._trigger = trigger;
                 _pressed_time = time;
                 last_time = pressed_time;
+                input_type = InputType.Key;
+            }
+            public InputTime(MouseButtons trigger, DateTime time) {
+                this._trigger = trigger;
+                _pressed_time = time;
+                last_time = pressed_time;
+                input_type = InputType.MouseButton;
             }
         }
 
-
         public static string list_keys() {
-            if (pressed_keys == null) return "";
+            if (pressed_inputs == null) return "";
             StringBuilder sb = new StringBuilder();
-            foreach (KeyTime key in pressed_keys) { sb.Append(key.key.ToString()); sb.Append(", "); }
+            foreach (InputTime input in pressed_inputs) {
+                sb.Append(input.type_prefix()); sb.Append(input.ToString().ToLower()); sb.Append(", "); 
+            }
             if (sb.Length > 0)
                 sb.Remove(sb.Length - 2, 2);
             return sb.ToString();
         }
 
 
-        public static bool key_in_pressed_list(Keys k, out KeyTime key_time) {
-            foreach (var key in pressed_keys) {
-                if (k == key.key) { key_time = key; return true; }
+        public static bool in_pressed_list(Keys k, out InputTime input_time) {
+            foreach (var input in pressed_inputs) {
+                if (k == input.key) { input_time = input; return true; }
             }
-            key_time = new KeyTime();
+            input_time = new InputTime();
             return false;
         }
+        public static bool in_pressed_list(MouseButtons mb, out InputTime input_time) {
+            foreach (var input in pressed_inputs) {
+                if (mb == input.mouse_button) { input_time = input; return true; }
+            }
+            input_time = new InputTime();
+            return false;
+        }
+
 
         public static void end() { 
             run_thread = false;
@@ -176,6 +214,17 @@ namespace MGRawInputLib {
         static TimeSpan sleep_ts;
         static Stopwatch stopwatch = new Stopwatch();
 
+        static HashSet<MouseButtons> get_pressed_mouse_buttons() {
+            HashSet<MouseButtons> pmb = new HashSet<MouseButtons>();
+            var buttons = Enum.GetValues(typeof(MouseButtons));
+            
+            foreach(MouseButtons b in buttons) {
+                if (is_pressed(b)) pmb.Add(b);
+            }
+
+            return pmb;
+        }
+
         static void update() {
             stopwatch.Start();
             Debug.Print(Stopwatch.IsHighResolution.ToString() + " " + Stopwatch.Frequency);
@@ -209,18 +258,28 @@ namespace MGRawInputLib {
                         handlers[i].accumulate_scroll_delta(ri_mouse_state.ScrollDelta);
                     }
 
-                    lock (pressed_keys) {
+                    lock (pressed_inputs) {
                         var current_keys = ri_keyboard_state.pressed_keys;
+                        var current_mouse_buttons = get_pressed_mouse_buttons();
 
-                        foreach (var kt in pressed_keys) {
+                        foreach (var kt in pressed_inputs) {
                             //kt.unhandle();
 
-                            if (!current_keys.Contains(kt.key)) pressed_keys.Remove(kt);
+                            if (kt.input_type == InputType.Key && !current_keys.Contains(kt.key)) 
+                                pressed_inputs.Remove(kt);
+                            if (kt.input_type == InputType.MouseButton && !current_mouse_buttons.Contains(kt.mouse_button)) 
+                                pressed_inputs.Remove(kt);
                         }
 
                         foreach (var k in current_keys) {
-                            if (!key_in_pressed_list(k, out _)) {
-                                pressed_keys.Add(new KeyTime(k, DateTime.Now));
+                            if (!in_pressed_list(k, out _)) {
+                                pressed_inputs.Add(new InputTime(k, DateTime.Now));
+                            }
+                        }
+
+                        foreach (var mb in current_mouse_buttons) {
+                            if (!in_pressed_list(mb, out _)) {
+                                pressed_inputs.Add(new InputTime(mb, DateTime.Now));
                             }
                         }
                     }
@@ -242,16 +301,16 @@ namespace MGRawInputLib {
                     foreach (InputHandler handler in handlers) handler.accumulate_mouse_delta(mouse_delta);
 
 
-                    lock (pressed_keys) {
+                    lock (pressed_inputs) {
                         var current_keys = keyboard_state.GetPressedKeys();
 
-                        foreach (var kt in pressed_keys) {
-                            if (!current_keys.Contains(kt.key)) pressed_keys.Remove(kt);
+                        foreach (var kt in pressed_inputs) {
+                            if (!current_keys.Contains(kt.key)) pressed_inputs.Remove(kt);
                         }
 
                         foreach (var k in current_keys) {
-                            if (!key_in_pressed_list(k, out _)) {
-                                pressed_keys.Add(new KeyTime(k, DateTime.Now));
+                            if (!in_pressed_list(k, out _)) {
+                                pressed_inputs.Add(new InputTime(k, DateTime.Now));
                             }
                         }
                     }
