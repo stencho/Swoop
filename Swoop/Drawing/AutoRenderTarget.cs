@@ -74,7 +74,7 @@ namespace SwoopLib {
                 Drawing.end();
 
                 if (targets.Count == 0) return;
-                foreach (AutoRenderTarget target in targets) {
+                foreach (AutoRenderTarget target in targets.Reverse<AutoRenderTarget>()) {
                     if (target.draw != null && target.draw_to_screen_late) {
                         //target.draw_screen_pos_map();
                         Drawing.image(target.render_target, target.position, target.size);
