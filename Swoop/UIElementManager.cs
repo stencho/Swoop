@@ -34,7 +34,7 @@ namespace SwoopLib {
 
         static bool interacting_with_focused_element = false;
 
-        //public static bool allow_element_defocus { get; set; } = true;
+        public static bool allow_element_defocus { get; set; } = true;
 
         public static void focus_element(UIElementManager manager, string element_name) {
             if (manager.elements.ContainsKey(element_name)) {
@@ -288,9 +288,9 @@ namespace SwoopLib {
             }
 
             
-            if (mouse_down && !mouse_down_prev && !click_hit && UIExterns.in_foreground()) {
+            if (mouse_down && !mouse_down_prev && element_under_mouse == null && manager_under_mouse == null && UIExterns.in_foreground()) {
                 //close menus and defocus elements if that is wanted
-                //if (allow_element_defocus) focused_element_name = ""; 
+                if (allow_element_defocus) focused_element_name = ""; 
             }
 
             mouse_down_prev = mouse_down;
