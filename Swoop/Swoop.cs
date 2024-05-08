@@ -249,6 +249,10 @@ namespace SwoopLib {
             }
         }
 
+        public static void update_input() {
+            input_handler.update();
+        }
+
         public static void Update(GameTime gt) {
             game_time = gt;
 
@@ -257,7 +261,6 @@ namespace SwoopLib {
             UIElementManager.update_UI_input();
             Tooltip.Manager.update();
 
-            input_handler.update();
 
             if (default_UI) {
                 UI.send_to_front("title_bar");

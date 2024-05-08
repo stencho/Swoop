@@ -114,22 +114,25 @@ namespace SwoopDemo {
             e_g.FillPie(System.Drawing.Brushes.LightGray, new System.Drawing.Rectangle(5, 75, 20, 20), -90f, 0f + spinny);
         }
 
+        XYPair rt_pos;
+
         protected void build_UI() {
             render_target_bg = new AutoRenderTarget(
                 resolution.X_only - (resolution.X_only / 4.5f) + ((UI.elements["title_bar"].height + 28) * XYPair.UnitY),
                 (XYPair.UnitX * 200) + (XYPair.UnitY * 100), true);
 
+            rt_pos = resolution.X_only - (resolution.X_only / 4.5f) + ((render_target_bg.position.Y + render_target_bg.size.Y + 20) * XYPair.UnitY);
             render_target_fg = new AutoRenderTarget(
-                resolution.X_only - (resolution.X_only / 4.5f) + ((render_target_bg.position.Y + render_target_bg.size.Y + 20) * XYPair.UnitY),
+                rt_pos,
                 (XYPair.UnitX * 200) + (XYPair.UnitY * 100), true);
 
             UI.add_element(new Label(
                 "test_3d_label_2", "shader > rt > foreground",
                 (resolution.X_only - (resolution.X_only / 4.5f)) + ((render_target_fg.position.Y - 11) * XYPair.UnitY)));
             UI.add_element(new Label(
-                "test_3d_label_3", "this text is behind the top\nrt layer and being passed\nthrough via a shader which is\naware of each pixel's screen\nposition, so it can pull data\nfrom the main screen render\ntarget and tint it for example\nwheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                "test_3d_label_3", "this text is behind the top\nrt layer and being passed\nthrough via a shader which is\naware of each pixel's screen\nposition, so it can pull data\nfrom the main screen render\ntarget and tint it for example\nwheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\n\n    hold Ctrl+Z to move this tint box around",
                 (resolution.X_only - (resolution.X_only / 4.5f)) + ((render_target_fg.position.Y + 5) * XYPair.UnitY) + (XYPair.UnitX * -20f)));
-            
+         
             /*
             UI.add_element(new GDICanvas("gdi_canvas", 
                 resolution.X_only - (resolution.X_only / 4.5f) + ((render_target_fg.position.Y + render_target_fg.size.Y + 20) * XYPair.UnitY),
@@ -191,7 +194,7 @@ namespace SwoopDemo {
 
                 tint_effect.set_param("tint", Swoop.UI_highlight_color.ToVector4());
                 tint_effect.set_param("bg", Swoop.UI_background_color.ToVector4());
-                tint_effect.set_param("screen_texture", Swoop.render_target_output);
+                tint_effect.set_param("screen_texture", output_rt);
                 tint_effect.set_param("screen_pos_texture", render_target_fg.screen_pos_rt);
 
                 tint_effect.draw_plane();
@@ -469,19 +472,22 @@ namespace SwoopDemo {
                 UI.elements["text_editor"].bottom_xy + (XYPair.UnitY * 8f), 
                 UI.elements["text_editor"].size.X_only * 0.75f, 
                 "Option Slider", 
-                "No", "Low", "Medium", "High", "Ultra", "Yes"
+                "Low", "Medium", "High", "Ultra", "Yes"
                 ));
             //UI.anchor_local("option_slider", UIElement.AnchorPoint.BOTTOM_RIGHT);
             //UI.anchor_to_side("option_slider", Anchor.AnchorTo.Right | Anchor.AnchorTo.Bottom);
-            UI.register_tooltip("option_slider", new Tooltip("TITLE", "test of a tooltip lmoa\nhaha"));
+            UI.register_tooltip("option_slider", new Tooltip("A TOOLTIP TITLE", "test of a tooltip lmoa\nhaha"));
 
             Binds.add("test", Keys.Back);
             Binds.add("test_two", MouseButtons.Right);
+            Binds.add("test_tint_rect", Keys.Z);
         }
 
         static float progress_bar_test_value = 0.5f;
 
         protected override void Update(GameTime gameTime) {
+            Swoop.update_input();
+
             float clock = (float)gameTime.ElapsedGameTime.TotalSeconds;
             progress_bar_test_value += 0.25f * clock;
             if (progress_bar_test_value > 1f)
@@ -493,7 +499,15 @@ namespace SwoopDemo {
             ((ProgressBar)UI.elements["progress_bar_vertical"]).value = progress_bar_test_value;
             ((ProgressBar)UI.elements["progress_bar_vertical_inverted"]).value = progress_bar_test_value;
 
-            Swoop.Update(gameTime);
+            if (Swoop.input_handler.is_pressed(Keys.LeftControl) && Binds.is_pressed("test_tint_rect", Swoop.input_handler)) {
+                Binds.handle("test_tint_rect", Swoop.input_handler);
+                render_target_fg.position = Input.cursor_pos.ToXYPair() - (render_target_fg.size / 2f);
+
+            } else if (Binds.just_released("test_tint_rect", Swoop.input_handler)) {
+                render_target_fg.position = rt_pos;
+            }
+
+
             StringBuilder sb = new StringBuilder();
 
             string title_text = $"{UIExterns.get_window_title()}";
@@ -509,6 +523,12 @@ namespace SwoopDemo {
 
             if (Swoop.input_handler.is_pressed(Keys.Escape)) ((Button)UI.elements["exit_button"]).click_action();
 
+
+            if (Swoop.input_handler.just_held(Keys.H)) {
+                Debug.Print("fart");
+            }
+
+            Swoop.Update(gameTime);
             fps.update(gameTime);
             base.Update(gameTime);
         }
@@ -533,6 +553,7 @@ namespace SwoopDemo {
             GraphicsDevice.SetRenderTarget(output_rt);
             GraphicsDevice.Clear(Color.Transparent);
             Swoop.DrawBackground();
+            AutoRenderTarget.Manager.draw_rts_to_target_background();
 
             font_manager_impact.draw_string("SPRITE FONT RENDERER", (XYPair.UnitX * 10) + (XYPair.UnitY * 440), Swoop.UI_highlight_color);
             font_manager_badaboom.draw_map_debug_layer((XYPair.UnitX * 10) + (XYPair.UnitY * 480), font_manager_badaboom.char_map_size, Content);
@@ -548,12 +569,11 @@ namespace SwoopDemo {
 
 
             //draw background RTs, then the main RT output, then the foreground RTs
-            AutoRenderTarget.Manager.draw_rts_to_target_background();
             Drawing.image(Swoop.render_target_output, XYPair.Zero, resolution);
-            AutoRenderTarget.Manager.draw_rts_to_target_foreground();
 
             GraphicsDevice.SetRenderTarget(null);
             Drawing.image(output_rt, XYPair.Zero, resolution);
+            AutoRenderTarget.Manager.draw_rts_to_target_foreground();
 
 
             //FontManager.glyph_draw_shader.begin_spritebatch(Drawing.sb, SamplerState.AnisotropicWrap);

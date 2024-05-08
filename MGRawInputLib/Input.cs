@@ -31,16 +31,31 @@ namespace MGRawInputLib {
             public TimeSpan time_since_press => DateTime.Now - _pressed_time;
             public bool held => time_since_press.TotalMilliseconds >= key_hold_time;
 
+            internal bool was_held = false;
+            bool _just_held = false;
+            public bool just_held { 
+                get {
+                    _just_held = held && !was_held;
+
+                    if (_just_held) {
+                        was_held = true;
+                    }
+
+                    return _just_held;
+                }
+            }
+
             public TimeSpan repeat_timer;
 
             DateTime last_time;
 
-            public bool handled = false;
-            public void handle() { handled = true; }
-            public void unhandle() { handled = false; }
+            bool _handled = false;
+            public bool handled => _handled;
+            public void handle() { _handled = true; }
+            public void unhandle() { _handled = false; }
 
             public bool repeat() {
-                if (handled) { last_time = DateTime.Now; return false; }
+                if (_handled) { last_time = DateTime.Now; return false; }
 
                 var time = DateTime.Now;
                 repeat_timer = time - last_time;
@@ -99,15 +114,19 @@ namespace MGRawInputLib {
 
 
         public static bool in_pressed_list(Keys k, out InputTime input_time) {
-            foreach (var input in pressed_inputs) {
-                if (k == input.key) { input_time = input; return true; }
+            lock (pressed_inputs) {
+                foreach (var input in pressed_inputs) {
+                    if (k == input.key) { input_time = input; return true; }
+                }
             }
             input_time = new InputTime();
             return false;
         }
         public static bool in_pressed_list(MouseButtons mb, out InputTime input_time) {
-            foreach (var input in pressed_inputs) {
-                if (mb == input.mouse_button) { input_time = input; return true; }
+            lock (pressed_inputs) {
+                foreach (var input in pressed_inputs) {
+                    if (mb == input.mouse_button) { input_time = input; return true; }
+                }
             }
             input_time = new InputTime();
             return false;
@@ -407,7 +426,7 @@ namespace MGRawInputLib {
         static void reset_mouse(Point resolution) {
         }
 
-        public static bool is_pressed(Keys key) {
+        public static bool is_pressed(Keys key) {            
             if (_input_method == input_method.MonoGame) return keyboard_state.IsKeyDown(key);
             else if (_input_method == input_method.RawInput) return ri_keyboard_state.IsKeyDown(key);
             else return keyboard_state.IsKeyDown(key) || ri_keyboard_state.IsKeyDown(key);

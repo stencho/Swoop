@@ -14,57 +14,63 @@ namespace MGRawInputLib {
         
         object trigger;
         
-        InputType bind_type;
+        InputType _bind_type;
+        public InputType bind_type => _bind_type;
+
+
+        public Keys as_key => bind_type == InputType.Key ? (Keys)trigger : Keys.None;
+        public MouseButtons as_mouse_button => bind_type == InputType.MouseButton ? (MouseButtons)trigger : MouseButtons.None;
+
 
         public string type_string() {
-            if (bind_type == InputType.Key) return "key_";
-            else if (bind_type == InputType.MouseButton) return "mouse_";
+            if (_bind_type == InputType.Key) return "key_";
+            else if (_bind_type == InputType.MouseButton) return "mouse_";
             else return "";
         }
 
         public Bind (Keys trigger) {
             this.trigger = trigger;
-            bind_type = InputType.Key;
+            _bind_type = InputType.Key;
         }
 
         public Bind (MouseButtons trigger) {
             this.trigger = trigger;
-            bind_type = InputType.MouseButton;
+            _bind_type = InputType.MouseButton;
         }
 
-        public bool is_pressed(InputHandler input_handler) {
-            if (bind_type == InputType.Key) return input_handler.is_pressed((Keys)trigger);
-            else if (bind_type == InputType.MouseButton) return input_handler.is_pressed((MouseButtons)trigger);
+        public bool is_pressed(InputHandler input_handler) {            
+            if (_bind_type == InputType.Key) return input_handler.is_pressed((Keys)trigger);
+            else if (_bind_type == InputType.MouseButton) return input_handler.is_pressed((MouseButtons)trigger);
             else return false;
         }
 
         public bool was_pressed(InputHandler input_handler) {
-            if (bind_type == InputType.Key) return input_handler.was_pressed((Keys)trigger);
-            else if (bind_type == InputType.MouseButton) return input_handler.was_pressed((MouseButtons)trigger);
+            if (_bind_type == InputType.Key) return input_handler.was_pressed((Keys)trigger);
+            else if (_bind_type == InputType.MouseButton) return input_handler.was_pressed((MouseButtons)trigger);
             else return false;
         }
 
         public bool just_pressed(InputHandler input_handler) {
-            if (bind_type == InputType.Key) return input_handler.just_pressed((Keys)trigger);
-            else if (bind_type == InputType.MouseButton) return input_handler.just_pressed((MouseButtons)trigger);
+            if (_bind_type == InputType.Key) return input_handler.just_pressed((Keys)trigger);
+            else if (_bind_type == InputType.MouseButton) return input_handler.just_pressed((MouseButtons)trigger);
             else return false;
         }
         
         public bool just_released(InputHandler input_handler) {
-            if (bind_type == InputType.Key) return input_handler.just_released((Keys)trigger);
-            else if (bind_type == InputType.MouseButton) return input_handler.just_released((MouseButtons)trigger);
+            if (_bind_type == InputType.Key) return input_handler.just_released((Keys)trigger);
+            else if (_bind_type == InputType.MouseButton) return input_handler.just_released((MouseButtons)trigger);
             else return false;
         }
 
         public bool held(InputHandler input_handler) {
-            if (bind_type == InputType.Key) return input_handler.held((Keys)trigger);
-            else if (bind_type == InputType.MouseButton) return input_handler.held((MouseButtons)trigger);
+            if (_bind_type == InputType.Key) return input_handler.held((Keys)trigger);
+            else if (_bind_type == InputType.MouseButton) return input_handler.held((MouseButtons)trigger);
             else return false;
         }
 
         public double held_time(InputHandler input_handler) {
-            if (bind_type == InputType.Key) return input_handler.held_time((Keys)trigger);
-            else if (bind_type == InputType.MouseButton) return input_handler.held_time((MouseButtons)trigger);
+            if (_bind_type == InputType.Key) return input_handler.held_time((Keys)trigger);
+            else if (_bind_type == InputType.MouseButton) return input_handler.held_time((MouseButtons)trigger);
             else return -1;
         }
 
@@ -85,7 +91,6 @@ namespace MGRawInputLib {
             if (binds.ContainsKey(bind)) return;
             binds.Add(bind, new Bind(trigger));
         }
-
         public static void remove(string bind) {
             if (!binds.ContainsKey(bind)) return;
             binds.Remove(bind);
@@ -98,6 +103,19 @@ namespace MGRawInputLib {
         public static void disable_bind(string bind) {
             if (!binds.ContainsKey(bind)) return;
             binds[bind].enabled = false;
+        }
+
+
+        public static void handle(string bind, InputHandler input) {
+            if (binds.ContainsKey(bind)) {
+                if (binds[bind].bind_type == InputType.Key)
+                    input.handle_key(binds[bind].as_key);
+                else if (binds[bind].bind_type == InputType.MouseButton)
+                    input.handle_key(binds[bind].as_mouse_button);
+                
+            } else {
+                Debug.Print($"Bind does not exist {bind}");
+            }
         }
 
 

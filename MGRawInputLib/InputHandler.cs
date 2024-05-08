@@ -81,13 +81,48 @@ namespace MGRawInputLib {
         }
 
         public void handle_key(Keys key) {
-            foreach (InputTime k in pressed_inputs) {
-                if (k.key == key) k.handle();
+            foreach (InputTime k in just_pressed_inputs) {
+                if (k.key == key) { k.handle(); break; }
+            }
+            foreach (InputTime k in Input.pressed_inputs) {
+                if (k.key == key) { k.handle(); break; }
+            }
+            foreach (InputTime k in previous_pressed_inputs) {
+                if (k.key == key) { k.handle(); break; }
             }
         }
         public void unhandle_key(Keys key) {
-            foreach (InputTime k in pressed_inputs) {
-                if (k.key == key) k.unhandle();
+            foreach (InputTime k in just_pressed_inputs) {
+                if (k.key == key) { k.unhandle(); break; }
+            }
+            foreach (InputTime k in Input.pressed_inputs) {
+                if (k.key == key) { k.unhandle(); break; }
+            }
+            foreach (InputTime k in previous_pressed_inputs) {
+                if (k.key == key) { k.unhandle(); break; }
+            }
+        }
+
+        public void handle_key(MouseButtons mb) {
+            foreach (InputTime k in just_pressed_inputs) {
+                if (k.mouse_button == mb) { k.handle(); break; }
+            }
+            foreach (InputTime k in Input.pressed_inputs) {
+                if (k.mouse_button == mb) { k.handle(); break; }
+            }
+            foreach (InputTime k in previous_pressed_inputs) {
+                if (k.mouse_button == mb) { k.handle(); break; }
+            }
+        }
+        public void unhandle_key(MouseButtons mb) {
+            foreach (InputTime k in just_pressed_inputs) {
+                if (k.mouse_button == mb) { k.unhandle(); break; }
+            }
+            foreach (InputTime k in Input.pressed_inputs) {
+                if (k.mouse_button == mb) { k.unhandle(); break; }
+            }
+            foreach (InputTime k in previous_pressed_inputs) {
+                if (k.mouse_button == mb) { k.unhandle(); break; }
             }
         }
 
@@ -131,7 +166,7 @@ namespace MGRawInputLib {
 
             lock (pressed_inputs) {
                 foreach (var k in pressed_inputs) {
-                    if (!previous_pressed_inputs.Contains(k)) {
+                    if (!previous_pressed_inputs.Contains(k) && !k.handled) {
                         just_pressed_inputs.Add(k);
                     }
 
@@ -276,15 +311,33 @@ namespace MGRawInputLib {
             return false;
         }
 
-        public bool just_pressed(Keys key) => is_pressed(key) && !was_pressed(key);        
+        public bool is_handled(Keys key) {
+            InputTime kt;
+            if (Input.in_pressed_list(key, out kt)) {
+                return kt.handled;
+            } else {
+                return false;
+            }
+        }
+        public bool is_handled(MouseButtons mb) {
+            InputTime kt;
+            if (Input.in_pressed_list(mb, out kt)) {
+                return kt.handled;
+            } else {
+                return false;
+            }
+        }
+
+        public bool just_pressed(Keys key) => is_pressed(key) && !was_pressed(key) && !is_handled(key);        
         public bool just_released(Keys key) => !is_pressed(key) && was_pressed(key);
 
-        public bool just_pressed(MouseButtons mouse_button) => is_pressed(mouse_button) && !was_pressed(mouse_button);
+        public bool just_pressed(MouseButtons mouse_button) => is_pressed(mouse_button) && !was_pressed(mouse_button) && !is_handled(mouse_button);
         public bool just_released(MouseButtons mouse_button) => !is_pressed(mouse_button) && was_pressed(mouse_button);
+
 
         public bool held(Keys key) {
             InputTime kt;
-            if (Input.in_pressed_list(key, out kt)) {
+            if (Input.in_pressed_list(key, out kt) && !kt.handled) {
                 return kt.held;
             } else {
                 return false;
@@ -292,8 +345,25 @@ namespace MGRawInputLib {
         }
         public bool held(MouseButtons mb) {
             InputTime kt;
-            if (Input.in_pressed_list(mb, out kt)) {
+            if (Input.in_pressed_list(mb, out kt) && !kt.handled) {
                 return kt.held;
+            } else {
+                return false;
+            }
+        }
+
+        public bool just_held(Keys key) {
+            InputTime kt; InputTime ktp;
+            if (Input.in_pressed_list(key, out kt) && !kt.handled) {
+                return kt.just_held;
+            } else {
+                return false;
+            }
+        }
+        public bool just_held(MouseButtons mb) {
+            InputTime kt; InputTime ktp;
+            if (Input.in_pressed_list(mb, out kt) && !kt.handled) {
+                return kt.just_held;
             } else {
                 return false;
             }
@@ -301,7 +371,7 @@ namespace MGRawInputLib {
 
         public double held_time(Keys key) {
             InputTime kt;
-            if (Input.in_pressed_list(key, out kt)) {
+            if (Input.in_pressed_list(key, out kt) && !kt.handled) {
                 return kt.time_since_press.TotalMilliseconds;
             } else {
                 return -1;
@@ -309,7 +379,7 @@ namespace MGRawInputLib {
         }
         public double held_time(MouseButtons mb) {
             InputTime kt;
-            if (Input.in_pressed_list(mb, out kt)) {
+            if (Input.in_pressed_list(mb, out kt) && !kt.handled) {
                 return kt.time_since_press.TotalMilliseconds;
             } else {
                 return -1;
@@ -318,6 +388,7 @@ namespace MGRawInputLib {
 
         public void do_action_loops() {
             just_pressed_action_loop();
+            pressed_action_loop();
             hold_repeat_action_loop();
         }
 
@@ -339,6 +410,23 @@ namespace MGRawInputLib {
             }
         }
 
+        Action<InputTime> pressed_action;
+        bool pressed_action_set = false;
+
+        public void set_pressed_action(Action<InputTime> pressed_action) {
+            this.pressed_action = pressed_action;
+            pressed_action_set = true;
+        }
+
+        public void pressed_action_loop() {
+            if (!pressed_action_set) return;
+
+            foreach (Input.InputTime key_time in pressed_inputs) {
+                if (!key_time.handled) {
+                    pressed_action(key_time);
+                }
+            }
+        }
 
         Action<InputTime> hold_tick_action;
         bool hold_tick_action_set = false;
