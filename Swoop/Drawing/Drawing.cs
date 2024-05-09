@@ -37,7 +37,6 @@ namespace SwoopLib
         private static int sdf_circle_res = 256;
 
         static Effects.Dither dither_effect;
-        static Effects.InvertingText color_flip_effect;
 
         public static FontManager font_manager_profont;
         public static FontManager font_manager_profont_big;
@@ -242,6 +241,7 @@ namespace SwoopLib
             begin();
             sb.Draw(OnePXWhite, min.ToVector2(), null, color, 0f, Vector2.Zero, (max - min).ToVector2(), SpriteEffects.None, 0f);
         }
+
         public static void fill_rect_dither(XYPair min, XYPair max, Color color_a, Color color_b) {
             if (dither_effect == null) dither_effect = new Dither(Swoop.content);
 
