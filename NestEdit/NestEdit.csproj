@@ -32,9 +32,10 @@
   <ItemGroup>
   	<Using Remove="System.Drawing" />
 	  <Using Remove="System.Windows.Forms" />
-  </ItemGroup>
+  </ItemGroup>	
   <ItemGroup>
-    <PackageReference Include="NAudio.Asio" Version="2.2.1" />
+    <PackageReference Include="ManagedBass" Version="3.1.1" />
+    <PackageReference Include="ManagedBass.Asio" Version="3.1.1" />
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
     <Message Text="Restoring dotnet tools" Importance="High" />

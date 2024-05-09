@@ -15,6 +15,9 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
+using ManagedBass;
+using ManagedBass.Asio;
+
 namespace NestEdit {
     public class NestEditGame : Game {
         GraphicsDeviceManager graphics;
@@ -30,6 +33,7 @@ namespace NestEdit {
         
         UIElementManager UI => Swoop.UI;
 
+        float[] _buffer;
 
         public NestEditGame() {
             graphics = new GraphicsDeviceManager(this);
@@ -38,7 +42,7 @@ namespace NestEdit {
 
             this.IsFixedTimeStep = true;
             this.InactiveSleepTime = System.TimeSpan.Zero;
-            this.TargetElapsedTime = System.TimeSpan.FromMilliseconds(1000.0 / target_fps);
+            this.TargetElapsedTime = System.TimeSpan.FromMilliseconds(1000.0 / target_fps);            
         }
 
         protected override void Initialize() {

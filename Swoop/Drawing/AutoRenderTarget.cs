@@ -81,7 +81,6 @@ namespace SwoopLib {
                     }
                 }
             }
-
         }
 
         static Effect screen_pos_effect;
@@ -122,6 +121,11 @@ namespace SwoopLib {
             needs_resize = true;
         }
 
+        bool needs_new_pos_map = false;
+        void request_new_pos_map() {
+            needs_new_pos_map = true;
+        }
+
         void resize_render_targets() {
             render_target = new RenderTarget2D(Drawing.graphics_device, size.X, size.Y, false, SurfaceFormat.Vector4, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
             
@@ -149,7 +153,6 @@ namespace SwoopLib {
             init();
         }
 
-
         void init() {
             Manager.add(this);
 
@@ -163,11 +166,6 @@ namespace SwoopLib {
         }
 
         public void update() { }
-
-        bool needs_new_pos_map = false;
-        void request_new_pos_map() {
-            needs_new_pos_map = true;
-        }
 
         public void draw_screen_pos_map() {
             Drawing.end();

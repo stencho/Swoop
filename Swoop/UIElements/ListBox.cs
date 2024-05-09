@@ -69,11 +69,11 @@ namespace SwoopLib.UIElements {
                     XYPair.Left, XYPair.Right, 
                     //XYPair.Left * 2, XYPair.Right * 2,
                     XYPair.Up, XYPair.Down//,
-                    //XYPair.Up * 2, XYPair.Down * 2
+                    //XYPair.Up * 2, XzzYPair.Down * 2
                     );
             } else {
                 Drawing.text(text, XYPair.Zero + (XYPair.UnitX * left_margin),
-                 is_selected ? Swoop.UI_background_color : Swoop.get_color(parent));
+                 is_selected ? Swoop.UI_background_color : Swoop.UI_color);
             }
         }
 
@@ -371,7 +371,7 @@ namespace SwoopLib.UIElements {
         internal void check_keys(InputTime key_time) {
             if (!Window.is_active) return;
             if (!focused) return;
-
+            if (key_time.handled) return;
             if (key_time.held == false) {
                 //JUST PRESSED ONLY
                 switch (key_time.key) {

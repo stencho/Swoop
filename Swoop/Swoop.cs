@@ -64,11 +64,14 @@ namespace SwoopLib {
         public static bool enable_draw { get; set; } = true;
         public static bool show_logo { get; set; } = true;
 
-        public static bool mouse_over_any_element => mouse_over_element != null;
+
         //awful
         public static UIElement? mouse_over_element => UIElementManager.manager_under_mouse == null ? null
             : (UIElementManager.manager_under_mouse.element_under_mouse == null ? null : UIElementManager.manager_under_mouse.element_under_mouse);
+        public static bool mouse_over_any_element => mouse_over_element != null;
 
+        public static UIElement? focused_element => UIElementManager.focused_element;
+        public static bool UI_focused => focused_element != null;
 
         internal static bool default_UI = false;
         internal static bool maximized = false;

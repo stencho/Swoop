@@ -1673,6 +1673,7 @@ namespace MGRawInputLib {
 
             static RAWINPUT data;
             static int rawinput_data_size = 0;
+
             internal static nint wnd_proc(nint hWnd, uint msg, nint wParam, nint lParam) {
                 if (!enable) goto ret;
                 if (msg == (uint)WM.INPUT) {
@@ -1690,7 +1691,6 @@ namespace MGRawInputLib {
                         }
                     }
                 }
-
                 ret:
                 return DefWindowProc(hWnd, msg, wParam, lParam);
             }

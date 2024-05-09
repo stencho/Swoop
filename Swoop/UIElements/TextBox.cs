@@ -87,6 +87,74 @@ namespace SwoopLib.UIElements {
         XYPair view_offset = XYPair.One * 10;
         XYPair view_size => size;
         XYPair view_margin => (XYPair.UnitX * single_character_size * 2) + Drawing.font_manager_profont.line_height_2d;
+        
+        int cursor_chunk = -1;
+
+        int find_chunk(TextLine tl, int x) {
+            var cursor_x = x;
+            var line_width = Drawing.font_manager_profont.measure_string(tl.text).X;
+            var max_width = size.X;
+
+            float c = (float)line_width / max_width;
+
+            if (c > 1) {
+                string chunk = "";
+                int chunk_start = 0;
+                int chunk_end = 0;
+                int chunk_width = 0;
+                int chunk_index = 0;
+                int move_back = 0;
+                bool moved_back = false;
+
+
+                for (; chunk_end <= tl.text.Length; ++chunk_end) {
+                    moved_back = false;
+                    move_back = 0;
+                    chunk = tl.text.Substring(chunk_start, chunk_end - chunk_start);
+                    chunk_width = 4 + Drawing.font_manager_profont.measure_string(chunk).X;
+
+                    if (chunk_width > max_width) {
+                        chunk_end--;
+                        chunk = tl.text.Substring(chunk_start, chunk_end - chunk_start);
+
+                        if (chunk.Contains(' ')) {
+                            if (chunk.EndsWith(' ')) {
+                                move_back++;
+                                chunk = tl.text.Substring(chunk_start, chunk_end - move_back - chunk_start);
+                            }
+
+                            while (!chunk.EndsWith(' ') && chunk_end - move_back > chunk_start) {
+                                move_back++;
+                                chunk = tl.text.Substring(chunk_start, chunk_end - move_back - chunk_start);
+                            }
+
+                            moved_back = move_back > 0;
+                            chunk_end -= move_back;
+                        }
+                    }
+
+                    if (chunk_width > max_width || chunk_end >= tl.text.Length || moved_back) {
+                        chunk = tl.text.Substring(chunk_start, chunk_end - chunk_start);
+
+                        if ((x > chunk_start && x < chunk_end)
+                            || (!moved_back && (x == chunk_start || x == chunk_end))
+                            || (moved_back && x == chunk_start)
+                            ) {
+                            return chunk_index;
+                        }
+
+                        chunk_start = chunk_end;
+                        chunk_index++;
+                    }
+                }
+
+
+            } else {
+                return 0;
+            }
+
+            return -1;
+        }
 
         TextInputManager text_manager;
         XYPair single_character_size;
@@ -497,9 +565,7 @@ namespace SwoopLib.UIElements {
                     var line_width = Drawing.font_manager_profont.measure_string(tl.text).X;
                     var max_width = size.X;
 
-                    float c = (float)line_width / max_width;
-
-                    
+                    float c = (float)line_width / max_width;                    
 
                     if (c > 1) {
                         string chunk = "";
