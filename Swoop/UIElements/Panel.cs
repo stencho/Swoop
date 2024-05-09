@@ -16,6 +16,11 @@ namespace SwoopLib.UIElements {
             enable_render_target = true;
             build(position, size, build_action);
         }
+        public Panel(string name, XYPair position, XYPair size, Action<Panel, UIElementManager>? build_action, Action<Panel>? draw_action) : base(name, position, size) {
+            enable_render_target = true;
+            build(position, size, build_action);
+            if (draw_action != null) this.draw_action = draw_action;
+        }
 
         void build(XYPair position, XYPair size, Action<Panel, UIElementManager>? build_action) {
             can_be_focused = false;
