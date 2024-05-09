@@ -132,7 +132,21 @@ namespace SwoopDemo {
             UI.add_element(new Label(
                 "test_3d_label_3", "this text is behind the top\nrt layer and being passed\nthrough via a shader which is\naware of each pixel's screen\nposition, so it can pull data\nfrom the main screen render\ntarget and tint it for example\nwheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\n\n    hold Ctrl+Z to move this tint box around",
                 (resolution.X_only - (resolution.X_only / 4.5f)) + ((render_target_fg.position.Y + 5) * XYPair.UnitY) + (XYPair.UnitX * -20f)));
-         
+
+            UI.add_element(new Panel("trans_panel",
+                resolution.X_only - (resolution.X_only / 4.5f) + ((render_target_fg.position.Y + render_target_fg.size.Y + 40) * XYPair.UnitY),
+                (XYPair.UnitX * 200) + (XYPair.UnitY * 100),
+                null, (Panel p) => { 
+                    Drawing.end(); 
+                    Drawing.begin(BlendState.Opaque); 
+                    Drawing.fill_rect(XYPair.One, p.size - (XYPair.One * 1), Color.Transparent);
+                    Drawing.end();
+                } ));
+
+            UI.add_element(new Label("hole",
+                "hole",
+                UI.elements["trans_panel"].position - (XYPair.UnitY * 13) + (XYPair.UnitX * 20)
+                )); ;
             /*
             UI.add_element(new GDICanvas("gdi_canvas", 
                 resolution.X_only - (resolution.X_only / 4.5f) + ((render_target_fg.position.Y + render_target_fg.size.Y + 20) * XYPair.UnitY),
@@ -148,8 +162,6 @@ namespace SwoopDemo {
             AutoRenderTarget.Manager.register_background_draw(render_target_bg);
             AutoRenderTarget.Manager.register_foreground_draw(render_target_fg);
 
-            draw_shader = new ShadedQuadWVP(Swoop.content, "draw_2d");
-            tint_effect = new ShadedQuadWVP(Swoop.content, "test_tint");
 
             UI.add_element(new Label("test_3d_label", "AutoRenderTarget tests\n3D plane > rt > background\nthis text is in front and\npart of the above label", (resolution.X_only - (resolution.X_only / 4.5f)) + ((UI.elements["title_bar"].height + 5) * XYPair.UnitY)));
 
@@ -160,14 +172,13 @@ namespace SwoopDemo {
             }, UI.elements["test_3d_label"].position - (XYPair.UnitX * 30), XYPair.One * 28));
             UI.elements["test_custom_draw_button"].can_be_focused = false;
 
-            //draw_shader.projection = Matrix.CreateOrthographic(2f, 2f, 0f, 5f);
-            //draw_shader.projection = Matrix.CreateOrthographic(1f,1f, 0f, 5f);
+            draw_shader = new ShadedQuadWVP(Swoop.content, "draw_2d");
+            tint_effect = new ShadedQuadWVP(Swoop.content, "test_tint");
+
             draw_shader.projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90f), render_target_bg.size.aspect_ratio, 0.01f, 5f);
             draw_shader.view = Matrix.CreateLookAt(Vector3.Backward * 1f, Vector3.Forward, Vector3.Up);
-
             draw_shader.world = Matrix.CreateFromAxisAngle(Vector3.Left, MathHelper.ToRadians(45f)) * Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(25));
-            //draw_shader.world = Matrix.CreateScale(trt.size.X, trt.size.Y, 1f);
-
+            
             draw_shader.set_param("main_texture", Drawing.Logo);
 
             draw_shader.set_param("screen_pos_texture", render_target_fg.screen_pos_rt);
@@ -449,6 +460,7 @@ namespace SwoopDemo {
                 "\ntodo:" +
                 "\nmouse support at all" +
                 "\nscroll bars" +
+                "\nselection is still broken" +
                 "\n" +
                 "\n" +
                 "\n" +
@@ -567,6 +579,13 @@ namespace SwoopDemo {
             font_manager_print.draw_string_rainbow("wet socks...", (XYPair.UnitX * 260) + (XYPair.UnitY * 480) + (XYPair.UnitY * 95), 1f, XYPair.One * 2, Swoop.UI_highlight_color, Color.Magenta, Color.LawnGreen, Color.Blue);
             font_manager_bebop.draw_string("SEE YOU SPACE COWBOY...", resolution - (font_manager_bebop.measure_string("SEE YOU SPACE COWBOY...") + (XYPair.UnitX * 20)), Swoop.UI_color, 1f);
 
+
+            Drawing.begin(BlendState.Opaque);
+            Drawing.fill_rect(
+                resolution.X_only - (resolution.X_only / 4.5f) + ((render_target_fg.position.Y + render_target_fg.size.Y + 40) * XYPair.UnitY),
+                resolution.X_only - (resolution.X_only / 4.5f) + ((render_target_fg.position.Y + render_target_fg.size.Y + 40) * XYPair.UnitY) + (XYPair.UnitX * 200) + (XYPair.UnitY * 100),
+                Color.Transparent);
+            Drawing.end();
 
             //draw background RTs, then the main RT output, then the foreground RTs
             Drawing.image(Swoop.render_target_output, XYPair.Zero, resolution);
