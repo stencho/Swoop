@@ -24,7 +24,7 @@ namespace SwoopLib.Effects {
 
         Action update_action;
 
-        public override void update() { 
+        internal override void update() { 
             if (update_action != null) update_action();
             base.update();
         }
@@ -70,7 +70,7 @@ namespace SwoopLib.Effects {
         };
         internal static int[] ib_data = { 0, 1, 2, 1, 3, 2 };
 
-        public ShadedQuad(ContentManager content, string effect_name, XYPair position, XYPair size) {
+        public ShadedQuad(ContentManager content, string effect_name, XYPair position, XYPair size) : base() {
             if (quad_vb == null) {
                 quad_vb = new VertexBuffer(Drawing.graphics_device, VertexPositionTexture.VertexDeclaration, 4, BufferUsage.None);
 
@@ -99,7 +99,9 @@ namespace SwoopLib.Effects {
                 * Matrix.CreateTranslation(-1f, 1f, 0) 
                 * Matrix.CreateTranslation(pr.X, -pr.Y, 0);
 
-            base.draw_buffers_basic_effect_first_pass(quad_vb, quad_ib, _world, Matrix.Identity, Matrix.Identity);
+            Drawing.graphics_device.SetVertexBuffer(quad_vb);
+            Drawing.graphics_device.Indices = quad_ib;
+            base.draw_buffers_basic_effect_first_pass(_world, Matrix.Identity, Matrix.Identity);
         }
     }
 
@@ -137,12 +139,12 @@ namespace SwoopLib.Effects {
         void default_params() {
         }
 
-        public override void update() {
+        internal override void update() {
             if (update_action != null) update_action();
             base.update();
         }
 
-        public ShadedQuadWVP(ContentManager content, string effect_name) {
+        public ShadedQuadWVP(ContentManager content, string effect_name) : base() {
             if (ShadedQuad.quad_vb == null) {
                 ShadedQuad.quad_vb = new VertexBuffer(Drawing.graphics_device, VertexPositionTexture.VertexDeclaration, 4, BufferUsage.None);
 

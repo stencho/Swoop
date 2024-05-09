@@ -9,9 +9,7 @@ using System.Threading.Tasks;
 
 namespace SwoopLib.Effects {
     public class DrawGlyph : ManagedEffect {
-        public DrawGlyph(ContentManager content) {
-            load_shader_file(content, "effects/glyph");
-        }
+        public DrawGlyph(ContentManager content) : base(content, "effects/glyph") {}        
         public void configure_shader(FontManager glyph_manager, GlyphInfo glyph) {}
     }
 }

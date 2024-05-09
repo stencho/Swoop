@@ -92,10 +92,37 @@ namespace SwoopLib
             }
         }
 
+        public static void begin(BlendState blend_state) {
+            if (!sb_drawing) {
+                sb.Begin(SpriteSortMode.Immediate, blend_state, SamplerState.PointWrap, null, null, null, null);
+                sb_drawing = true;
+            }
+        }
+        public static void begin(BlendState blend_state, SamplerState sampler_state) {
+            if (!sb_drawing) {
+                sb.Begin(SpriteSortMode.Immediate, blend_state, sampler_state, null, null, null, null);
+                sb_drawing = true;
+            }
+        }
+
         public static void begin(Effect effect) {
             if (!sb_drawing) {
                 //sb.Begin();
                 sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, null, null, effect, null);
+                sb_drawing = true;
+            }
+        }
+        public static void begin(Effect effect, BlendState blend_state) {
+            if (!sb_drawing) {
+                //sb.Begin();
+                sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, null, null, effect, null);
+                sb_drawing = true;
+            }
+        }
+        public static void begin(Effect effect, BlendState blend_state, SamplerState sampler_state) {
+            if (!sb_drawing) {
+                //sb.Begin();
+                sb.Begin(SpriteSortMode.Immediate, blend_state, sampler_state, null, null, effect, null);
                 sb_drawing = true;
             }
         }

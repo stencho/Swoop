@@ -17,8 +17,6 @@ namespace SwoopLib.Effects {
             set_param("bottom_right", bottom_right);
         }
 
-        public Dither(ContentManager content) {
-            load_shader_file(content, "effects/dither");
-        }
+        public Dither(ContentManager content) : base(content, "effects/dither") {}
     }
 }
