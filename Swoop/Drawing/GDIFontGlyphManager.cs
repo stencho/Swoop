@@ -252,6 +252,10 @@ namespace SwoopLib {
             return measure_string(sub).X;
         }
 
+
+        int FIRST_UNICODE_CHAR = 50000;
+
+
         //this shit is outstandingly fucking stupid why am I maintaining two borderline identical methods
         //do better
         public XYPair measure_string(string s, float scale = 1.0f) {
@@ -278,7 +282,7 @@ namespace SwoopLib {
                         if (index < s.Length) {
                             current_str = s.Substring(index, 1);
                             current_char = s[index];
-                            if (current_char > 50000 && index < s.Length - 1) {
+                            if (current_char > FIRST_UNICODE_CHAR && index < s.Length - 1) {
                                 current_str = current_char.ToString() + s[index + 1].ToString();
                             }
                         } else goto end;
@@ -289,7 +293,7 @@ namespace SwoopLib {
                         if (index < s.Length) {
                             current_str = s.Substring(index, 1);
                             current_char = s[index];
-                            if (current_char > 50000 && index < s.Length - 1) {
+                            if (current_char > FIRST_UNICODE_CHAR && index < s.Length - 1) {
                                 current_str = current_char.ToString() + s[index + 1].ToString();
                             }
                         } else goto end;
@@ -307,7 +311,7 @@ namespace SwoopLib {
                         if (index < s.Length) {
                             current_str = s.Substring(index, 1);
                             current_char = s[index];
-                            if (current_char > 50000 && index < s.Length - 1) {
+                            if (current_char > FIRST_UNICODE_CHAR && index < s.Length - 1) {
                                 current_str = current_char.ToString() + s[index + 1].ToString();
                             }
                         } else goto end;
@@ -327,7 +331,7 @@ namespace SwoopLib {
 
                     if (current_x > highest_x) highest_x = current_x;
 
-                    if (current_char > 50000) {
+                    if (current_char > FIRST_UNICODE_CHAR) {
                         index++;
                         index++;
 
@@ -346,7 +350,7 @@ namespace SwoopLib {
 
 
                 } else { //add a new glyph
-                    if (index < s.Length - 1 && current_char > 50000 && s[index + 1] > 50000) {
+                    if (index < s.Length - 1 && current_char > FIRST_UNICODE_CHAR && s[index + 1] > FIRST_UNICODE_CHAR) {
                         current_str = current_char.ToString() + s[index + 1].ToString();
                         current_char = s[index];
 
@@ -368,7 +372,7 @@ namespace SwoopLib {
             int index = 0;
             string current_str = s.Substring(index, 1);
             char current_char = s[index];
-            if (current_char > 50000 && index < s.Length - 1) {
+            if (current_char > FIRST_UNICODE_CHAR && index < s.Length - 1) {
                 current_str = current_char.ToString() + s[index + 1].ToString();
             }
             int current_x = 0;
@@ -390,7 +394,7 @@ namespace SwoopLib {
                         if (index < s.Length) {
                             current_str = s.Substring(index, 1);
                             current_char = s[index];
-                            if (current_char > 50000 && index < s.Length - 1) {
+                            if (current_char > FIRST_UNICODE_CHAR && index < s.Length - 1) {
                                 current_str = current_char.ToString() + s[index + 1].ToString();
                             }
                         } else goto end;
@@ -401,7 +405,7 @@ namespace SwoopLib {
                         if (index < s.Length) {
                             current_str = s.Substring(index, 1);
                             current_char = s[index];
-                            if (current_char > 50000 && index < s.Length - 1) {
+                            if (current_char > FIRST_UNICODE_CHAR && index < s.Length - 1) {
                                 current_str = current_char.ToString() + s[index + 1].ToString();
                             }
                         } else goto end;
@@ -418,7 +422,7 @@ namespace SwoopLib {
                         if (index < s.Length) {
                             current_str = s.Substring(index, 1);
                             current_char = s[index];
-                            if (current_char > 50000 && index < s.Length - 1) {
+                            if (current_char > FIRST_UNICODE_CHAR && index < s.Length - 1) {
                                 current_str = current_char.ToString() + s[index + 1].ToString();
                             }
                         } else goto end;
@@ -451,7 +455,7 @@ namespace SwoopLib {
                         current_x += monospace_width;
                     }
 
-                    if (current_char > 50000) {
+                    if (current_char > FIRST_UNICODE_CHAR) {
                         index++;
                         index++;
 
@@ -471,7 +475,7 @@ namespace SwoopLib {
    
                     
                 } else { //add a new glyph
-                    if (index < s.Length - 1 && current_char > 50000 && s[index + 1] > 50000) {
+                    if (index < s.Length - 1 && current_char > FIRST_UNICODE_CHAR && s[index + 1] > FIRST_UNICODE_CHAR) {
                         current_str = current_char.ToString() + s[index + 1].ToString();
                         current_char = s[index];
 
@@ -535,7 +539,6 @@ namespace SwoopLib {
                         cdata[add_index].A = (byte)(*(ptr + (i)) >> 24);
 
                         cdata[add_index].R = (byte)(*(ptr + (i)) >> 16);
-
                         cdata[add_index].G = (byte)(*(ptr + (i)) >> 8);
                         cdata[add_index].B = (byte)(*(ptr + (i)));
                         add_index++;

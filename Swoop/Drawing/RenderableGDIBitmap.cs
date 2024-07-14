@@ -111,10 +111,8 @@ namespace SwoopLib {
                     if (x >= bitmap_position.X && x < bitmap_position.X + bitmap_size.X &&
                         y >= bitmap_position.Y && y < bitmap_position.Y + bitmap_size.Y) {
                         
-                        cdata[add_index].A = (byte)(*(ptr + (i)) >> 24);
-                        
-                        cdata[add_index].R = (byte)(*(ptr + (i)) >> 16);
-                        
+                        cdata[add_index].A = (byte)(*(ptr + (i)) >> 24);                        
+                        cdata[add_index].R = (byte)(*(ptr + (i)) >> 16);                        
                         cdata[add_index].G = (byte)(*(ptr + (i)) >> 8);
                         cdata[add_index].B = (byte)(*(ptr + (i)));
                         add_index++;
