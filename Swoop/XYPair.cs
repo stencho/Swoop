@@ -18,9 +18,15 @@ namespace SwoopLib {
         public static XYPair sizeToXYPair(this Rectangle r) => r.Size.ToXYPair();
 
         public static System.Drawing.PointF ToPointF(this Vector2 v2) => new System.Drawing.PointF(v2.X, v2.Y);
-        public static System.Drawing.PointF ToPointF(this XYPair v2) => new System.Drawing.PointF(v2.X, v2.Y);
-
+        public static System.Drawing.PointF ToPointF(this XYPair v2) => new System.Drawing.PointF(v2.X, v2.Y);       
         
+        public static XYPair ToX(this int i) => new XYPair(i, 0);
+        public static XYPair ToY(this int i) => new XYPair(0, i);
+        public static XYPair ToXY(this int i) => new XYPair(i, i);
+
+        public static Vector2 ToX(this float f) => new Vector2(f, 0);
+        public static Vector2 ToY(this float f) => new Vector2(0, f);
+        public static Vector2 ToXY(this float f) => new Vector2(f, f);
     }
 
     //disable warnings for equals/hashcode overrides - works fine without
@@ -174,6 +180,7 @@ namespace SwoopLib {
         public static bool operator !=(XYPair a, XYPair b) => (a.X != b.X || a.Y != b.Y);
 
         public static XYPair operator -(XYPair a) { return _zero - a; }
+
 
         public override string ToString() => string.Format("{{ {0} : {1} }}", X, Y);
         public string ToXString() => string.Format("{0}x{1}", X, Y);
