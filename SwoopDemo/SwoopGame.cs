@@ -16,11 +16,12 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Microsoft.VisualBasic.Devices;
 using System.Diagnostics;
+using System.Collections.Generic;
 namespace SwoopDemo {
     public class SwoopGame : Game {
         GraphicsDeviceManager graphics;
 
-        public static double target_fps = 240;
+        public static double target_fps = 60;
         FPSCounter fps;
 
         public static XYPair resolution = new XYPair(1050, 830);
@@ -60,7 +61,7 @@ namespace SwoopDemo {
         }
 
         protected override void Initialize() {
-            Swoop.Initialize(this, graphics, Window, resolution, true, true);
+            Swoop.Initialize(this, graphics, Window, resolution, true, false, true);
 
             fps = new FPSCounter();
             this.Disposed += SwoopGame_Disposed;
@@ -146,18 +147,7 @@ namespace SwoopDemo {
             UI.add_element(new Label("hole",
                 "hole",
                 UI.elements["trans_panel"].position - (XYPair.UnitY * 13) + (XYPair.UnitX * 20)
-                )); ;
-            /*
-            UI.add_element(new GDICanvas("gdi_canvas", 
-                resolution.X_only - (resolution.X_only / 4.5f) + ((render_target_fg.position.Y + render_target_fg.size.Y + 20) * XYPair.UnitY),
-                (XYPair.UnitX * 200) + (XYPair.UnitY * 100), 
-                draw_gdi_canvas));
-
-            UI.add_element(new Label("gdi_label",
-                "GDI+ drawing canvas, for some reason",
-                UI.elements["gdi_canvas"].position - (XYPair.UnitY * 13)
-                )); ;
-            */
+                ));
 
             AutoRenderTarget.Manager.register_background_draw(render_target_bg);
             AutoRenderTarget.Manager.register_foreground_draw(render_target_fg);
@@ -482,13 +472,22 @@ namespace SwoopDemo {
 
             UI.add_element(new OptionSlider("option_slider",
                 UI.elements["text_editor"].bottom_xy + (XYPair.UnitY * 8f), 
-                UI.elements["text_editor"].size.X_only * 0.75f, 
+                UI.elements["text_editor"].size.X_only, 
                 "Option Slider", 
                 "Low", "Medium", "High", "Ultra", "Yes"
                 ));
             //UI.anchor_local("option_slider", UIElement.AnchorPoint.BOTTOM_RIGHT);
             //UI.anchor_to_side("option_slider", Anchor.AnchorTo.Right | Anchor.AnchorTo.Bottom);
             UI.register_tooltip("option_slider", new Tooltip("A TOOLTIP TITLE", "test of a tooltip lmoa\nhaha"));
+
+            UI.add_elements(new DropDown("dropdown",
+                UI.elements["option_slider"].bottom_xy + (XYPair.UnitY * 8f),
+                UI.elements["option_slider"].size.X,
+                "fart lol hahahahahahahhahahdahsjgdfjsdfgkhjsdfhgjksdfgkljsfdhngsdnfh g",
+                "anotehr fart"
+                ));
+
+
 
             Binds.add("test", Keys.Back);
             Binds.add("test_two", MouseButtons.Right);
@@ -582,8 +581,8 @@ namespace SwoopDemo {
 
             Drawing.begin(BlendState.Opaque);
             Drawing.fill_rect(
-                resolution.X_only - (resolution.X_only / 4.5f) + ((render_target_fg.position.Y + render_target_fg.size.Y + 40) * XYPair.UnitY),
-                resolution.X_only - (resolution.X_only / 4.5f) + ((render_target_fg.position.Y + render_target_fg.size.Y + 40) * XYPair.UnitY) + (XYPair.UnitX * 200) + (XYPair.UnitY * 100),
+                Swoop.UI.elements["trans_panel"].position,
+                Swoop.UI.elements["trans_panel"].position + (XYPair.UnitX * 200) + (XYPair.UnitY * 100),
                 Color.Transparent);
             Drawing.end();
 
