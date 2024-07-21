@@ -24,7 +24,9 @@ with.
     the amount of spacing in between characters.
     -->
 	  <Spacing>0</Spacing>
-	  <VerticalSpacing>-1</VerticalSpacing>
+	  <!--
+    <VerticalSpacing>-1</VerticalSpacing>
+    -->
 
     <!--
     UseKerning controls the layout of the font. If this value is true, kerning information
