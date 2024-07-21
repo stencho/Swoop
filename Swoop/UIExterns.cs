@@ -32,9 +32,31 @@ namespace SwoopLib {
 
         [DllImport("user32.dll", SetLastError = true)] public static extern uint GetWindowLong(IntPtr hWnd, int nIndex);
         [DllImport("user32.dll", SetLastError = true)] public static extern int SetWindowLong(IntPtr hWnd, int nIndex, uint dwNewLong);
+        [DllImport("user32.dll", SetLastError = true)] public static extern int SetWindowLong(IntPtr hWnd, int nIndex, long dwNewLong);
         [DllImport("dwmapi.dll")] public static extern void DwmIsCompositionEnabled(ref int enabledptr);
         [DllImport("dwmapi.dll")] public static extern int DwmExtendFrameIntoClientArea(IntPtr hWnd, ref int[] pMarInset);
         [DllImport("user32.dll", SetLastError = true)] public static extern bool SetLayeredWindowAttributes(IntPtr hwnd, uint crKey, byte bAlpha, uint dwFlags);
+
+        [DllImport("dwmapi.dll")] static extern UInt32 DwmGetWindowAttribute(IntPtr hwnd, DwmWindowAttribute dwAttribute, out bool pvAttribute, int cbAttribute);
+        [DllImport("dwmapi.dll")] static extern UInt32 DwmGetWindowAttribute(IntPtr hwnd, DwmWindowAttribute dwAttribute, out UInt32 pvAttribute, int cbAttribute);
+
+        public static class Dwm {
+            public static class GetWindowAttribute {
+                public static bool ALLOW_NCPAINT() {
+                    bool b = false;
+                    UInt32 res = DwmGetWindowAttribute(actual_window_handle, DwmWindowAttribute.DWMWA_ALLOW_NCPAINT, out b, Marshal.SizeOf(typeof(bool)));
+                    Debug.WriteLine(BitConverter.ToString(BitConverter.GetBytes(res)) + " " + BitConverter.ToString(BitConverter.GetBytes(b)));
+                    return b;
+                }
+
+                public static Color DWMWA_BORDER_COLOR() {
+                    UInt32 c;
+                    UInt32 res = DwmGetWindowAttribute(actual_window_handle, DwmWindowAttribute.DWMWA_BORDER_COLOR, out c, Marshal.SizeOf(typeof(UInt32)));
+                    Debug.WriteLine(BitConverter.ToString(BitConverter.GetBytes(res)) + " " + BitConverter.ToString(BitConverter.GetBytes(c)));
+                    return Color.FromArgb(0,0,0,0);
+                }
+            }
+        }
 
         public const int GWL_EXSTYLE = -20;
         public const int GWL_STYLE = -16;
@@ -47,7 +69,7 @@ namespace SwoopLib {
         public const int SWP_NOMOVE = 0x0002;
         public const int SWP_NOSIZE = 0x0001;
         public const int S_OK = 0x00000000;
-        [Flags] public enum WS : uint {
+        [Flags] public enum WS : long {
             /// <summary>The window has a thin-line border.</summary>
             BORDER = 0x800000,
             /// <summary>The window has a title bar (includes the BORDER style).</summary>
@@ -65,7 +87,37 @@ namespace SwoopLib {
             /// <summary>The window has a sizing border.</summary>
             SIZEFRAME = 0x40000,
             /// <summary>The window has a window menu on its title bar. The CAPTION style must also be specified.</summary>
-            SYSMENU = 0x80000
+            SYSMENU = 0x80000,
+            THICKFRAME = 0x00040000L,
+            POPUP = 0x80000000L
+        }
+
+        public enum DwmWindowAttribute {
+            DWMWA_NCRENDERING_ENABLED,
+            DWMWA_NCRENDERING_POLICY,
+            DWMWA_TRANSITIONS_FORCEDISABLED,
+            DWMWA_ALLOW_NCPAINT,
+            DWMWA_CAPTION_BUTTON_BOUNDS,
+            DWMWA_NONCLIENT_RTL_LAYOUT,
+            DWMWA_FORCE_ICONIC_REPRESENTATION,
+            DWMWA_FLIP3D_POLICY,
+            DWMWA_EXTENDED_FRAME_BOUNDS,
+            DWMWA_HAS_ICONIC_BITMAP,
+            DWMWA_DISALLOW_PEEK,
+            DWMWA_EXCLUDED_FROM_PEEK,
+            DWMWA_CLOAK,
+            DWMWA_CLOAKED,
+            DWMWA_FREEZE_REPRESENTATION,
+            DWMWA_PASSIVE_UPDATE_MODE,
+            DWMWA_USE_HOSTBACKDROPBRUSH,
+            DWMWA_USE_IMMERSIVE_DARK_MODE = 20,
+            DWMWA_WINDOW_CORNER_PREFERENCE = 33,
+            DWMWA_BORDER_COLOR,
+            DWMWA_CAPTION_COLOR,
+            DWMWA_TEXT_COLOR,
+            DWMWA_VISIBLE_FRAME_BORDER_THICKNESS,
+            DWMWA_SYSTEMBACKDROP_TYPE,
+            DWMWA_LAST
         }
 
         public static void minimize_window() {
