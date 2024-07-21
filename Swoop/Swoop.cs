@@ -14,6 +14,8 @@ using SwoopLib.Effects;
 using System.Net.WebSockets;
 using System.Runtime.InteropServices;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.ComponentModel.DataAnnotations;
 
 namespace SwoopLib {
     public static class Swoop {
@@ -64,6 +66,50 @@ namespace SwoopLib {
         public static bool enable_draw { get; set; } = true;
         public static bool show_logo { get; set; } = true;
 
+        static bool _show_resize_border_when_borderless_and_resizeable = true;
+        public static bool show_resize_border_when_borderless_and_resizeable {
+            get {
+                return _show_resize_border_when_borderless_and_resizeable;
+            }
+            set {
+                _show_resize_border_when_borderless_and_resizeable = value;
+
+                if (borderless && resizeable && _show_resize_border_when_borderless_and_resizeable) {
+                    game_window.IsBorderless = false;
+                    make_window_sizeframe_only();
+                }
+            }
+        }
+
+        static bool _resizeable = false;
+        public static bool resizeable {
+            get {
+                return _resizeable;
+            } 
+            set {
+                _resizeable = value;
+                game_window.AllowUserResizing = value;
+
+                if (borderless && _resizeable && show_resize_border_when_borderless_and_resizeable) {
+                    game_window.IsBorderless = false;
+                    make_window_sizeframe_only();
+                }
+            }
+        }
+        static bool _borderless = false;
+        public static bool borderless {
+            get { return _borderless; }
+            set { 
+                _borderless = value;
+                
+                if (_borderless && resizeable && show_resize_border_when_borderless_and_resizeable) {
+                    game_window.IsBorderless = false;
+                    make_window_sizeframe_only();
+                } else {
+                    game_window.IsBorderless = _borderless;
+                }
+            }
+        }
 
         //awful
         public static UIElement? mouse_over_element => UIElementManager.manager_under_mouse == null ? null
@@ -104,8 +150,14 @@ namespace SwoopLib {
         static GameWindow game_window;
         public static GameTime game_time;
 
+        static void make_window_sizeframe_only() {
+            long ls = UIExterns.GetWindowLong(UIExterns.actual_window_handle, UIExterns.GWL_STYLE);
+            ls &= ~((long)UIExterns.WS.CAPTION | (long)UIExterns.WS.SIZEFRAME | (long)UIExterns.WS.MINIMIZE | (long)UIExterns.WS.MAXIMIZE | (long)UIExterns.WS.SYSMENU | (long)UIExterns.WS.DLGFRAME | (long)UIExterns.WS.THICKFRAME);
+            ls |= (long)UIExterns.WS.SIZEFRAME;
+            UIExterns.SetWindowLong(UIExterns.actual_window_handle, UIExterns.GWL_STYLE, ls);
+        }
 
-        public static void Initialize(Game parent, GraphicsDeviceManager gdm, GameWindow window, XYPair resolution, bool borderless = true, bool transparent_window = false) {
+        public static void Initialize(Game parent, GraphicsDeviceManager gdm, GameWindow window, XYPair resolution, bool borderless = true, bool resizeable = false, bool transparent_window = false) {
             Swoop.parent = parent;
 
             Input.initialize(parent);
@@ -113,15 +165,14 @@ namespace SwoopLib {
 
             Swoop._resolution = resolution;
             game_window = window;
-            window.IsBorderless = borderless;
-            window.Title = "Swoop";
 
+            window.Title = "Swoop";
+            
             gdm.PreferredBackBufferWidth = resolution.X;
             gdm.PreferredBackBufferHeight = resolution.Y;
 
             gdm.ApplyChanges();
 
-            window.AllowUserResizing = true;
             window.ClientSizeChanged += Window_ClientSizeChanged;
 
             MGRawInputLib.Window.init(window);
@@ -143,9 +194,11 @@ namespace SwoopLib {
                         throw new Win32Exception(ret);
                 }
             }
+            Swoop.borderless = borderless;
+            Swoop.resizeable = resizeable;
         }        
 
-        public static void Load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, GameWindow window, bool default_window_UI = true, bool resizeable = false) {
+        public static void Load(GraphicsDevice gd, GraphicsDeviceManager gdm, ContentManager content, GameWindow window, bool default_window_UI = true) {
             Swoop.content = content;
 
             Drawing.load(gd, gdm, content, resolution);
@@ -174,6 +227,7 @@ namespace SwoopLib {
             };
             
 
+
             default_UI = default_window_UI;
             if (default_window_UI)
                 build_default_UI(resizeable);            
@@ -183,12 +237,12 @@ namespace SwoopLib {
             var text_length = Drawing.measure_string_profont_xy("x") ;
 
             UI.add_element(new Button("exit_button", "x",
-                _resolution.X_only - text_length.X_only - (Vector2.UnitX * 10f)));
+                _resolution.X_only - text_length.X_only - (Vector2.UnitX * 10f))) ;
             UI.elements["exit_button"].ignore_dialog = true;
             UI.elements["exit_button"].can_be_focused = false;
 
             UI.add_element(new Button("maximize_button", "^",
-                    _resolution.X_only - UI.elements["exit_button"].size.X_only - text_length.X_only - (Vector2.UnitX * 10f) + XYPair.UnitX,
+                    _resolution.X_only - UI.elements["exit_button"].size.X_only - text_length.X_only - (Vector2.UnitX * 9f),
                     UI.elements["exit_button"].size));
             UI.elements["maximize_button"].ignore_dialog = true;
             UI.elements["maximize_button"].can_be_focused = false;
@@ -217,13 +271,13 @@ namespace SwoopLib {
             };
 
             UI.add_element(new TitleBar("title_bar",
-                XYPair.Zero, UI.elements["minimize_button"].position.X + 1));
+                XYPair.Zero - XYPair.UnitY, UI.elements["minimize_button"].position.X + 1));
             UI.elements["title_bar"].ignore_dialog = true;
-
+            /*
             if (resizeable) {
                 UI.add_element(new ResizeHandle("resize_handle", _resolution - (XYPair.One * 15), XYPair.One * 15));
             }
-
+            */
             Window.resize_end = (Point size) => {
                 Swoop._resolution = parent.Window.ClientBounds.Size.ToXYPair();
 
@@ -234,11 +288,11 @@ namespace SwoopLib {
                 UI.elements["minimize_button"].position = _resolution.X_only - UI.elements["exit_button"].size.X_only - UI.elements["minimize_button"].size.X_only - UI.elements["maximize_button"].size.X_only + (XYPair.UnitX * 2);
 
                 UI.elements["title_bar"].size = new XYPair(UI.elements["minimize_button"].X + 1, UI.elements["title_bar"].size.Y);
-
+                /*
                 if (resizeable) {
                     UI.elements["resize_handle"].position = Swoop._resolution - (XYPair.One * 15);
                 }
-
+                */
                 Swoop.enable_draw = true;
 
                 if (resize_end != null) resize_end(Swoop._resolution);
