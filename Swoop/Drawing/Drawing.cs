@@ -199,14 +199,28 @@ namespace SwoopLib
             if (points.Length > 2 && close_polygon)
                 line(points.First(), points.Last(), color, thickness);
 
-
-            for (var i = 0; i < points.Length; i++) {
+            //for (var i = 0; i < points.Length; i++) {
                 //fill_circle(points[i], thickness, color);
+            //}
+        }
+        public static void poly(Color color, float thickness, bool close_polygon, params XYPair[] points) {
+            if (points.Length < 2) return;
+            begin();
+
+            for (var i = 0; i < points.Length - 1; i++) {
+                var p = points[i];
+                var pP = points[i + 1];
+                line(p, pP, color, thickness);
             }
+
+            if (points.Length > 2 && close_polygon)
+                line(points.First(), points.Last(), color, thickness);
+
+            //for (var i = 0; i < points.Length; i++) {
+                //fill_circle(points[i], thickness, color);
+            //}
         }
 
-        public static void fill_poly() {
-        }
 
         public static void tri(Vector2 A, Vector2 B, Vector2 C, Color color, float thickness) {
             begin();
@@ -486,14 +500,17 @@ namespace SwoopLib
 
         public static Vector2 measure_string_profont(string text) {
             //return fnt_profont.MeasureString(text);
+            //return Vector2.One;
             return font_manager_profont.measure_string(text).ToVector2();
         }
         public static Point measure_string_profont_pt(string text) {
             //return fnt_profont.MeasureString(text).ToPoint();
+            //return new Point(1, 1);
             return font_manager_profont.measure_string(text).ToPoint();
         }
         public static XYPair measure_string_profont_xy(string text) {
             //return fnt_profont.MeasureString(text).ToXYPair();
+            //return XYPair.One;
             return font_manager_profont.measure_string(text);
         }
     }
