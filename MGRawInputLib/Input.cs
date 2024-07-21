@@ -248,7 +248,13 @@ namespace MGRawInputLib {
             stopwatch.Start();
             Debug.Print(Stopwatch.IsHighResolution.ToString() + " " + Stopwatch.Frequency);
             Externs.timeBeginPeriod(5);
+
+            //while (run_thread) {
+                //Thread.Sleep(1000);
+            //}
+
             while (run_thread) {
+                start_tick = stopwatch.ElapsedTicks;
                 //start_tick = current_tick;
                 bool active = false;
 
@@ -261,7 +267,7 @@ namespace MGRawInputLib {
                 //gamepad_three_state = GamePad.GetState(PlayerIndex.Three);
                 //gamepad_four_state = GamePad.GetState(PlayerIndex.Four);
 
-                if (_input_method == input_method.RawInput) {
+                if (_input_method == input_method.RawInput && Externs.RawInput.new_rawinput_data) {
 
                     cursor_pos = Externs.get_cursor_pos_relative_to_window(parent.Window);
                     cursor_pos_actual = Externs.get_cursor_pos();
@@ -376,18 +382,19 @@ namespace MGRawInputLib {
 
                 if (limit_thread_rate) {
                     if (use_sleep) {                            
-                        //while (true) {
-                        current_tick = stopwatch.ElapsedTicks;
-                        time_span_ticks = (current_tick - start_tick);
-                        sleep_ts = new TimeSpan((long)(thread_ms * 10000.0) - time_span_ticks);
+                        while (true) {
+                            current_tick = stopwatch.ElapsedTicks;
+                            time_span_ticks = (current_tick - start_tick);
+                            sleep_ts = new TimeSpan((long)(thread_ms * 10000.0) - time_span_ticks);
 
-                        if (sleep_ts.Ticks > 0)
-                            Thread.Sleep(sleep_ts);
+                            if (sleep_ts.Ticks > 0)
+                                Thread.Sleep(sleep_ts);
 
-                        //current_tick = DateTime.Now.Ticks;
-                        //break;
-                        //if (time_span_ticks / 10000.0 >= thread_ms) break;
-                        //}
+                            //current_tick = DateTime.Now.Ticks;
+                            //break;
+                            if (time_span_ticks / 10000.0 >= thread_ms) 
+                                break;
+                        }
 
                     } else {
                         while (true) {
@@ -396,7 +403,7 @@ namespace MGRawInputLib {
 
                             if (time_span_ticks / 10000.0 >= thread_ms) break;
                         }
-                        start_tick = current_tick;
+
                     }
                 }
 
@@ -416,7 +423,7 @@ namespace MGRawInputLib {
                     //_fps_timer = 0;
                 }
 
-                start_tick = stopwatch.ElapsedTicks;
+                //start_tick = stopwatch.ElapsedTicks;
 
                 //start_tick = current_tick;
             }

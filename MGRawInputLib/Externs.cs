@@ -1673,6 +1673,7 @@ namespace MGRawInputLib {
 
             static RAWINPUT data;
             static int rawinput_data_size = 0;
+            public static bool new_rawinput_data = false;
 
             internal static nint wnd_proc(nint hWnd, uint msg, nint wParam, nint lParam) {
                 if (!enable) goto ret;
@@ -1688,6 +1689,8 @@ namespace MGRawInputLib {
                                 RawInputKeyboard.update_rawinput(data);
                             else if (data.Header.Type == RawInputType.MOUSE)
                                 RawInputMouse.update_rawinput(data.Data.Mouse);
+
+                            new_rawinput_data = true;
                         }
                     }
                 }
